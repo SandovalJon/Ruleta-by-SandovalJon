@@ -277,6 +277,9 @@
         }
 
 canvas {
+            width: 400px;
+            max-width: 100%;
+            height: auto;
             border-radius: 50%;
             box-shadow: 0 0 30px var(--accent-glow-1), 0 0 60px var(--accent-glow-2);
             cursor: pointer;
@@ -368,6 +371,46 @@ canvas {
         .footer span {
             color: var(--accent);
             opacity: 0.7;
+        }
+
+        .roulette-container {
+            max-width: 100%;
+        }
+
+        @media (hover: none) {
+            canvas:hover {
+                transform: none;
+            }
+            .roulette-wrapper.winner-mode canvas:hover {
+                transform: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 14px 12px;
+            }
+            h1 {
+                font-size: 1.7rem;
+            }
+            .container {
+                gap: 24px;
+            }
+            .drop-zone {
+                width: 100%;
+                max-width: 300px;
+            }
+            .preview-images {
+                max-width: 100%;
+            }
+            .theme-switcher {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .result {
+                font-size: 1.05rem;
+                padding: 12px 18px;
+            }
         }
     </style>
 </head>
