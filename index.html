@@ -1969,7 +1969,9 @@ googleBtn.addEventListener('click', () => {
             loadSetBtn.disabled = true;
             setMsg.textContent = tt('loadingSet');
 
-            fbDB.collection('sets').doc(setId).collection('images').orderBy('index').get()
+            fbDB.collection('sets').doc(setId).collection('images')
+                .where('uid', '==', currentUser.uid)
+                .orderBy('index').get()
                 .then((snap) => {
                     const dataUrls = [];
                     snap.forEach((doc) => {
@@ -1992,7 +1994,8 @@ googleBtn.addEventListener('click', () => {
             deleteSetBtn.disabled = true;
             setMsg.textContent = tt('deleting');
 
-            fbDB.collection('sets').doc(setId).collection('images').get()
+            fbDB.collection('sets').doc(setId).collection('images')
+                .where('uid', '==', currentUser.uid).get()
                 .then((snap) => {
                     const batch = fbDB.batch();
                     snap.forEach((doc) => {
