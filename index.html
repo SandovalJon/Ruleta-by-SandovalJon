@@ -412,10 +412,217 @@ canvas {
                 padding: 12px 18px;
             }
         }
+
+        .auth-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .google-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .google-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .google-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 24px;
+            font-size: 0.9rem;
+        }
+
+        .user-chip img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        .logout-btn {
+            margin-left: 4px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            color: white;
+            background: var(--accent);
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent-dark);
+        }
+
+        .sets-panel {
+            width: 300px;
+            margin-top: 14px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+        }
+
+        .sets-panel h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .sets-save {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .set-name-input {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .set-name-input:focus {
+            border-color: var(--accent-light);
+        }
+
+        .save-btn {
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .sets-load {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sets-select {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .sets-select option {
+            background: #222;
+            color: white;
+        }
+
+        .load-btn {
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: transparent;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .load-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .set-msg {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            min-height: 18px;
+            text-align: center;
+            color: var(--text-hint);
+        }
+
+        .delete-set-btn {
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            font-size: 0.9rem;
+            color: white;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .delete-set-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .sets-panel {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
     <h1 id="title">🎰 Ruleta de Imágenes</h1>
+
+    <div class="auth-panel" id="authPanel">
+        <button class="google-btn" id="googleBtn" style="display:none;">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            <span id="googleBtnText">Iniciar sesión con Google</span>
+        </button>
+        <div class="user-chip" id="userChip" style="display:none;">
+            <img id="userAvatar" alt="">
+            <span id="userName"></span>
+            <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+        </div>
+    </div>
 
     <div class="theme-switcher" id="themeSwitcher">
         <button class="theme-btn active" data-theme="noche" title="Paleta nocturna">🌙 Noche</button>
@@ -459,8 +666,22 @@ canvas {
                     <small id="dropHint">(mínimo 2, máximo 25)</small>
                 </div>
             </div>
-            <div class="preview-images" id="previewImages"></div>
+<div class="preview-images" id="previewImages"></div>
             <button class="clear-btn" id="clearBtn">🗑️ Limpiar</button>
+
+            <div class="sets-panel" id="setsPanel">
+                <h3 id="setsTitle">💾 Mis sets de imágenes</h3>
+                <div class="sets-save">
+                    <input type="text" class="set-name-input" id="setNameInput" placeholder="Nombre del set" maxlength="40">
+                    <button class="save-btn" id="saveSetBtn" disabled>💾 Guardar</button>
+                </div>
+                <div class="sets-load">
+                    <select class="sets-select" id="setsSelect"></select>
+                    <button class="load-btn" id="loadSetBtn" disabled>Cargar</button>
+                    <button class="delete-set-btn" id="deleteSetBtn" title="Eliminar set">🗑️</button>
+                </div>
+                <div class="set-msg" id="setMsg"></div>
+            </div>
         </div>
 
         <div class="roulette-container">
@@ -1160,6 +1381,7 @@ clearBtn.addEventListener('click', () => {
             winnerZoom = 0;
             rebuildWheel();
             refreshMessages();
+            if (typeof updateSaveBtn === 'function') updateSaveBtn();
         });
 
         const MAX_IMAGE = 800;
@@ -1231,8 +1453,10 @@ clearBtn.addEventListener('click', () => {
                         } else {
                             rebuildWheel();
                         }
-                        refreshMessages();
-                    };
+refreshMessages();
+                         if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                     };
+
                     img.onerror = () => {
                         pendingLoads--;
                         if (pendingLoads <= 0) {
@@ -1246,7 +1470,6 @@ clearBtn.addEventListener('click', () => {
                 });
             });
         }
-
         function updatePreview() {
             previewImages.innerHTML = images.map((src, index) => 
                 `<div class="preview-item" data-index="${index}">
@@ -1269,6 +1492,7 @@ function removeImage(index) {
             updatePreview();
             rebuildWheel();
             refreshMessages();
+            if (typeof updateSaveBtn === 'function') updateSaveBtn();
         }
 
         previewImages.addEventListener('click', (e) => {
@@ -1528,8 +1752,335 @@ if (winnerIndex >= 0) {
                 refreshMessages();
                 return;
             }
-            spin();
+spin();
         });
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWyDECZQRwSu6pN5KUNNhEbzEg2LmGA_I",
+            authDomain: "ruleta-d53d9.firebaseapp.com",
+            projectId: "ruleta-d53d9",
+            storageBucket: "ruleta-d53d9.firebasestorage.app",
+            messagingSenderId: "729366427789",
+            appId: "1:729366427789:web:58a6c7fc44ba5006600ac4"
+        };
+
+        const authPanel = document.getElementById('authPanel');
+        const googleBtn = document.getElementById('googleBtn');
+        const googleBtnText = document.getElementById('googleBtnText');
+        const userChip = document.getElementById('userChip');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const setMsg = document.getElementById('setMsg');
+        const setNameInput = document.getElementById('setNameInput');
+        const saveSetBtn = document.getElementById('saveSetBtn');
+        const setsSelect = document.getElementById('setsSelect');
+        const loadSetBtn = document.getElementById('loadSetBtn');
+        const deleteSetBtn = document.getElementById('deleteSetBtn');
+
+        let fbAuth = null;
+        let fbDB = null;
+        let currentUser = null;
+
+        const U = {
+            es: {
+                login: 'Iniciar sesión con Google', logout: 'Cerrar sesión',
+                setsTitle: '💾 Mis sets de imágenes', setNamePh: 'Nombre del set',
+                save: '💾 Guardar', load: 'Cargar',
+                saveNeed: 'Agrega al menos 2 imágenes para guardar',
+                saving: 'Guardando...', savedOk: 'Set guardado ✓',
+                loadingSet: 'Cargando set...', loadedOk: 'Set cargado ✓',
+                delTitle: 'Eliminar set', deleting: 'Eliminando...', delOk: 'Set eliminado',
+                err: 'Error', savePh: 'Guardando...'
+            },
+            en: {
+                login: 'Sign in with Google', logout: 'Sign out',
+                setsTitle: '💾 My image sets', setNamePh: 'Set name',
+                save: '💾 Save', load: 'Load',
+                saveNeed: 'Add at least 2 images to save',
+                saving: 'Saving...', savedOk: 'Set saved ✓',
+                loadingSet: 'Loading set...', loadedOk: 'Set loaded ✓',
+                delTitle: 'Delete set', deleting: 'Deleting...', delOk: 'Set deleted',
+                err: 'Error', savePh: 'Saving...'
+            }
+        };
+
+        function tt(key) {
+            const base = (U[currentLang] || U.es || U.en) || {};
+            if (base[key] === undefined) return (U.en && U.en[key]) || key;
+            return base[key];
+        }
+
+        function setAuthUI() {
+            googleBtnText.textContent = tt('login');
+            logoutBtn.textContent = tt('logout');
+            setsTitle.textContent = tt('setsTitle');
+            setNameInput.placeholder = tt('setNamePh');
+            saveSetBtn.textContent = tt('save');
+            loadSetBtn.textContent = tt('load');
+            deleteSetBtn.title = tt('delTitle');
+        }
+
+        function updateSaveBtn() {
+            if (!currentUser) {
+                saveSetBtn.disabled = true;
+                return;
+            }
+            saveSetBtn.disabled = images.length < 2;
+        }
+
+        if (typeof langSelect !== 'undefined' && langSelect) {
+            langSelect.addEventListener('change', () => {
+                setAuthUI();
+                updateSaveBtn();
+            });
+        }
+
+        function fbInit() {
+            firebase.initializeApp(firebaseConfig);
+            fbAuth = firebase.auth();
+            fbDB = firebase.firestore();
+            fbAuth.onAuthStateChanged(handleAuth);
+            fbAuth.getRedirectResult().catch(() => {});
+            updateGoogleBtn();
+        }
+
+        function handleAuth(user) {
+            currentUser = user;
+            if (user) {
+                googleBtn.style.display = 'none';
+                userChip.style.display = 'flex';
+                userAvatar.src = user.photoURL || '';
+                userName.textContent = user.displayName || user.email || user.uid;
+                saveSetBtn.disabled = images.length < 2;
+                loadMySets();
+            } else {
+                googleBtn.style.display = 'inline-flex';
+                userChip.style.display = 'none';
+                saveSetBtn.disabled = true;
+                setsSelect.innerHTML = '<option value="">—</option>';
+                loadSetBtn.disabled = true;
+                setMsg.textContent = '';
+            }
+        }
+
+        function updateGoogleBtn() {
+            if (currentLang && L[currentLang] && L[currentLang].login) {
+                googleBtnText.textContent = L[currentLang].login;
+            }
+        }
+
+        function updateSetMsg(elId, text) {
+            const el = document.getElementById(elId);
+            if (el) el.textContent = text;
+        }
+
+        if (typeof firebase !== 'undefined') {
+            try {
+                fbInit();
+                setAuthUI();
+            } catch (e) {
+                console.warn('Firebase no inicializado', e);
+            }
+        }
+
+googleBtn.addEventListener('click', () => {
+            if (!fbAuth) return;
+            fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+                .then(() => {})
+                .catch((e) => {
+                    if (e && e.code === 'auth/popup-blocked') {
+                        fbAuth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch((e2) => {
+                            setMsg.textContent = tt('err') + ': ' + e2.message;
+                        });
+                    } else {
+                        setMsg.textContent = tt('err') + ': ' + e.message;
+                    }
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            if (!fbAuth) return;
+            fbAuth.signOut().catch((e) => { setMsg.textContent = tt('err') + ': ' + e.message; });
+        });
+
+        function loadMySets() {
+            if (!fbDB || !currentUser) return;
+            fbDB.collection('sets').where('uid', '==', currentUser.uid).orderBy('createdAt', 'desc').get()
+                .then((snap) => {
+                    setsSelect.innerHTML = '<option value="">—</option>';
+                    snap.forEach((doc) => {
+                        const d = doc.data();
+                        const opt = document.createElement('option');
+                        opt.value = doc.id;
+                        opt.textContent = d.name + (d.count ? ' (' + d.count + ')' : '');
+                        setsSelect.appendChild(opt);
+                    });
+                    loadSetBtn.disabled = setsSelect.options.length <= 1;
+                    deleteSetBtn.disabled = setsSelect.options.length <= 1;
+                    if (setsSelect.options.length > 1) {
+                        setMsg.textContent = '';
+                    }
+                })
+                .catch((e) => { setMsg.textContent = tt('err') + ': ' + e.message; });
+        }
+
+        function saveCurrentSet() {
+            if (!fbDB || !currentUser) return;
+            if (images.length < 2) {
+                setMsg.textContent = tt('saveNeed');
+                return;
+            }
+            const name = setNameInput.value.trim() || 'Mi set';
+            saveSetBtn.disabled = true;
+            setMsg.textContent = tt('saving');
+
+            fbDB.collection('sets').add({
+                uid: currentUser.uid,
+                name: name,
+                count: images.length,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then((setRef) => {
+                const batch = fbDB.batch();
+                images.forEach((dataUrl, i) => {
+                    const imgRef = setRef.collection('images').doc(String(i));
+                    batch.set(imgRef, { uid: currentUser.uid, index: i, dataUrl: dataUrl });
+                });
+                return batch.commit().then(() => setRef);
+            }).then(() => {
+                setMsg.textContent = tt('savedOk');
+                setTimeout(() => { setMsg.textContent = ''; }, 2200);
+                loadMySets();
+            }).catch((e) => {
+                setMsg.textContent = tt('err') + ': ' + e.message;
+                saveSetBtn.disabled = false;
+            });
+        }
+
+        function loadCurrentSet() {
+            if (!fbDB || !currentUser) return;
+            const setId = setsSelect.value;
+            if (!setId) return;
+            loadSetBtn.disabled = true;
+            setMsg.textContent = tt('loadingSet');
+
+            fbDB.collection('sets').doc(setId).collection('images').orderBy('index').get()
+                .then((snap) => {
+                    const dataUrls = [];
+                    snap.forEach((doc) => {
+                        if (doc.exists) dataUrls.push(doc.data().dataUrl);
+                    });
+                    resetAndSetImages(dataUrls);
+                    setMsg.textContent = tt('loadedOk');
+                    setTimeout(() => { setMsg.textContent = ''; loadSetBtn.disabled = false; }, 1800);
+                })
+                .catch((e) => {
+                    setMsg.textContent = tt('err') + ': ' + e.message;
+                    loadSetBtn.disabled = false;
+                });
+        }
+
+        function deleteCurrentSet() {
+            if (!fbDB || !currentUser) return;
+            const setId = setsSelect.value;
+            if (!setId) return;
+            deleteSetBtn.disabled = true;
+            setMsg.textContent = tt('deleting');
+
+            fbDB.collection('sets').doc(setId).collection('images').get()
+                .then((snap) => {
+                    const batch = fbDB.batch();
+                    snap.forEach((doc) => {
+                        batch.delete(doc.ref);
+                    });
+                    const setRef = fbDB.collection('sets').doc(setId);
+                    batch.delete(setRef);
+                    return batch.commit();
+                })
+                .then(() => {
+                    setMsg.textContent = tt('delOk');
+                    setTimeout(() => { setMsg.textContent = ''; }, 1800);
+                    loadMySets();
+                })
+                .catch((e) => {
+                    setMsg.textContent = tt('err') + ': ' + e.message;
+                    deleteSetBtn.disabled = false;
+                });
+        }
+
+        function resetAndSetImages(dataUrls) {
+            cancelAnimationFrame(spinTimeout);
+            if (isSpinning) isSpinning = false;
+            images = [];
+            loadedImages = [];
+            thumbImages = [];
+            currentRotation = 0;
+            winnerIndex = -1;
+            winnerZoom = 0;
+            isHovering = false;
+            rouletteWrapper.classList.remove('winner-mode');
+            previewImages.innerHTML = '';
+            addDataUrls(dataUrls);
+            saveSetBtn.disabled = images.length >= 2 ? false : true;
+        }
+
+        function addDataUrls(dataUrls) {
+            if (dataUrls.length === 0) {
+                rebuildWheel();
+                refreshMessages();
+                return;
+            }
+            if (images.length + dataUrls.length > 25) {
+                result.textContent = t('max');
+                return;
+            }
+            isLoading = true;
+            pendingLoads += dataUrls.length;
+            refreshMessages();
+            drawRoulette();
+            dataUrls.forEach((dataUrl, idx) => {
+                const img = new Image();
+                img.onload = () => {
+                    images[idx] = dataUrl;
+                    loadedImages[idx] = img;
+                    thumbImages[idx] = makeThumb(img, 128);
+                    pendingLoads--;
+                    if (pendingLoads <= 0) {
+                        pendingLoads = 0;
+                        isLoading = false;
+                    }
+                    updatePreview();
+                    if (isLoading) {
+                        drawRoulette();
+                    } else {
+                        rebuildWheel();
+                    }
+                    refreshMessages();
+                    if (currentUser && currentUser.uid) {
+                        saveSetBtn.disabled = images.length >= 2 ? false : true;
+                    }
+                };
+                img.onerror = () => {
+                    pendingLoads--;
+                    if (pendingLoads <= 0) {
+                        pendingLoads = 0;
+                        isLoading = false;
+                        rebuildWheel();
+                        refreshMessages();
+                    }
+                };
+                img.src = dataUrl;
+            });
+        }
+
+        saveSetBtn.addEventListener('click', saveCurrentSet);
+        loadSetBtn.addEventListener('click', loadCurrentSet);
+        deleteSetBtn.addEventListener('click', deleteCurrentSet);
     </script>
 </body>
 </html>
