@@ -652,9 +652,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             document.querySelector('.theme-btn[data-theme="atardecer"]').title = t('themeAtardecer');
             langSelect.value = lang;
             refreshMessages();
-            try {
-                localStorage.setItem('roulette-lang', lang);
-            } catch (e) {}
         }
 
         function refreshMessages() {
@@ -684,7 +681,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             }
         }
 
-        langSelect.addEventListener('change', () => setLanguage(langSelect.value));
+        langSelect.addEventListener('change', () => {
+            setLanguage(langSelect.value);
+            try {
+                localStorage.setItem('roulette-lang', langSelect.value);
+            } catch (e) {}
+        });
 
         const themeColors = {
             noche: [
