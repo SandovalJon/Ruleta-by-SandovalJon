@@ -1061,9 +1061,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
 
         langSelect.addEventListener('change', () => {
             setLanguage(langSelect.value);
-            try {
-                localStorage.setItem('roulette-lang', langSelect.value);
-            } catch (e) {}
         });
 
         const themeColors = {
@@ -1117,14 +1114,9 @@ let colors = themeColors[currentTheme];
         } catch (e) {}
 
         try {
-            const savedLang = localStorage.getItem('roulette-lang');
-            if (savedLang && L[savedLang]) {
-                setLanguage(savedLang);
-            } else {
-                const navLang = (navigator.languages && navigator.languages[0]) ? navigator.languages[0] : navigator.language;
-                const detected = (navLang || 'es').split('-')[0];
-                setLanguage(L[detected] ? detected : 'es');
-            }
+            const navLang = (navigator.languages && navigator.languages[0]) ? navigator.languages[0] : navigator.language;
+            const detected = (navLang || 'es').split('-')[0];
+            setLanguage(L[detected] ? detected : 'es');
         } catch (e) {
             setLanguage('es');
         }
