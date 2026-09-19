@@ -357,6 +357,40 @@ canvas {
             color: white;
         }
 
+        .record-btn {
+            margin: 10px auto 0;
+            display: block;
+            padding: 10px 25px;
+            font-size: 1rem;
+            color: white;
+            background: transparent;
+            border: 2px solid var(--accent);
+            border-radius: 25px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .record-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .record-btn.armed {
+            box-shadow: 0 0 0 3px var(--accent-soft-strong), 0 0 16px var(--accent-glow-2);
+        }
+
+        .record-btn.recording {
+            color: white;
+            background: var(--accent);
+            animation: record-pulse 1s infinite;
+        }
+
+        @keyframes record-pulse {
+            0%, 100% { box-shadow: 0 0 12px var(--accent-glow-2); }
+            50% { box-shadow: 0 0 28px var(--accent-glow-4); }
+        }
+
         .hidden {
             display: none;
         }
@@ -668,6 +702,7 @@ canvas {
             </div>
 <div class="preview-images" id="previewImages"></div>
             <button class="clear-btn" id="clearBtn">🗑️ Limpiar</button>
+            <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)">🎥 Grabar girada (MP4)</button>
 
             <div class="sets-panel" id="setsPanel">
                 <h3 id="setsTitle">💾 Mis sets de imágenes</h3>
@@ -706,6 +741,7 @@ canvas {
         const ctx = canvas.getContext('2d');
         const rouletteWrapper = document.querySelector('.roulette-wrapper');
         const clearBtn = document.getElementById('clearBtn');
+        const recordBtn = document.getElementById('recordBtn');
         const result = document.getElementById('result');
         const resultHint = document.getElementById('result-hint');
 
@@ -720,6 +756,19 @@ let winnerIndex = -1;
         let isHovering = false;
         let isLoading = false;
         let pendingLoads = 0;
+
+        let recArmed = false;
+        let recActive = false;
+        let recMediaRecorder = null;
+        let recStream = null;
+        let recChunks = [];
+        let recExt = 'mp4';
+        let recEncoder = null;
+        let recMuxer = null;
+        let recMuxerTarget = null;
+        let recRaf = null;
+        let recRafLast = 0;
+        let recFrameKey = true;
 
 const themeSwitcher = document.getElementById('themeSwitcher');
         const langSelect = document.getElementById('langSelect');
@@ -748,7 +797,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Atardecer',
                 themeNoche: 'Paleta nocturna',
                 themeEsmeralda: 'Paleta verde',
-                themeAtardecer: 'Paleta cálida'
+                themeAtardecer: 'Paleta cálida',
+                record: '🎥 Grabar girada (MP4)',
+                recording: 'Grabando video…',
+                savedVideo: '🎥 Video MP4 guardado',
+                recordUnavailable: 'Este navegador no puede grabar video MP4'
             },
             en: {
                 title: '🎰 Image Roulette',
@@ -768,7 +821,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Sunset',
                 themeNoche: 'Night palette',
                 themeEsmeralda: 'Emerald palette',
-                themeAtardecer: 'Sunset palette'
+                themeAtardecer: 'Sunset palette',
+                record: '🎥 Record spin (MP4)',
+                recording: 'Recording…',
+                savedVideo: '🎥 MP4 video saved',
+                recordUnavailable: 'This browser cannot record MP4 video'
             },
             pt: {
                 title: '🎰 Roleta de Imagens',
@@ -788,7 +845,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Pôr do sol',
                 themeNoche: 'Paleta noturna',
                 themeEsmeralda: 'Paleta esmeralda',
-                themeAtardecer: 'Paleta pôr do sol'
+                themeAtardecer: 'Paleta pôr do sol',
+                record: '🎥 Gravar giro (MP4)',
+                recording: 'Gravando…',
+                savedVideo: '🎥 Vídeo MP4 salvo',
+                recordUnavailable: 'Este navegador não pode gravar vídeo MP4'
             },
             fr: {
                 title: '🎰 Roulette à Images',
@@ -808,7 +869,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Coucher de soleil',
                 themeNoche: 'Palette nocturne',
                 themeEsmeralda: 'Palette émeraude',
-                themeAtardecer: 'Palette coucher de soleil'
+                themeAtardecer: 'Palette coucher de soleil',
+                record: '🎥 Enregistrer le tour (MP4)',
+                recording: 'Enregistrement…',
+                savedVideo: '🎥 Vidéo MP4 enregistrée',
+                recordUnavailable: 'Ce navigateur ne peut pas enregistrer de vidéo MP4'
             },
             de: {
                 title: '🎰 Bild-Roulette',
@@ -828,7 +893,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Sonnenuntergang',
                 themeNoche: 'Nachts-Palette',
                 themeEsmeralda: 'Smaragd-Palette',
-                themeAtardecer: 'Sonnenuntergang-Palette'
+                themeAtardecer: 'Sonnenuntergang-Palette',
+                record: '🎥 Drehung aufnehmen (MP4)',
+                recording: 'Aufnahme…',
+                savedVideo: '🎥 MP4-Video gespeichert',
+                recordUnavailable: 'Dieser Browser kann kein MP4-Video aufnehmen'
             },
             zh: {
                 title: '🎰 图片轮盘',
@@ -848,7 +917,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 日落',
                 themeNoche: '夜晚调色板',
                 themeEsmeralda: '翡翠调色板',
-                themeAtardecer: '日落调色板'
+                themeAtardecer: '日落调色板',
+                record: '🎥 录制旋转 (MP4)',
+                recording: '录制中…',
+                savedVideo: '🎥 已保存 MP4 视频',
+                recordUnavailable: '此浏览器无法录制 MP4 视频'
             },
             hi: {
                 title: '🎰 इमेज रूलेट',
@@ -868,7 +941,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 सूर्यास्त',
                 themeNoche: 'रात का पैलेट',
                 themeEsmeralda: 'पन्ना पैलेट',
-                themeAtardecer: 'सूर्यास्त पैलेट'
+                themeAtardecer: 'सूर्यास्त पैलेट',
+                record: '🎥 घुमाव रिकॉर्ड करें (MP4)',
+                recording: 'रिकॉर्ड हो रहा है…',
+                savedVideo: '🎥 MP4 वीडियो सहेजा गया',
+                recordUnavailable: 'यह ब्राउज़र MP4 वीडियो रिकॉर्ड नहीं कर सकता'
             },
             ar: {
                 title: '🎰 روليت الصور',
@@ -888,7 +965,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 غروب',
                 themeNoche: 'لوحة ليلية',
                 themeEsmeralda: 'لوحة زمردية',
-                themeAtardecer: 'لوحة غروب'
+                themeAtardecer: 'لوحة غروب',
+                record: '🎥 تسجيل الدوران (MP4)',
+                recording: 'جارٍ التسجيل…',
+                savedVideo: '🎥 تم حفظ الفيديو MP4',
+                recordUnavailable: 'لا يمكن لهذا المتصفح تسجيل فيديو MP4'
             },
             bn: {
                 title: '🎰 ইমেজ রুলেট',
@@ -908,7 +989,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 সূর্যাস্ত',
                 themeNoche: 'রাতের প্যালেট',
                 themeEsmeralda: 'পান্না প্যালেট',
-                themeAtardecer: 'সূর্যাস্ত প্যালেট'
+                themeAtardecer: 'সূর্যাস্ত প্যালেট',
+                record: '🎥 ঘূর্ণন রেকর্ড করুন (MP4)',
+                recording: 'রেকর্ড হচ্ছে…',
+                savedVideo: '🎥 MP4 ভিডিও সংরক্ষিত',
+                recordUnavailable: 'এই ব্রাউজারটি MP4 ভিডিও রেকর্ড করতে পারে না'
             },
             ru: {
                 title: '🎰 Рулетка изображений',
@@ -928,7 +1013,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Закат',
                 themeNoche: 'Ночная палитра',
                 themeEsmeralda: 'Изумрудная палитра',
-                themeAtardecer: 'Палитра заката'
+                themeAtardecer: 'Палитра заката',
+                record: '🎥 Записать вращение (MP4)',
+                recording: 'Запись…',
+                savedVideo: '🎥 Видео MP4 сохранено',
+                recordUnavailable: 'Этот браузер не может записать видео MP4'
             },
             ur: {
                 title: '🎰 امیج رولیٹ',
@@ -948,7 +1037,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 غروب آفتاب',
                 themeNoche: 'رات کا پیلیٹ',
                 themeEsmeralda: 'زمرد پیلیٹ',
-                themeAtardecer: 'غروب آفتاب پیلیٹ'
+                themeAtardecer: 'غروب آفتاب پیلیٹ',
+                record: '🎥 گھماؤ ریکارڈ کریں (MP4)',
+                recording: 'ریکارڈ ہو رہا ہے…',
+                savedVideo: '🎥 MP4 ویڈیو محفوظ ہو گئی',
+                recordUnavailable: 'یہ براؤزر MP4 ویڈیو ریکارڈ نہیں کر سکتا'
             },
             id: {
                 title: '🎰 Roulette Gambar',
@@ -968,7 +1061,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Matahari terbenam',
                 themeNoche: 'Palet malam',
                 themeEsmeralda: 'Palet zamrud',
-                themeAtardecer: 'Palet matahari terbenam'
+                themeAtardecer: 'Palet matahari terbenam',
+                record: '🎥 Rekam putaran (MP4)',
+                recording: 'Merekam…',
+                savedVideo: '🎥 Video MP4 disimpan',
+                recordUnavailable: 'Browser ini tidak dapat merekam video MP4'
             },
             ja: {
                 title: '🎰 画像ルーレット',
@@ -988,7 +1085,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 夕日',
                 themeNoche: '夜のパレット',
                 themeEsmeralda: 'エメラルドのパレット',
-                themeAtardecer: '夕日のパレット'
+                themeAtardecer: '夕日のパレット',
+                record: '🎥 回転を録画 (MP4)',
+                recording: '録画中…',
+                savedVideo: '🎥 MP4動画を保存しました',
+                recordUnavailable: 'このブラウザはMP4動画を録画できません'
             },
             pa: {
                 title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
@@ -1008,7 +1109,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 ਸੂਰਜ ਡੁੱਬਣਾ',
                 themeNoche: 'ਰਾਤ ਦਾ ਪੈਲੇਟ',
                 themeEsmeralda: 'ਪੰਨਾ ਪੈਲੇਟ',
-                themeAtardecer: 'ਸੂਰਜ ਡੁੱਬਣ ਪੈਲੇਟ'
+                themeAtardecer: 'ਸੂਰਜ ਡੁੱਬਣ ਪੈਲੇਟ',
+                record: '🎥 ਘੁੰਮਾਅ ਰਿਕਾਰਡ ਕਰੋ (MP4)',
+                recording: 'ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…',
+                savedVideo: '🎥 MP4 ਵੀਡੀਓ ਸੇਵ ਹੋ ਗਈ',
+                recordUnavailable: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ MP4 ਵੀਡੀਓ ਰਿਕਾਰਡ ਨਹੀਂ ਕਰ ਸਕਦਾ'
             },
             jv: {
                 title: '🎰 Roulette Gambar',
@@ -1028,7 +1133,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Srengéngé ngumpla',
                 themeNoche: 'Palèt wengi',
                 themeEsmeralda: 'Palèt zamrud',
-                themeAtardecer: 'Palèt srengéngé ngumpla'
+                themeAtardecer: 'Palèt srengéngé ngumpla',
+                record: '🎥 Rekam puteran (MP4)',
+                recording: 'Rekam…',
+                savedVideo: '🎥 Video MP4 disimpen',
+                recordUnavailable: 'Browser iki ora bisa ngrekam video MP4'
             },
             vi: {
                 title: '🎰 Vòng quay Hình ảnh',
@@ -1048,7 +1157,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Hoàng hôn',
                 themeNoche: 'Bảng màu đêm',
                 themeEsmeralda: 'Bảng màu ngọc lục bảo',
-                themeAtardecer: 'Bảng màu hoàng hôn'
+                themeAtardecer: 'Bảng màu hoàng hôn',
+                record: '🎥 Quay video (MP4)',
+                recording: 'Đang ghi…',
+                savedVideo: '🎥 Đã lưu video MP4',
+                recordUnavailable: 'Trình duyệt này không thể quay video MP4'
             },
             te: {
                 title: '🎰 ఇమేజ్ రూలెట్',
@@ -1068,7 +1181,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 సూర్యాస్తమయం',
                 themeNoche: 'రాత్రి పాలెట్',
                 themeEsmeralda: 'పచ్చ పాలెట్',
-                themeAtardecer: 'సూర్యాస్తమయ పాలెట్'
+                themeAtardecer: 'సూర్యాస్తమయ పాలెట్',
+                record: '🎥 భ్రమణం రికార్డ్ చేయండి (MP4)',
+                recording: 'రికార్డ్ చేస్తోంది…',
+                savedVideo: '🎥 MP4 వీడియో సేవ్ చేయబడింది',
+                recordUnavailable: 'ఈ బ్రౌజర్ MP4 వీడియోను రికార్డ్ చేయలేదు'
             },
             ko: {
                 title: '🎰 이미지 룰렛',
@@ -1088,7 +1205,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 석양',
                 themeNoche: '밤 팔레트',
                 themeEsmeralda: '에메랄드 팔레트',
-                themeAtardecer: '석양 팔레트'
+                themeAtardecer: '석양 팔레트',
+                record: '🎥 회전 녹화 (MP4)',
+                recording: '녹화 중…',
+                savedVideo: '🎥 MP4 동영상 저장됨',
+                recordUnavailable: '이 브라우저는 MP4 동영상을 녹화할 수 없습니다'
             },
             tr: {
                 title: '🎰 Görsel Ruleti',
@@ -1108,7 +1229,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Gün batımı',
                 themeNoche: 'Gece paleti',
                 themeEsmeralda: 'Zümrüt paleti',
-                themeAtardecer: 'Gün batımı paleti'
+                themeAtardecer: 'Gün batımı paleti',
+                record: '🎥 Dönüşü kaydet (MP4)',
+                recording: 'Kaydediliyor…',
+                savedVideo: '🎥 MP4 video kaydedildi',
+                recordUnavailable: 'Bu tarayıcı MP4 video kaydedemez'
             },
             fa: {
                 title: '🎰 رولت تصویر',
@@ -1128,7 +1253,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 غروب',
                 themeNoche: 'پالت شب',
                 themeEsmeralda: 'پالت زمردی',
-                themeAtardecer: 'پالت غروب'
+                themeAtardecer: 'پالت غروب',
+                record: '🎥 ضبط چرخش (MP4)',
+                recording: 'در حال ضبط…',
+                savedVideo: '🎥 ویدیوی MP4 ذخیره شد',
+                recordUnavailable: 'این مرورگر نمیتواند ویدیوی MP4 ضبط کند'
             },
             mr: {
                 title: '🎰 इमेज रूलेट',
@@ -1148,7 +1277,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 सूर्यास्त',
                 themeNoche: 'रात्रीचा पॅलेट',
                 themeEsmeralda: 'पाचू पॅलेट',
-                themeAtardecer: 'सूर्यास्त पॅलेट'
+                themeAtardecer: 'सूर्यास्त पॅलेट',
+                record: '🎥 फेरी रेकॉर्ड करा (MP4)',
+                recording: 'रेकॉर्डिंग…',
+                savedVideo: '🎥 MP4 व्हिडिओ सेव्ह केला',
+                recordUnavailable: 'हा ब्राउझर MP4 व्हिडिओ रेकॉर्ड करू शकत नाही'
             },
             ta: {
                 title: '🎰 பட ரவுலட்',
@@ -1168,7 +1301,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 சூரிய அஸ்தமனம்',
                 themeNoche: 'இரவு தட்டு',
                 themeEsmeralda: 'மரகத தட்டு',
-                themeAtardecer: 'சூரிய அஸ்தமன தட்டு'
+                themeAtardecer: 'சூரிய அஸ்தமன தட்டு',
+                record: '🎥 சுழற்சியைப் பதிவுசெய் (MP4)',
+                recording: 'பதிவு செய்கிறது…',
+                savedVideo: '🎥 MP4 வீடியோ சேமிக்கப்பட்டது',
+                recordUnavailable: 'இந்த உலாவி MP4 வீடியோவை பதிவு செய்ய முடியாது'
             },
             ha: {
                 title: '🎰 Roulette na Hotuna',
@@ -1188,7 +1325,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Faɗuwar rana',
                 themeNoche: 'Pallet dare',
                 themeEsmeralda: 'Pallet emerald',
-                themeAtardecer: 'Pallet faɗuwar rana'
+                themeAtardecer: 'Pallet faɗuwar rana',
+                record: '🎥 Rikodi juyi (MP4)',
+                recording: 'Ana rikodi…',
+                savedVideo: '🎥 An adana bidiyon MP4',
+                recordUnavailable: 'Wannan burauza ba zai iya rikodin bidiyon MP4 ba'
             },
             sw: {
                 title: '🎰 Rulleti ya Picha',
@@ -1208,7 +1349,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Machweo',
                 themeNoche: 'Rangi za usiku',
                 themeEsmeralda: 'Rangi za zumaridi',
-                themeAtardecer: 'Rangi za machweo'
+                themeAtardecer: 'Rangi za machweo',
+                record: '🎥 Rekodi mzunguko (MP4)',
+                recording: 'Inarekodi…',
+                savedVideo: '🎥 Video MP4 umehifadhiwa',
+                recordUnavailable: 'Kivinjari hiki hakiwezi kurekodi video MP4'
             },
             it: {
                 title: '🎰 Ruota delle Immagini',
@@ -1228,7 +1373,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 themeBtnAtardecer: '🌅 Tramonto',
                 themeNoche: 'Paletta notturna',
                 themeEsmeralda: 'Paletta smeraldo',
-                themeAtardecer: 'Paletta tramonto'
+                themeAtardecer: 'Paletta tramonto',
+                record: '🎥 Registra il giro (MP4)',
+                recording: 'Registrazione…',
+                savedVideo: '🎥 Video MP4 salvato',
+                recordUnavailable: 'Questo browser non può registrare video MP4'
             }
         };
 
@@ -1243,6 +1392,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             dropText.textContent = t('drop');
             dropHint.textContent = t('dropHint');
             clearBtn.textContent = t('clear');
+            recordBtn.textContent = t('record');
+            recordBtn.title = t('record');
             document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
             document.querySelector('.theme-btn[data-theme="esmeralda"]').textContent = t('themeBtnEsmeralda');
             document.querySelector('.theme-btn[data-theme="atardecer"]').textContent = t('themeBtnAtardecer');
@@ -1254,6 +1405,10 @@ const themeSwitcher = document.getElementById('themeSwitcher');
         }
 
         function refreshMessages() {
+            if (recActive) {
+                result.textContent = t('recording');
+                return;
+            }
             if (isLoading) {
                 result.textContent = t('loading');
                 return;
@@ -1370,6 +1525,7 @@ let colors = themeColors[currentTheme];
         });
 
 clearBtn.addEventListener('click', () => {
+            if (recArmed && !recActive) setRecordingArmed(false);
             images = [];
             loadedImages = [];
             thumbImages = [];
@@ -1673,6 +1829,8 @@ const wheelCache = document.createElement('canvas');
         function spin() {
             if (isSpinning || loadedImages.length < 2) return;
 
+            if (recArmed && !recActive) startRecording();
+
 isSpinning = true;
             refreshMessages();
 
@@ -1723,6 +1881,8 @@ rouletteWrapper.classList.add('winner-mode');
 
                 if (progress < 1) {
                     spinTimeout = requestAnimationFrame(animateWinner);
+                } else {
+                    finishRecording();
                 }
             }
 
@@ -1754,6 +1914,217 @@ if (winnerIndex >= 0) {
             }
 spin();
         });
+
+        recordBtn.addEventListener('click', () => {
+            if (recActive) return;
+            if (!recArmed) {
+                if (loadedImages.length < 2) {
+                    result.textContent = t('min');
+                    return;
+                }
+                setRecordingArmed(true);
+            } else {
+                setRecordingArmed(false);
+            }
+        });
+
+        function setRecordingArmed(v) {
+            recArmed = v;
+            if (recArmed) {
+                recordBtn.classList.add('armed');
+            } else {
+                recordBtn.classList.remove('armed');
+            }
+        }
+
+        function setRecordingActive(v) {
+            recActive = v;
+            if (v) {
+                recordBtn.classList.add('recording');
+                recordBtn.textContent = t('recording');
+            } else {
+                recArmed = false;
+                recordBtn.classList.remove('recording', 'armed');
+                recordBtn.textContent = t('record');
+            }
+            refreshMessages();
+        }
+
+        function pickRecorderType() {
+            if (typeof MediaRecorder !== 'undefined') {
+                if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E') || MediaRecorder.isTypeSupported('video/mp4')) return 'wm';
+            }
+            if (typeof VideoEncoder !== 'undefined') return 'wc';
+            if (typeof MediaRecorder !== 'undefined') {
+                if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') || MediaRecorder.isTypeSupported('video/webm;codecs=vp8') || MediaRecorder.isTypeSupported('video/webm')) return 'wr';
+            }
+            return null;
+        }
+
+        function startRecording() {
+            setRecordingActive(true);
+            const type = pickRecorderType();
+            if (type === 'wm') {
+                beginMediaRecorder(true);
+            } else if (type === 'wr') {
+                beginMediaRecorder(false);
+            } else if (type === 'wc') {
+                import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/+esm')
+                    .then((mod) => beginWebCodecs(mod))
+                    .catch(() => failRecording(t('recordUnavailable')));
+            } else {
+                failRecording(t('recordUnavailable'));
+            }
+        }
+
+        function failRecording(msg) {
+            setRecordingActive(false);
+            result.textContent = msg;
+        }
+
+        function beginMediaRecorder(isMp4) {
+            const mime = isMp4
+                ? (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E') ? 'video/mp4;codecs=avc1.42E01E' : 'video/mp4')
+                : (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm');
+            recExt = mime.indexOf('mp4') >= 0 ? 'mp4' : 'webm';
+            try {
+                recStream = canvas.captureStream(30);
+                recMediaRecorder = new MediaRecorder(recStream, { mimeType: mime, videoBitsPerSecond: 8000000 });
+                recChunks = [];
+                recMediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size) recChunks.push(e.data);
+                };
+                recMediaRecorder.onstop = () => {
+                    const blob = new Blob(recChunks, { type: mime });
+                    recChunks = [];
+                    cleanupMediaRecorder();
+                    deliverRecording(blob, recExt);
+                };
+                recMediaRecorder.onerror = () => {
+                    cleanupMediaRecorder();
+                    failRecording(tt('err'));
+                };
+                recMediaRecorder.start(1000);
+            } catch (e) {
+                cleanupMediaRecorder();
+                failRecording(t('recordUnavailable'));
+            }
+        }
+
+        function cleanupMediaRecorder() {
+            if (recStream) {
+                recStream.getTracks().forEach((tr) => tr.stop());
+                recStream = null;
+            }
+            recMediaRecorder = null;
+        }
+
+        function beginWebCodecs(mod) {
+            try {
+                recMuxerTarget = new mod.ArrayBufferTarget();
+                recMuxer = new mod.Muxer({
+                    target: recMuxerTarget,
+                    video: { codec: 'avc', width: canvas.width, height: canvas.height },
+                    fastStart: 'in-memory',
+                    firstTimestampBehavior: 'offset'
+                });
+                recEncoder = new VideoEncoder({
+                    output: (chunk, meta) => {
+                        if (recMuxer) recMuxer.addVideoChunk(chunk, meta);
+                    },
+                    error: (e) => {
+                        finishWebCodecs(true);
+                        if (e && e.message) result.textContent = tt('err') + ': ' + e.message;
+                    }
+                });
+                recEncoder.configure({ codec: 'avc1.42001f', width: canvas.width, height: canvas.height, bitrate: 8000000, framerate: 30 });
+                recFrameKey = true;
+                recRafLast = 0;
+                recRaf = requestAnimationFrame(recordFrame);
+            } catch (e) {
+                failRecording(t('recordUnavailable'));
+            }
+        }
+
+        function recordFrame(ts) {
+            if (!recActive || !recEncoder) {
+                recRaf = null;
+                return;
+            }
+            const interval = 1000 / 30;
+            if (ts - recRafLast >= interval) {
+                recRafLast = ts;
+                let frame = null;
+                try {
+                    frame = new VideoFrame(canvas, { timestamp: ts * 1000 });
+                } catch (e) {}
+                if (frame) {
+                    recEncoder.encode(frame, { keyFrame: recFrameKey });
+                    recFrameKey = false;
+                    frame.close();
+                }
+            }
+            recRaf = requestAnimationFrame(recordFrame);
+        }
+
+        function finishRecording() {
+            if (!recActive) return;
+            if (recMediaRecorder) {
+                if (recMediaRecorder.state !== 'inactive') recMediaRecorder.stop();
+                return;
+            }
+            if (recEncoder) {
+                recActive = false;
+                if (recRaf) {
+                    cancelAnimationFrame(recRaf);
+                    recRaf = null;
+                }
+                finishWebCodecs(false);
+            }
+        }
+
+        async function finishWebCodecs(hadError) {
+            let buf = null;
+            try {
+                if (recEncoder) await recEncoder.flush();
+            } catch (e) {}
+            if (!hadError && recMuxer) {
+                try {
+                    recMuxer.finalize();
+                    if (recMuxerTarget) buf = recMuxerTarget.buffer;
+                } catch (e) {}
+            }
+            if (recEncoder) recEncoder.close();
+            recEncoder = null;
+            recMuxer = null;
+            recMuxerTarget = null;
+            if (buf && buf.byteLength > 0) {
+                deliverRecording(new Blob([buf], { type: 'video/mp4' }), 'mp4');
+            } else {
+                setRecordingActive(false);
+                if (!hadError) {
+                    result.textContent = tt('err');
+                }
+            }
+        }
+
+        function deliverRecording(blob, ext) {
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const name = 'ruleta_' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '_' + pad(d.getHours()) + '-' + pad(d.getMinutes()) + '-' + pad(d.getSeconds()) + '.' + ext;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                URL.revokeObjectURL(a.href);
+                a.remove();
+            }, 1500);
+            setRecordingActive(false);
+            resultHint.textContent = t('savedVideo');
+            setTimeout(refreshMessages, 2500);
+        }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1796,7 +2167,7 @@ spin();
                 saving: 'Guardando...', savedOk: 'Set guardado ✓',
                 loadingSet: 'Cargando set...', loadedOk: 'Set cargado ✓',
                 delTitle: 'Eliminar set', deleting: 'Eliminando...', delOk: 'Set eliminado',
-                err: 'Error', savePh: 'Guardando...'
+                err: 'Error', savePh: 'Guardando...', record: '🎥 Grabar girada (MP4)', recording: 'Grabando video…', savedVideo: '🎥 Video MP4 guardado', recordUnavailable: 'Este navegador no puede grabar video MP4'
             },
             en: {
                 login: 'Sign in with Google', logout: 'Sign out',
@@ -1806,7 +2177,7 @@ spin();
                 saving: 'Saving...', savedOk: 'Set saved ✓',
                 loadingSet: 'Loading set...', loadedOk: 'Set loaded ✓',
                 delTitle: 'Delete set', deleting: 'Deleting...', delOk: 'Set deleted',
-                err: 'Error', savePh: 'Saving...'
+                err: 'Error', savePh: 'Saving...', record: '🎥 Record spin (MP4)', recording: 'Recording…', savedVideo: '🎥 MP4 video saved', recordUnavailable: 'This browser cannot record MP4 video'
             },
             pt: {
                 login: 'Entrar com o Google', logout: 'Sair',
@@ -1816,7 +2187,7 @@ spin();
                 saving: 'Salvando...', savedOk: 'Conjunto salvo ✓',
                 loadingSet: 'Carregando conjunto...', loadedOk: 'Conjunto carregado ✓',
                 delTitle: 'Excluir conjunto', deleting: 'Excluindo...', delOk: 'Conjunto excluído',
-                err: 'Erro', savePh: 'Salvando...'
+                err: 'Erro', savePh: 'Salvando...', record: '🎥 Gravar giro (MP4)', recording: 'Gravando…', savedVideo: '🎥 Vídeo MP4 salvo', recordUnavailable: 'Este navegador não pode gravar vídeo MP4'
             },
             fr: {
                 login: 'Se connecter avec Google', logout: 'Se déconnecter',
@@ -1826,7 +2197,7 @@ spin();
                 saving: 'Enregistrement...', savedOk: 'Ensemble enregistré ✓',
                 loadingSet: 'Chargement de l\'ensemble...', loadedOk: 'Ensemble chargé ✓',
                 delTitle: 'Supprimer l\'ensemble', deleting: 'Suppression...', delOk: 'Ensemble supprimé',
-                err: 'Erreur', savePh: 'Enregistrement...'
+                err: 'Erreur', savePh: 'Enregistrement...', record: '🎥 Enregistrer le tour (MP4)', recording: 'Enregistrement…', savedVideo: '🎥 Vidéo MP4 enregistrée', recordUnavailable: 'Ce navigateur ne peut pas enregistrer de vidéo MP4'
             },
             de: {
                 login: 'Mit Google anmelden', logout: 'Abmelden',
@@ -1836,7 +2207,7 @@ spin();
                 saving: 'Speichern...', savedOk: 'Set gespeichert ✓',
                 loadingSet: 'Set wird geladen...', loadedOk: 'Set geladen ✓',
                 delTitle: 'Set löschen', deleting: 'Löschen...', delOk: 'Set gelöscht',
-                err: 'Fehler', savePh: 'Speichern...'
+                err: 'Fehler', savePh: 'Speichern...', record: '🎥 Drehung aufnehmen (MP4)', recording: 'Aufnahme…', savedVideo: '🎥 MP4-Video gespeichert', recordUnavailable: 'Dieser Browser kann kein MP4-Video aufnehmen'
             },
             zh: {
                 login: '使用 Google 登录', logout: '退出登录',
@@ -1846,7 +2217,7 @@ spin();
                 saving: '保存中...', savedOk: '图片组已保存 ✓',
                 loadingSet: '加载中...', loadedOk: '图片组已加载 ✓',
                 delTitle: '删除图片组', deleting: '删除中...', delOk: '图片组已删除',
-                err: '错误', savePh: '保存中...'
+                err: '错误', savePh: '保存中...', record: '🎥 录制旋转 (MP4)', recording: '录制中…', savedVideo: '🎥 已保存 MP4 视频', recordUnavailable: '此浏览器无法录制 MP4 视频'
             },
             hi: {
                 login: 'Google से साइन इन करें', logout: 'साइन आउट',
@@ -1856,7 +2227,7 @@ spin();
                 saving: 'सेव हो रहा है...', savedOk: 'सेट सेव हो गया ✓',
                 loadingSet: 'सेट लोड हो रहा है...', loadedOk: 'सेट लोड हो गया ✓',
                 delTitle: 'सेट हटाएँ', deleting: 'हटाया जा रहा है...', delOk: 'सेट हटा दिया गया',
-                err: 'त्रुटि', savePh: 'सेव हो रहा है...'
+                err: 'त्रुटि', savePh: 'सेव हो रहा है...', record: '🎥 घुमाव रिकॉर्ड करें (MP4)', recording: 'रिकॉर्ड हो रहा है…', savedVideo: '🎥 MP4 वीडियो सहेजा गया', recordUnavailable: 'यह ब्राउज़र MP4 वीडियो रिकॉर्ड नहीं कर सकता'
             },
             ar: {
                 login: 'تسجيل الدخول عبر Google', logout: 'تسجيل الخروج',
@@ -1866,7 +2237,7 @@ spin();
                 saving: 'جارٍ الحفظ...', savedOk: 'تم حفظ المجموعة ✓',
                 loadingSet: 'جارٍ التحميل...', loadedOk: 'تم تحميل المجموعة ✓',
                 delTitle: 'حذف المجموعة', deleting: 'جارٍ الحذف...', delOk: 'تم حذف المجموعة',
-                err: 'خطأ', savePh: 'جارٍ الحفظ...'
+                err: 'خطأ', savePh: 'جارٍ الحفظ...', record: '🎥 تسجيل الدوران (MP4)', recording: 'جارٍ التسجيل…', savedVideo: '🎥 تم حفظ الفيديو MP4', recordUnavailable: 'لا يمكن لهذا المتصفح تسجيل فيديو MP4'
             },
             bn: {
                 login: 'Google দিয়ে সাইন ইন করুন', logout: 'সাইন আউট',
@@ -1876,7 +2247,7 @@ spin();
                 saving: 'সংরক্ষণ হচ্ছে...', savedOk: 'সেট সংরক্ষিত হয়েছে ✓',
                 loadingSet: 'সেট লোড হচ্ছে...', loadedOk: 'সেট লোড হয়েছে ✓',
                 delTitle: 'সেট মুছুন', deleting: 'মুছে ফেলা হচ্ছে...', delOk: 'সেট মুছে ফেলা হয়েছে',
-                err: 'ত্রুটি', savePh: 'সংরক্ষণ হচ্ছে...'
+                err: 'ত্রুটি', savePh: 'সংরক্ষণ হচ্ছে...', record: '🎥 ঘূর্ণন রেকর্ড করুন (MP4)', recording: 'রেকর্ড হচ্ছে…', savedVideo: '🎥 MP4 ভিডিও সংরক্ষিত', recordUnavailable: 'এই ব্রাউজারটি MP4 ভিডিও রেকর্ড করতে পারে না'
             },
             ru: {
                 login: 'Войти через Google', logout: 'Выйти',
@@ -1886,7 +2257,7 @@ spin();
                 saving: 'Сохранение...', savedOk: 'Набор сохранён ✓',
                 loadingSet: 'Загрузка набора...', loadedOk: 'Набор загружен ✓',
                 delTitle: 'Удалить набор', deleting: 'Удаление...', delOk: 'Набор удалён',
-                err: 'Ошибка', savePh: 'Сохранение...'
+                err: 'Ошибка', savePh: 'Сохранение...', record: '🎥 Записать вращение (MP4)', recording: 'Запись…', savedVideo: '🎥 Видео MP4 сохранено', recordUnavailable: 'Этот браузер не может записать видео MP4'
             },
             ur: {
                 login: 'Google سے سائن ان کریں', logout: 'سائن آؤٹ',
@@ -1896,7 +2267,7 @@ spin();
                 saving: 'محفوظ ہو رہا ہے...', savedOk: 'سیٹ محفوظ ہو گئی ✓',
                 loadingSet: 'سیٹ لوڈ ہو رہی ہے...', loadedOk: 'سیٹ لوڈ ہو گئی ✓',
                 delTitle: 'سیٹ حذف کریں', deleting: 'حذف ہو رہا ہے...', delOk: 'سیٹ حذف ہو گئی',
-                err: 'خرابی', savePh: 'محفوظ ہو رہا ہے...'
+                err: 'خرابی', savePh: 'محفوظ ہو رہا ہے...', record: '🎥 گھماؤ ریکارڈ کریں (MP4)', recording: 'ریکارڈ ہو رہا ہے…', savedVideo: '🎥 MP4 ویڈیو محفوظ ہو گئی', recordUnavailable: 'یہ براؤزر MP4 ویڈیو ریکارڈ نہیں کر سکتا'
             },
             id: {
                 login: 'Masuk dengan Google', logout: 'Keluar',
@@ -1906,7 +2277,7 @@ spin();
                 saving: 'Menyimpan...', savedOk: 'Set tersimpan ✓',
                 loadingSet: 'Memuat set...', loadedOk: 'Set dimuat ✓',
                 delTitle: 'Hapus set', deleting: 'Menghapus...', delOk: 'Set dihapus',
-                err: 'Kesalahan', savePh: 'Menyimpan...'
+                err: 'Kesalahan', savePh: 'Menyimpan...', record: '🎥 Rekam putaran (MP4)', recording: 'Merekam…', savedVideo: '🎥 Video MP4 disimpan', recordUnavailable: 'Browser ini tidak dapat merekam video MP4'
             },
             ja: {
                 login: 'Googleでログイン', logout: 'ログアウト',
@@ -1916,7 +2287,7 @@ spin();
                 saving: '保存中...', savedOk: 'セットを保存しました ✓',
                 loadingSet: '読み込み中...', loadedOk: 'セットを読み込みました ✓',
                 delTitle: 'セットを削除', deleting: '削除中...', delOk: 'セットを削除しました',
-                err: 'エラー', savePh: '保存中...'
+                err: 'エラー', savePh: '保存中...', record: '🎥 回転を録画 (MP4)', recording: '録画中…', savedVideo: '🎥 MP4動画を保存しました', recordUnavailable: 'このブラウザはMP4動画を録画できません'
             },
             pa: {
                 login: 'Google ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ', logout: 'ਸਾਈਨ ਆਊਟ',
@@ -1926,7 +2297,7 @@ spin();
                 saving: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...', savedOk: 'ਸੈੱਟ ਸੇਵ ਹੋ ਗਿਆ ✓',
                 loadingSet: 'ਸੈੱਟ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...', loadedOk: 'ਸੈੱਟ ਲੋਡ ਹੋ ਗਿਆ ✓',
                 delTitle: 'ਸੈੱਟ ਮਿਟਾਓ', deleting: 'ਮਿਟ ਰਿਹਾ ਹੈ...', delOk: 'ਸੈੱਟ ਮਿਟਾ ਦਿੱਤਾ ਗਿਆ',
-                err: 'ਗਲਤੀ', savePh: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...'
+                err: 'ਗਲਤੀ', savePh: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...', record: '🎥 ਘੁੰਮਾਅ ਰਿਕਾਰਡ ਕਰੋ (MP4)', recording: 'ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…', savedVideo: '🎥 MP4 ਵੀਡੀਓ ਸੇਵ ਹੋ ਗਈ', recordUnavailable: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ MP4 ਵੀਡੀਓ ਰਿਕਾਰਡ ਨਹੀਂ ਕਰ ਸਕਦਾ'
             },
             jv: {
                 login: 'Mlebet nganggo Google', logout: 'Metu',
@@ -1936,7 +2307,7 @@ spin();
                 saving: 'Nyimpen...', savedOk: 'Set kesimpen ✓',
                 loadingSet: 'Mbukak set...', loadedOk: 'Set keunggah ✓',
                 delTitle: 'Busak set', deleting: 'Mbusa...', delOk: 'Set kebusak',
-                err: 'Kaluputan', savePh: 'Nyimpen...'
+                err: 'Kaluputan', savePh: 'Nyimpen...', record: '🎥 Rekam puteran (MP4)', recording: 'Rekam…', savedVideo: '🎥 Video MP4 disimpen', recordUnavailable: 'Browser iki ora bisa ngrekam video MP4'
             },
             vi: {
                 login: 'Đăng nhập bằng Google', logout: 'Đăng xuất',
@@ -1946,7 +2317,7 @@ spin();
                 saving: 'Đang lưu...', savedOk: 'Đã lưu bộ ảnh ✓',
                 loadingSet: 'Đang tải bộ ảnh...', loadedOk: 'Đã tải bộ ảnh ✓',
                 delTitle: 'Xóa bộ ảnh', deleting: 'Đang xóa...', delOk: 'Đã xóa bộ ảnh',
-                err: 'Lỗi', savePh: 'Đang lưu...'
+                err: 'Lỗi', savePh: 'Đang lưu...', record: '🎥 Quay video (MP4)', recording: 'Đang ghi…', savedVideo: '🎥 Đã lưu video MP4', recordUnavailable: 'Trình duyệt này không thể quay video MP4'
             },
             te: {
                 login: 'Googleతో సైన్ ఇన్ చేయండి', logout: 'సైన్ అవుట్',
@@ -1956,7 +2327,7 @@ spin();
                 saving: 'సేవ్ అవుతోంది...', savedOk: 'సెట్ సేవ్ అయింది ✓',
                 loadingSet: 'సెట్ లోడ్ అవుతోంది...', loadedOk: 'సెట్ లోడ్ అయింది ✓',
                 delTitle: 'సెట్ తొలగించు', deleting: 'తొలగిస్తోంది...', delOk: 'సెట్ తొలగించబడింది',
-                err: 'దోషం', savePh: 'సేవ్ అవుతోంది...'
+                err: 'దోషం', savePh: 'సేవ్ అవుతోంది...', record: '🎥 భ్రమణం రికార్డ్ చేయండి (MP4)', recording: 'రికార్డ్ చేస్తోంది…', savedVideo: '🎥 MP4 వీడియో సేవ్ చేయబడింది', recordUnavailable: 'ఈ బ్రౌజర్ MP4 వీడియోను రికార్డ్ చేయలేదు'
             },
             ko: {
                 login: 'Google로 로그인', logout: '로그아웃',
@@ -1966,7 +2337,7 @@ spin();
                 saving: '저장 중...', savedOk: '세트 저장됨 ✓',
                 loadingSet: '세트 불러오는 중...', loadedOk: '세트 불러옴 ✓',
                 delTitle: '세트 삭제', deleting: '삭제 중...', delOk: '세트 삭제됨',
-                err: '오류', savePh: '저장 중...'
+                err: '오류', savePh: '저장 중...', record: '🎥 회전 녹화 (MP4)', recording: '녹화 중…', savedVideo: '🎥 MP4 동영상 저장됨', recordUnavailable: '이 브라우저는 MP4 동영상을 녹화할 수 없습니다'
             },
             tr: {
                 login: 'Google ile giriş yap', logout: 'Çıkış yap',
@@ -1976,7 +2347,7 @@ spin();
                 saving: 'Kaydediliyor...', savedOk: 'Set kaydedildi ✓',
                 loadingSet: 'Set yükleniyor...', loadedOk: 'Set yüklendi ✓',
                 delTitle: 'Seti sil', deleting: 'Siliniyor...', delOk: 'Set silindi',
-                err: 'Hata', savePh: 'Kaydediliyor...'
+                err: 'Hata', savePh: 'Kaydediliyor...', record: '🎥 Dönüşü kaydet (MP4)', recording: 'Kaydediliyor…', savedVideo: '🎥 MP4 video kaydedildi', recordUnavailable: 'Bu tarayıcı MP4 video kaydedemez'
             },
             fa: {
                 login: 'ورود با Google', logout: 'خروج',
@@ -1986,7 +2357,7 @@ spin();
                 saving: 'در حال ذخیره...', savedOk: 'مجموعه ذخیره شد ✓',
                 loadingSet: 'در حال بارگذاری...', loadedOk: 'مجموعه بارگذاری شد ✓',
                 delTitle: 'حذف مجموعه', deleting: 'در حال حذف...', delOk: 'مجموعه حذف شد',
-                err: 'خطا', savePh: 'در حال ذخیره...'
+                err: 'خطا', savePh: 'در حال ذخیره...', record: '🎥 ضبط چرخش (MP4)', recording: 'در حال ضبط…', savedVideo: '🎥 ویدیوی MP4 ذخیره شد', recordUnavailable: 'این مرورگر نمیتواند ویدیوی MP4 ضبط کند'
             },
             mr: {
                 login: 'Google सह साइन इन करा', logout: 'साइन आउट',
@@ -1996,7 +2367,7 @@ spin();
                 saving: 'जतन होत आहे...', savedOk: 'संच जतन झाला ✓',
                 loadingSet: 'संच लोड होत आहे...', loadedOk: 'संच लोड झाला ✓',
                 delTitle: 'संच हटवा', deleting: 'हटवत आहे...', delOk: 'संच हटवला',
-                err: 'त्रुटी', savePh: 'जतन होत आहे...'
+                err: 'त्रुटी', savePh: 'जतन होत आहे...', record: '🎥 फेरी रेकॉर्ड करा (MP4)', recording: 'रेकॉर्डिंग…', savedVideo: '🎥 MP4 व्हिडिओ सेव्ह केला', recordUnavailable: 'हा ब्राउझर MP4 व्हिडिओ रेकॉर्ड करू शकत नाही'
             },
             ta: {
                 login: 'Google மூலம் உள்நுழைக', logout: 'வெளியேறு',
@@ -2006,7 +2377,7 @@ spin();
                 saving: 'சேமிக்கிறது...', savedOk: 'தொகுப்பு சேமிக்கப்பட்டது ✓',
                 loadingSet: 'தொகுப்பு ஏற்றப்படுகிறது...', loadedOk: 'தொகுப்பு ஏற்றப்பட்டது ✓',
                 delTitle: 'தொகுப்பை நீக்கு', deleting: 'நீக்குகிறது...', delOk: 'தொகுப்பு நீக்கப்பட்டது',
-                err: 'பிழை', savePh: 'சேமிக்கிறது...'
+                err: 'பிழை', savePh: 'சேமிக்கிறது...', record: '🎥 சுழற்சியைப் பதிவுசெய் (MP4)', recording: 'பதிவு செய்கிறது…', savedVideo: '🎥 MP4 வீடியோ சேமிக்கப்பட்டது', recordUnavailable: 'இந்த உலாவி MP4 வீடியோவை பதிவு செய்ய முடியாது'
             },
             ha: {
                 login: 'Shiga da Google', logout: 'Fita',
@@ -2016,7 +2387,7 @@ spin();
                 saving: 'Ana ajiyewa...', savedOk: 'An ajiye saitin ✓',
                 loadingSet: 'Ana lodin saitin...', loadedOk: 'An loda saitin ✓',
                 delTitle: 'Share saitin', deleting: 'Ana sharewa...', delOk: 'An share saitin',
-                err: 'Kuskure', savePh: 'Ana ajiyewa...'
+                err: 'Kuskure', savePh: 'Ana ajiyewa...', record: '🎥 Rikodi juyi (MP4)', recording: 'Ana rikodi…', savedVideo: '🎥 An adana bidiyon MP4', recordUnavailable: 'Wannan burauza ba zai iya rikodin bidiyon MP4 ba'
             },
             sw: {
                 login: 'Ingia kwa Google', logout: 'Toka',
@@ -2026,7 +2397,7 @@ spin();
                 saving: 'Inahifadhi...', savedOk: 'Seti imehifadhiwa ✓',
                 loadingSet: 'Inapakia seti...', loadedOk: 'Seti imepakiwa ✓',
                 delTitle: 'Futa seti', deleting: 'Inafuta...', delOk: 'Seti imefutwa',
-                err: 'Kosa', savePh: 'Inahifadhi...'
+                err: 'Kosa', savePh: 'Inahifadhi...', record: '🎥 Rekodi mzunguko (MP4)', recording: 'Inarekodi…', savedVideo: '🎥 Video MP4 umehifadhiwa', recordUnavailable: 'Kivinjari hiki hakiwezi kurekodi video MP4'
             },
             it: {
                 login: 'Accedi con Google', logout: 'Esci',
@@ -2036,7 +2407,7 @@ spin();
                 saving: 'Salvataggio...', savedOk: 'Set salvato ✓',
                 loadingSet: 'Caricamento set...', loadedOk: 'Set caricato ✓',
                 delTitle: 'Elimina set', deleting: 'Eliminazione...', delOk: 'Set eliminato',
-                err: 'Errore', savePh: 'Salvataggio...'
+                err: 'Errore', savePh: 'Salvataggio...', record: '🎥 Registra il giro (MP4)', recording: 'Registrazione…', savedVideo: '🎥 Video MP4 salvato', recordUnavailable: 'Questo browser non può registrare video MP4'
             }
         };
 
