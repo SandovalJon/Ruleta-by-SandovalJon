@@ -376,10 +376,6 @@ canvas {
             color: white;
         }
 
-        .record-btn.armed {
-            box-shadow: 0 0 0 3px var(--accent-soft-strong), 0 0 16px var(--accent-glow-2);
-        }
-
         .record-btn.recording {
             color: white;
             background: var(--accent);
@@ -757,8 +753,8 @@ let winnerIndex = -1;
         let isLoading = false;
         let pendingLoads = 0;
 
-        let recArmed = false;
         let recActive = false;
+        let recDiscard = false;
         let recMediaRecorder = null;
         let recStream = null;
         let recChunks = [];
@@ -1392,7 +1388,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             dropText.textContent = t('drop');
             dropHint.textContent = t('dropHint');
             clearBtn.textContent = t('clear');
-            recordBtn.textContent = t('record');
+            recordBtn.textContent = recActive ? t('recording') : t('record');
             recordBtn.title = t('record');
             document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
             document.querySelector('.theme-btn[data-theme="esmeralda"]').textContent = t('themeBtnEsmeralda');
@@ -1525,7 +1521,10 @@ let colors = themeColors[currentTheme];
         });
 
 clearBtn.addEventListener('click', () => {
-            if (recArmed && !recActive) setRecordingArmed(false);
+            if (recActive) {
+                recDiscard = true;
+                finishRecording();
+            }
             images = [];
             loadedImages = [];
             thumbImages = [];
@@ -1829,8 +1828,6 @@ const wheelCache = document.createElement('canvas');
         function spin() {
             if (isSpinning || loadedImages.length < 2) return;
 
-            if (recArmed && !recActive) startRecording();
-
 isSpinning = true;
             refreshMessages();
 
@@ -1916,26 +1913,23 @@ spin();
         });
 
         recordBtn.addEventListener('click', () => {
-            if (recActive) return;
-            if (!recArmed) {
-                if (loadedImages.length < 2) {
-                    result.textContent = t('min');
-                    return;
-                }
-                setRecordingArmed(true);
-            } else {
-                setRecordingArmed(false);
+            if (recActive || isSpinning) return;
+            if (loadedImages.length < 2) {
+                result.textContent = t('min');
+                return;
             }
+            if (winnerIndex >= 0) {
+                winnerIndex = -1;
+                winnerZoom = 0;
+                isHovering = false;
+                rouletteWrapper.classList.remove('winner-mode');
+                drawRoulette();
+                refreshMessages();
+            }
+            startRecording();
+            if (!recActive) return;
+            spin();
         });
-
-        function setRecordingArmed(v) {
-            recArmed = v;
-            if (recArmed) {
-                recordBtn.classList.add('armed');
-            } else {
-                recordBtn.classList.remove('armed');
-            }
-        }
 
         function setRecordingActive(v) {
             recActive = v;
@@ -1943,8 +1937,7 @@ spin();
                 recordBtn.classList.add('recording');
                 recordBtn.textContent = t('recording');
             } else {
-                recArmed = false;
-                recordBtn.classList.remove('recording', 'armed');
+                recordBtn.classList.remove('recording');
                 recordBtn.textContent = t('record');
             }
             refreshMessages();
@@ -1962,6 +1955,7 @@ spin();
         }
 
         function startRecording() {
+            recDiscard = false;
             setRecordingActive(true);
             const type = pickRecorderType();
             if (type === 'wm') {
@@ -2088,7 +2082,7 @@ spin();
             try {
                 if (recEncoder) await recEncoder.flush();
             } catch (e) {}
-            if (!hadError && recMuxer) {
+            if (!hadError && recMuxer && !recDiscard) {
                 try {
                     recMuxer.finalize();
                     if (recMuxerTarget) buf = recMuxerTarget.buffer;
@@ -2098,7 +2092,11 @@ spin();
             recEncoder = null;
             recMuxer = null;
             recMuxerTarget = null;
-            if (buf && buf.byteLength > 0) {
+            if (recDiscard) {
+                recDiscard = false;
+                setRecordingActive(false);
+                refreshMessages();
+            } else if (buf && buf.byteLength > 0) {
                 deliverRecording(new Blob([buf], { type: 'video/mp4' }), 'mp4');
             } else {
                 setRecordingActive(false);
@@ -2109,6 +2107,12 @@ spin();
         }
 
         function deliverRecording(blob, ext) {
+            if (recDiscard) {
+                recDiscard = false;
+                setRecordingActive(false);
+                refreshMessages();
+                return;
+            }
             const d = new Date();
             const pad = (n) => String(n).padStart(2, '0');
             const name = 'ruleta_' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '_' + pad(d.getHours()) + '-' + pad(d.getMinutes()) + '-' + pad(d.getSeconds()) + '.' + ext;
