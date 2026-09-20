@@ -330,6 +330,24 @@ canvas {
             font-weight: normal;
         }
 
+        .participant-counter {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .participant-counter #participantCount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
         .result.winner {
             background: var(--gold-soft-strong);
             border-color: var(--gold);
@@ -391,20 +409,105 @@ canvas {
             50% { box-shadow: 0 0 28px var(--accent-glow-4); }
         }
 
+        button:focus-visible, select:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        canvas:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 4px;
+        }
+
         .hidden {
             display: none;
         }
 
 .footer {
-            margin-top: 40px;
+            margin-top: auto;
+            padding-top: 40px;
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.35);
             letter-spacing: 1.5px;
+            width: 100%;
+            text-align: center;
         }
 
         .footer span {
             color: var(--accent);
             opacity: 0.7;
+        }
+
+        .shortcuts-popup {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            background: var(--bg-2, #1a1a2e);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .shortcuts-popup.visible {
+            display: block;
+        }
+
+        .shortcuts-popup .shortcuts-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .shortcuts-popup .shortcut {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shortcuts-popup .shortcut kbd {
+            display: inline-block;
+            min-width: 60px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        
+
+        .shortcuts-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .shortcut {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .shortcut kbd {
+            display: inline-block;
+            padding: 1px 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .roulette-container {
@@ -701,10 +804,10 @@ canvas {
                 </div>
             </div>
 <div class="preview-images" id="previewImages"></div>
-            <button class="clear-btn" id="clearBtn">🗑️ Limpiar</button>
-            <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)">🎥 Grabar girada (MP4)</button>
-            <button class="record-btn elim-btn" id="elimBtn" title="Eliminar ganador">🎯 Eliminar ganador</button>
-            <button class="record-btn elim-btn" id="soundBtn" title="Sonido">🔊</button>
+            <button class="clear-btn" id="clearBtn" aria-label="Limpiar todas las imágenes">🗑️ Limpiar</button>
+            <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)" aria-label="Grabar girada en video MP4">🎥 Grabar girada (MP4)</button>
+            <button class="record-btn elim-btn" id="elimBtn" title="Eliminar ganador" aria-label="Activar modo eliminación">🎯 Eliminar ganador</button>
+            <button class="record-btn elim-btn" id="soundBtn" title="Sonido" aria-label="Activar o desactivar sonido">🔊</button>
 
             <div class="sets-panel" id="setsPanel">
                 <h3 id="setsTitle">💾 Mis sets de imágenes</h3>
@@ -728,12 +831,28 @@ canvas {
             </div>
 <div class="result" id="result">Agrega imágenes para comenzar</div>
             <div class="result hidden" id="result-hint"></div>
+            <div class="participant-counter" id="participantCounter" style="display:none;">
+                <span id="participantCount">0</span> <span data-i18n="participants">participantes</span>
+            </div>
         </div>
     </div>
 
-    <div class="footer">by <span>SandovalJon</span></div>
+    <div class="footer">
+        by <span>SandovalJon</span>
+        <div style="margin-top: 10px;">
+            <button class="record-btn elim-btn" id="shortcutsBtn" title="Atajos de teclado (solo escritorio)" aria-label="Mostrar atajos de teclado">⌨️ Atajos de teclado</button>
+        </div>
+    </div>
 
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+
+    <div class="shortcuts-popup" id="shortcutsPopup">
+        <div class="shortcuts-title">Atajos de teclado (escritorio)</div>
+        <div class="shortcut"><kbd>Espacio</kbd> Girar / Cerrar ganador</div>
+        <div class="shortcut"><kbd>Escape</kbd> Cerrar ganador</div>
+        <div class="shortcut"><kbd>S</kbd> Silenciar / Activar sonido</div>
+        <div class="shortcut"><kbd>E</kbd> Activar / Desactivar eliminación</div>
+    </div>
 
     <script>
         const dropZone = document.getElementById('dropZone');
@@ -820,12 +939,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Grabando video…',
                 savedVideo: '🎥 Video MP4 guardado',
                 recordUnavailable: 'Este navegador no puede grabar video MP4',
-                eliminate: 'Eliminar ganador',
-                eliminateActive: 'Eliminación ON',
+                eliminate: 'Eliminación: desactivado',
+                eliminateActive: 'Eliminación: activado',
                 eliminated: 'Eliminado del sorteo · quedan {n}',
                 allEliminated: '¡Sorteo terminado! Todos los ganadores elegidos',
                 eliminateHint: 'Se elimina al ganador tras cada girada',
-                sound: 'Sonido'
+                sound: 'Sonido',
+                confirmClear: '¿Limpiar todas las imágenes?',
+                participants: 'participantes'
             },
             en: {
                 title: '🎰 Image Roulette',
@@ -850,12 +971,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Recording…',
                 savedVideo: '🎥 MP4 video saved',
                 recordUnavailable: 'This browser cannot record MP4 video',
-                eliminate: 'Remove winner',
-                eliminateActive: 'Elimination ON',
+                eliminate: 'Elimination: off',
+                eliminateActive: 'Elimination: on',
                 eliminated: 'Removed from the draw · {n} left',
                 allEliminated: 'Draw over! All winners picked',
                 eliminateHint: 'The winner is removed after every spin',
-                sound: 'Sound'
+                sound: 'Sound',
+                confirmClear: 'Clear all images?',
+                participants: 'participants'
             },
             pt: {
                 title: '🎰 Roleta de Imagens',
@@ -880,12 +1003,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Gravando…',
                 savedVideo: '🎥 Vídeo MP4 salvo',
                 recordUnavailable: 'Este navegador não pode gravar vídeo MP4',
-                eliminate: 'Remover vencedor',
-                eliminateActive: 'Eliminação ON',
+                eliminate: 'Eliminação: desligado',
+                eliminateActive: 'Eliminação: ligado',
                 eliminated: 'Removido do sorteio · restam {n}',
                 allEliminated: 'Sorteio encerrado! Todos os vencedores escolhidos',
                 eliminateHint: 'O vencedor é removido após cada girada',
-                sound: 'Som'
+                sound: 'Som',
+                confirmClear: 'Limpar todas as imagens?',
+                participants: 'participantes'
             },
             fr: {
                 title: '🎰 Roulette à Images',
@@ -910,12 +1035,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Enregistrement…',
                 savedVideo: '🎥 Vidéo MP4 enregistrée',
                 recordUnavailable: 'Ce navigateur ne peut pas enregistrer de vidéo MP4',
-                eliminate: 'Retirer le gagnant',
-                eliminateActive: 'Élimination ON',
+                eliminate: 'Élimination: désactivée',
+                eliminateActive: 'Élimination: activée',
                 eliminated: 'Retiré du tirage · reste {n}',
                 allEliminated: 'Tirage terminé ! Tous les gagnants choisis',
                 eliminateHint: 'Le gagnant est retiré après chaque tour',
-                sound: 'Son'
+                sound: 'Son',
+                confirmClear: 'Effacer toutes les images?',
+                participants: 'participants'
             },
             de: {
                 title: '🎰 Bild-Roulette',
@@ -940,12 +1067,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Aufnahme…',
                 savedVideo: '🎥 MP4-Video gespeichert',
                 recordUnavailable: 'Dieser Browser kann kein MP4-Video aufnehmen',
-                eliminate: 'Gewinner entfernen',
-                eliminateActive: 'Eliminierung ON',
+                eliminate: 'Eliminierung: aus',
+                eliminateActive: 'Eliminierung: ein',
                 eliminated: 'Aus dem Los entfernt · {n} übrig',
                 allEliminated: 'Auslosung beendet! Alle Gewinner gewählt',
                 eliminateHint: 'Der Gewinner wird nach jeder Drehung entfernt',
-                sound: 'Ton'
+                sound: 'Ton',
+                confirmClear: 'Alle Bilder löschen?',
+                participants: 'Teilnehmer'
             },
             zh: {
                 title: '🎰 图片轮盘',
@@ -970,12 +1099,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: '录制中…',
                 savedVideo: '🎥 已保存 MP4 视频',
                 recordUnavailable: '此浏览器无法录制 MP4 视频',
-                eliminate: '移除获胜者',
-                eliminateActive: '淘汰模式开启',
+                eliminate: '淘汰: 已关闭',
+                eliminateActive: '淘汰: 已开启',
                 eliminated: '已从抽奖中移除 · 剩 {n}',
                 allEliminated: '抽奖结束！所有获胜者已选出',
                 eliminateHint: '每次转动后移除获胜者',
-                sound: '声音'
+                sound: '声音',
+                confirmClear: '清除所有图片？',
+                participants: '参与者'
             },
             hi: {
                 title: '🎰 इमेज रूलेट',
@@ -1000,12 +1131,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'रिकॉर्ड हो रहा है…',
                 savedVideo: '🎥 MP4 वीडियो सहेजा गया',
                 recordUnavailable: 'यह ब्राउज़र MP4 वीडियो रिकॉर्ड नहीं कर सकता',
-                eliminate: 'विजेता हटाएँ',
-                eliminateActive: 'उन्मूलन चालू',
+                eliminate: 'उन्मूलन: बंद',
+                eliminateActive: 'उन्मूलन: चालू',
                 eliminated: 'निकाले गए · बचे {n}',
                 allEliminated: 'ड्रॉ खत्म! सभी विजेता चुने गए',
                 eliminateHint: 'हर घुमाव पर विजेता हटाया जाता है',
-                sound: 'ध्वनि'
+                sound: 'ध्वनि',
+                confirmClear: 'सभी चित्रों हटाएँ?',
+                participants: 'भागेदार'
             },
             ar: {
                 title: '🎰 روليت الصور',
@@ -1030,12 +1163,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'جارٍ التسجيل…',
                 savedVideo: '🎥 تم حفظ الفيديو MP4',
                 recordUnavailable: 'لا يمكن لهذا المتصفح تسجيل فيديو MP4',
-                eliminate: 'إزالة الفائز',
-                eliminateActive: 'وضع الإقصاء ON',
+                eliminate: 'الإقصاء: معطّل',
+                eliminateActive: 'الإقصاء: مفعّل',
                 eliminated: 'أُزيل من السحب · بقي {n}',
                 allEliminated: 'انتهى السحب! تم اختيار جميع الفائزين',
                 eliminateHint: 'يُحذف الفائز بعد كل دورة',
-                sound: 'صوت'
+                sound: 'صوت',
+                confirmClear: 'مسح جميع الصور？',
+                participants: 'مشاركين'
             },
             bn: {
                 title: '🎰 ইমেজ রুলেট',
@@ -1060,12 +1195,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'রেকর্ড হচ্ছে…',
                 savedVideo: '🎥 MP4 ভিডিও সংরক্ষিত',
                 recordUnavailable: 'এই ব্রাউজারটি MP4 ভিডিও রেকর্ড করতে পারে না',
-                eliminate: 'বিজয়ী সরান',
-                eliminateActive: 'নির্মূল চালু',
+                eliminate: 'নির্মূল: বন্ধ',
+                eliminateActive: 'নির্মূল: চালু',
                 eliminated: 'তালিকা থেকে সরানো হয়েছে · বাকি {n}',
                 allEliminated: 'ড্র শেষ! সব বিজয়ী বাছাই করা হয়েছে',
                 eliminateHint: 'প্রতিটি ঘোরার পর বিজয়ী সরানো হয়',
-                sound: 'শব্দ'
+                sound: 'শব্দ',
+                confirmClear: 'সব চিত্র মুছে ফেলবেন？',
+                participants: 'অংশত্রিক'
             },
             ru: {
                 title: '🎰 Рулетка изображений',
@@ -1090,12 +1227,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Запись…',
                 savedVideo: '🎥 Видео MP4 сохранено',
                 recordUnavailable: 'Этот браузер не может записать видео MP4',
-                eliminate: 'Убрать победителя',
-                eliminateActive: 'Режим исключения ON',
+                eliminate: 'Исключение: выкл',
+                eliminateActive: 'Исключение: вкл',
                 eliminated: 'Исключён из розыгрыша · осталось {n}',
                 allEliminated: 'Розыгрыш завершён! Все победители выбраны',
                 eliminateHint: 'Победитель убирается после каждого вращения',
-                sound: 'Звук'
+                sound: 'Звук',
+                confirmClear: 'Очистить все изображения？',
+                participants: 'участники'
             },
             ur: {
                 title: '🎰 امیج رولیٹ',
@@ -1120,12 +1259,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'ریکارڈ ہو رہا ہے…',
                 savedVideo: '🎥 MP4 ویڈیو محفوظ ہو گئی',
                 recordUnavailable: 'یہ براؤزر MP4 ویڈیو ریکارڈ نہیں کر سکتا',
-                eliminate: 'فاتح کو ہٹائیں',
-                eliminateActive: 'اخراج موڈ آن',
+                eliminate: 'اخراج: بند',
+                eliminateActive: 'اخراج: فعال',
                 eliminated: 'قرعہ سے نکالا گیا · بقیہ {n}',
                 allEliminated: 'قرعہ ختم! تمام فاتح منتخب ہوئے',
                 eliminateHint: 'ہر چکر کے بعد فاتح ہٹایا جاتا ہے',
-                sound: 'آواز'
+                sound: 'آواز',
+                confirmClear: 'تمام تصوير مسحه？',
+                participants: 'شريک'
             },
             id: {
                 title: '🎰 Roulette Gambar',
@@ -1150,12 +1291,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Merekam…',
                 savedVideo: '🎥 Video MP4 disimpan',
                 recordUnavailable: 'Browser ini tidak dapat merekam video MP4',
-                eliminate: 'Hapus pemenang',
-                eliminateActive: 'Eliminasi ON',
+                eliminate: 'Eliminasi: mati',
+                eliminateActive: 'Eliminasi: hidup',
                 eliminated: 'Dihapus dari undian · tersisa {n}',
                 allEliminated: 'Undian selesai! Semua pemenang terpilih',
                 eliminateHint: 'Pemenang dihapus setelah setiap putaran',
-                sound: 'Suara'
+                sound: 'Suara',
+                confirmClear: 'Hapus semua gambar?',
+                participants: 'peserta'
             },
             ja: {
                 title: '🎰 画像ルーレット',
@@ -1180,12 +1323,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: '録画中…',
                 savedVideo: '🎥 MP4動画を保存しました',
                 recordUnavailable: 'このブラウザはMP4動画を録画できません',
-                eliminate: '勝者を削除',
-                eliminateActive: '除外モード ON',
+                eliminate: '除外: オフ',
+                eliminateActive: '除外: オン',
                 eliminated: '抽選から除外 · 残り {n}',
                 allEliminated: '抽選終了！全勝者が選ばれました',
                 eliminateHint: '毎回の回転後に勝者を除外します',
-                sound: 'サウンド'
+                sound: 'サウンド',
+                confirmClear: 'すべての画像を削除しますか？',
+                participants: '参加者'
             },
             pa: {
                 title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
@@ -1210,12 +1355,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…',
                 savedVideo: '🎥 MP4 ਵੀਡੀਓ ਸੇਵ ਹੋ ਗਈ',
                 recordUnavailable: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ MP4 ਵੀਡੀਓ ਰਿਕਾਰਡ ਨਹੀਂ ਕਰ ਸਕਦਾ',
-                eliminate: 'ਜੇਤੂ ਹਟਾਓ',
-                eliminateActive: 'ਖ਼ਾਤਮਾ ਚਾਲੂ',
+                eliminate: 'ਖ਼ਾਤਮਾ: ਬੰਦ',
+                eliminateActive: 'ਖ਼ਾਤਮਾ: ਚਾਲੂ',
                 eliminated: 'ਲਾਟਰੀ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ · ਬਾਕੀ {n}',
                 allEliminated: 'ਲਾਟਰੀ ਖਤਮ! ਸਾਰੇ ਜੇਤੂ ਚੁਣੇ ਗਏ',
                 eliminateHint: 'ਹਰ ਘੁਮਾਅ ਤੋਂ ਬਾਅਦ ਜੇਤੂ ਹਟਾਇਆ ਜਾਂਦਾ ਹੈ',
-                sound: 'ਆਵਾਜ਼'
+                sound: 'ਆਵਾਜ਼',
+                confirmClear: 'ਸਾਰੀਏਇ ਤਸ੍ਵਰ ਸਾਫ ਕਰਨੇ ਹੈ？',
+                participants: 'ਭਾਗੇਦਾਰ'
             },
             jv: {
                 title: '🎰 Roulette Gambar',
@@ -1240,12 +1387,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Rekam…',
                 savedVideo: '🎥 Video MP4 disimpen',
                 recordUnavailable: 'Browser iki ora bisa ngrekam video MP4',
-                eliminate: 'Mbusak pemenang',
-                eliminateActive: 'Eliminasi ON',
+                eliminate: 'Eliminasi: mati',
+                eliminateActive: 'Eliminasi: urip',
                 eliminated: 'Dibuwang saka undian · isih {n}',
                 allEliminated: 'Undian rampung! Kabeh pemenang dipilih',
                 eliminateHint: 'Pemenang dibusak sawise saben puteran',
-                sound: 'Swara'
+                sound: 'Swara',
+                confirmClear: 'Busak kabeh gambar?',
+                participants: 'peserta'
             },
             vi: {
                 title: '🎰 Vòng quay Hình ảnh',
@@ -1270,12 +1419,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Đang ghi…',
                 savedVideo: '🎥 Đã lưu video MP4',
                 recordUnavailable: 'Trình duyệt này không thể quay video MP4',
-                eliminate: 'Xóa người thắng',
-                eliminateActive: 'Chế độ loại ON',
+                eliminate: 'Loại: tắt',
+                eliminateActive: 'Loại: bật',
                 eliminated: 'Bị loại khỏi vòng quay · còn {n}',
                 allEliminated: 'Kết thúc! Tất cả người thắng đã chọn',
                 eliminateHint: 'Loại người thắng sau mỗi lượt quay',
-                sound: 'Âm thanh'
+                sound: 'Âm thanh',
+                confirmClear: 'Xóa tất cả ảnh？',
+                participants: 'thành viên'
             },
             te: {
                 title: '🎰 ఇమేజ్ రూలెట్',
@@ -1300,12 +1451,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'రికార్డ్ చేస్తోంది…',
                 savedVideo: '🎥 MP4 వీడియో సేవ్ చేయబడింది',
                 recordUnavailable: 'ఈ బ్రౌజర్ MP4 వీడియోను రికార్డ్ చేయలేదు',
-                eliminate: 'విజేతను తొలగించండి',
-                eliminateActive: 'ఎలిమినేషన్ ఆన్',
+                eliminate: 'ఎలిమినేషన్: ఆఫ్',
+                eliminateActive: 'ఎలిమినేషన్: ఆన్',
                 eliminated: 'డ్రా నుండి తొలగించబడింది · మిగిలినవి {n}',
                 allEliminated: 'డ్రా ముగిసింది! అందరు విజేతలు ఎంపికయ్యారు',
                 eliminateHint: 'ప్రతి భ్రమణంలో విజేతను తొలగిస్తుంది',
-                sound: 'ధ్వਨి'
+                sound: 'ధ్వਨి',
+                confirmClear: 'ฅมู สีราก ฤ฾มเกี่ยว่าง？',
+                participants: 'సభ్గమెఓలు'
             },
             ko: {
                 title: '🎰 이미지 룰렛',
@@ -1330,12 +1483,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: '녹화 중…',
                 savedVideo: '🎥 MP4 동영상 저장됨',
                 recordUnavailable: '이 브라우저는 MP4 동영상을 녹화할 수 없습니다',
-                eliminate: '승자 제거',
-                eliminateActive: '승자 제외 모드 ON',
+                eliminate: '제외: 꺼짐',
+                eliminateActive: '제외: 켜짐',
                 eliminated: '추첨에서 제외됨 · 남음 {n}',
                 allEliminated: '추첨 종료! 모든 승자가 선택됨',
                 eliminateHint: '매 회전 후 승자를 제거합니다',
-                sound: '소리'
+                sound: '소리',
+                confirmClear: '모든 이미지를 삭제하시겠습니까？',
+                participants: '참거자'
             },
             tr: {
                 title: '🎰 Görsel Ruleti',
@@ -1360,12 +1515,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Kaydediliyor…',
                 savedVideo: '🎥 MP4 video kaydedildi',
                 recordUnavailable: 'Bu tarayıcı MP4 video kaydedemez',
-                eliminate: 'Kazananı kaldır',
-                eliminateActive: 'Elenme ON',
+                eliminate: 'Elenme: kapalı',
+                eliminateActive: 'Elenme: açık',
                 eliminated: 'Çekilişten kaldırıldı · kalan {n}',
                 allEliminated: 'Çekiliş bitti! Tüm kazananlar seçildi',
                 eliminateHint: 'Her dönüşten sonra kazanan elenir',
-                sound: 'Ses'
+                sound: 'Ses',
+                confirmClear: 'Tüm resimleri temizle？',
+                participants: 'katılımcı'
             },
             fa: {
                 title: '🎰 رولت تصویر',
@@ -1390,12 +1547,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'در حال ضبط…',
                 savedVideo: '🎥 ویدیوی MP4 ذخیره شد',
                 recordUnavailable: 'این مرورگر نمیتواند ویدیوی MP4 ضبط کند',
-                eliminate: 'حذف برنده',
-                eliminateActive: 'حالت حذف برنده: روشن',
+                eliminate: 'حذف: غیرفعال',
+                eliminateActive: 'حذف: فعال',
                 eliminated: 'از قرعه‌کشی حذف شد · {n} باقی',
                 allEliminated: 'قرعه‌کشی تمام شد! همه برنده‌ها انتخاب شدند',
                 eliminateHint: 'برنده بعد از هر چرخش حذف می‌شود',
-                sound: 'صدا'
+                sound: 'صدا',
+                confirmClear: 'همه تصاویر حذف شود？',
+                participants: 'مشترک'
             },
             mr: {
                 title: '🎰 इमेज रूलेट',
@@ -1420,12 +1579,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'रेकॉर्डिंग…',
                 savedVideo: '🎥 MP4 व्हिडिओ सेव्ह केला',
                 recordUnavailable: 'हा ब्राउझर MP4 व्हिडिओ रेकॉर्ड करू शकत नाही',
-                eliminate: 'विजेता काढा',
-                eliminateActive: 'विजेता वगळणे चालू',
+                eliminate: 'विजेता वगळणे: बंद',
+                eliminateActive: 'विजेता वगळणे: चालू',
                 eliminated: 'सोडतीतून काढले · उर्वरित {n}',
                 allEliminated: 'सोडत संपली! सर्व विजेते निवडले',
                 eliminateHint: 'प्रत्येक फेऱ्यानंतर विजेता काढला जातो',
-                sound: 'आवाज'
+                sound: 'आवाज',
+                confirmClear: 'सर्व इमेज़ साफ करणेका？',
+                participants: 'सभनगार'
             },
             ta: {
                 title: '🎰 பட ரவுலட்',
@@ -1450,12 +1611,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'பதிவு செய்கிறது…',
                 savedVideo: '🎥 MP4 வீடியோ சேமிக்கப்பட்டது',
                 recordUnavailable: 'இந்த உலாவி MP4 வீடியோவை பதிவு செய்ய முடியாது',
-                eliminate: 'வெற்றியாளரை அகற்று',
-                eliminateActive: 'நீக்குதல் ஆன்',
+                eliminate: 'நீக்குதல்: அணை',
+                eliminateActive: 'நீக்குதல்: இயக்கம்',
                 eliminated: 'ட்ராவிலிருந்து அகற்றப்பட்டது · மீதம் {n}',
                 allEliminated: 'ட்ரா முடிந்தது! அனைத்து வெற்றியாளர்களும் தேர்வு',
                 eliminateHint: 'ஒவ்வொரு சுழற்சிக்கும் பிறகு வெற்றியாளர் அகற்றப்படுவார்',
-                sound: 'ஒலி'
+                sound: 'ஒலி',
+                confirmClear: 'ฮาม์ โรยด้วย ใหม่ทั้งหมดใช้？',
+                participants: 'பற்ப஑வ்ரகிர்'
             },
             ha: {
                 title: '🎰 Roulette na Hotuna',
@@ -1480,12 +1643,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Ana rikodi…',
                 savedVideo: '🎥 An adana bidiyon MP4',
                 recordUnavailable: 'Wannan burauza ba zai iya rikodin bidiyon MP4 ba',
-                eliminate: 'Cire wanda ya ci',
-                eliminateActive: 'Keɓewa ON',
+                eliminate: 'Keɓewa: kashe',
+                eliminateActive: 'Keɓewa: kunna',
                 eliminated: 'An cire daga zabe · saura {n}',
                 allEliminated: 'Zabe ya ƙare! Duk waɗanda suka ci an zaɓesu',
                 eliminateHint: 'Ana cire wanda ya ci bayan kowane juyi',
-                sound: 'Sauti'
+                sound: 'Sauti',
+                confirmClear: 'Share fakat duka hotuna?',
+                participants: 'masu shiga'
             },
             sw: {
                 title: '🎰 Rulleti ya Picha',
@@ -1510,12 +1675,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Inarekodi…',
                 savedVideo: '🎥 Video MP4 umehifadhiwa',
                 recordUnavailable: 'Kivinjari hiki hakiwezi kurekodi video MP4',
-                eliminate: 'Ondoa mshindi',
-                eliminateActive: 'Uondoaji ON',
+                eliminate: 'Uondoaji: kuzima',
+                eliminateActive: 'Uondoaji: kuwaka',
                 eliminated: 'Ameondolewa kwenye droo · imebaki {n}',
                 allEliminated: 'Droo imekamilika! Washindi wote wamechaguliwa',
                 eliminateHint: 'Mshindi huondolewa baada ya kila mzunguko',
-                sound: 'Sauti'
+                sound: 'Sauti',
+                confirmClear: 'Futa picha zote?',
+                participants: 'washiriki'
             },
             it: {
                 title: '🎰 Ruota delle Immagini',
@@ -1540,12 +1707,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 recording: 'Registrazione…',
                 savedVideo: '🎥 Video MP4 salvato',
                 recordUnavailable: 'Questo browser non può registrare video MP4',
-                eliminate: 'Rimuovi il vincitore',
-                eliminateActive: 'Eliminazione ON',
+                eliminate: 'Eliminazione: spenta',
+                eliminateActive: 'Eliminazione: accesa',
                 eliminated: 'Rimosso dal sorteggio · restano {n}',
                 allEliminated: 'Sorteggio terminato! Tutti i vincitori scelti',
                 eliminateHint: 'Il vincitore viene rimosso dopo ogni giro',
-                sound: 'Audio'
+                sound: 'Audio',
+                confirmClear: 'Cancella tutte le immagini?',
+                participants: 'partecipanti'
             }
         };
 
@@ -1578,6 +1747,15 @@ const themeSwitcher = document.getElementById('themeSwitcher');
         }
 
         function refreshMessages() {
+            const counter = document.getElementById('participantCounter');
+            const countEl = document.getElementById('participantCount');
+            if (loadedImages.length > 0) {
+                counter.style.display = 'inline-flex';
+                countEl.textContent = loadedImages.length;
+            } else {
+                counter.style.display = 'none';
+            }
+
             if (recActive) {
                 result.textContent = t('recording');
                 return;
@@ -1792,6 +1970,7 @@ let colors = themeColors[currentTheme];
         });
 
 clearBtn.addEventListener('click', () => {
+            if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
             if (recActive) {
                 recDiscard = true;
                 finishRecording();
@@ -1838,6 +2017,13 @@ clearBtn.addEventListener('click', () => {
 
         function handleFiles(files) {
             const newImages = Array.from(files).filter(f => f.type.startsWith('image/'));
+            const rejected = Array.from(files).filter(f => !f.type.startsWith('image/'));
+            
+            if (rejected.length > 0 && newImages.length === 0) {
+                result.textContent = t('onlyImages') || 'Solo se aceptan archivos de imagen';
+                setTimeout(() => refreshMessages(), 3000);
+                return;
+            }
             
             if (images.length + newImages.length > 25) {
                 result.textContent = t('max');
@@ -2223,7 +2409,19 @@ rouletteWrapper.classList.add('winner-mode');
             if (soundEnabled) getAudio();
         });
 
-canvas.addEventListener('mouseenter', () => {
+document.getElementById('shortcutsBtn').addEventListener('click', () => {
+            document.getElementById('shortcutsPopup').classList.toggle('visible');
+        });
+
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('shortcutsPopup');
+            const btn = document.getElementById('shortcutsBtn');
+            if (!popup.contains(e.target) && e.target !== btn) {
+                popup.classList.remove('visible');
+            }
+        });
+
+        canvas.addEventListener('mouseenter', () => {
             isHovering = true;
             drawRoulette();
         });
@@ -2550,8 +2748,10 @@ spin();
                 saving: 'Guardando...', savedOk: 'Set guardado ✓',
                 loadingSet: 'Cargando set...', loadedOk: 'Set cargado ✓',
                 delTitle: 'Eliminar set', deleting: 'Eliminando...', delOk: 'Set eliminado',
-                err: 'Error', savePh: 'Guardando...', record: '🎥 Grabar girada (MP4)', recording: 'Grabando video…', savedVideo: '🎥 Video MP4 guardado', recordUnavailable: 'Este navegador no puede grabar video MP4', eliminate: 'Eliminar ganador', eliminateActive: 'Eliminación ON', eliminated: 'Eliminado del sorteo · quedan {n}', allEliminated: '¡Sorteo terminado! Todos los ganadores elegidos', eliminateHint: 'Se elimina al ganador tras cada girada',
-                sound: 'Sonido'
+                err: 'Error', savePh: 'Guardando...', record: '🎥 Grabar girada (MP4)', recording: 'Grabando video…', savedVideo: '🎥 Video MP4 guardado', recordUnavailable: 'Este navegador no puede grabar video MP4', eliminate: 'Eliminación: desactivado', eliminateActive: 'Eliminación: activado', eliminated: 'Eliminado del sorteo · quedan {n}', allEliminated: '¡Sorteo terminado! Todos los ganadores elegidos', eliminateHint: 'Se elimina al ganador tras cada girada',
+                sound: 'Sonido',
+                confirmClear: '¿Limpiar todas las imágenes?',
+                participants: 'participantes'
             },
             en: {
                 login: 'Sign in with Google', logout: 'Sign out',
@@ -2561,8 +2761,10 @@ spin();
                 saving: 'Saving...', savedOk: 'Set saved ✓',
                 loadingSet: 'Loading set...', loadedOk: 'Set loaded ✓',
                 delTitle: 'Delete set', deleting: 'Deleting...', delOk: 'Set deleted',
-                err: 'Error', savePh: 'Saving...', record: '🎥 Record spin (MP4)', recording: 'Recording…', savedVideo: '🎥 MP4 video saved', recordUnavailable: 'This browser cannot record MP4 video', eliminate: 'Remove winner', eliminateActive: 'Elimination ON', eliminated: 'Removed from the draw · {n} left', allEliminated: 'Draw over! All winners picked', eliminateHint: 'The winner is removed after every spin',
-                sound: 'Sound'
+                err: 'Error', savePh: 'Saving...', record: '🎥 Record spin (MP4)', recording: 'Recording…', savedVideo: '🎥 MP4 video saved', recordUnavailable: 'This browser cannot record MP4 video', eliminate: 'Elimination: off', eliminateActive: 'Elimination: on', eliminated: 'Removed from the draw · {n} left', allEliminated: 'Draw over! All winners picked', eliminateHint: 'The winner is removed after every spin',
+                sound: 'Sound',
+                confirmClear: 'Clear all images?',
+                participants: 'participants'
             },
             pt: {
                 login: 'Entrar com o Google', logout: 'Sair',
@@ -2572,8 +2774,10 @@ spin();
                 saving: 'Salvando...', savedOk: 'Conjunto salvo ✓',
                 loadingSet: 'Carregando conjunto...', loadedOk: 'Conjunto carregado ✓',
                 delTitle: 'Excluir conjunto', deleting: 'Excluindo...', delOk: 'Conjunto excluído',
-                err: 'Erro', savePh: 'Salvando...', record: '🎥 Gravar giro (MP4)', recording: 'Gravando…', savedVideo: '🎥 Vídeo MP4 salvo', recordUnavailable: 'Este navegador não pode gravar vídeo MP4', eliminate: 'Remover vencedor', eliminateActive: 'Eliminação ON', eliminated: 'Removido do sorteio · restam {n}', allEliminated: 'Sorteio encerrado! Todos os vencedores escolhidos', eliminateHint: 'O vencedor é removido após cada girada',
-                sound: 'Som'
+                err: 'Erro', savePh: 'Salvando...', record: '🎥 Gravar giro (MP4)', recording: 'Gravando…', savedVideo: '🎥 Vídeo MP4 salvo', recordUnavailable: 'Este navegador não pode gravar vídeo MP4', eliminate: 'Eliminação: desligado', eliminateActive: 'Eliminação: ligado', eliminated: 'Removido do sorteio · restam {n}', allEliminated: 'Sorteio encerrado! Todos os vencedores escolhidos', eliminateHint: 'O vencedor é removido após cada girada',
+                sound: 'Som',
+                confirmClear: 'Limpar todas as imagens?',
+                participants: 'participantes'
             },
             fr: {
                 login: 'Se connecter avec Google', logout: 'Se déconnecter',
@@ -2583,8 +2787,10 @@ spin();
                 saving: 'Enregistrement...', savedOk: 'Ensemble enregistré ✓',
                 loadingSet: 'Chargement de l\'ensemble...', loadedOk: 'Ensemble chargé ✓',
                 delTitle: 'Supprimer l\'ensemble', deleting: 'Suppression...', delOk: 'Ensemble supprimé',
-                err: 'Erreur', savePh: 'Enregistrement...', record: '🎥 Enregistrer le tour (MP4)', recording: 'Enregistrement…', savedVideo: '🎥 Vidéo MP4 enregistrée', recordUnavailable: 'Ce navigateur ne peut pas enregistrer de vidéo MP4', eliminate: 'Retirer le gagnant', eliminateActive: 'Élimination ON', eliminated: 'Retiré du tirage · reste {n}', allEliminated: 'Tirage terminé ! Tous les gagnants choisis', eliminateHint: 'Le gagnant est retiré après chaque tour',
-                sound: 'Son'
+                err: 'Erreur', savePh: 'Enregistrement...', record: '🎥 Enregistrer le tour (MP4)', recording: 'Enregistrement…', savedVideo: '🎥 Vidéo MP4 enregistrée', recordUnavailable: 'Ce navigateur ne peut pas enregistrer de vidéo MP4', eliminate: 'Élimination: désactivée', eliminateActive: 'Élimination: activée', eliminated: 'Retiré du tirage · reste {n}', allEliminated: 'Tirage terminé ! Tous les gagnants choisis', eliminateHint: 'Le gagnant est retiré après chaque tour',
+                sound: 'Son',
+                confirmClear: 'Effacer toutes les images?',
+                participants: 'participants'
             },
             de: {
                 login: 'Mit Google anmelden', logout: 'Abmelden',
@@ -2594,8 +2800,10 @@ spin();
                 saving: 'Speichern...', savedOk: 'Set gespeichert ✓',
                 loadingSet: 'Set wird geladen...', loadedOk: 'Set geladen ✓',
                 delTitle: 'Set löschen', deleting: 'Löschen...', delOk: 'Set gelöscht',
-                err: 'Fehler', savePh: 'Speichern...', record: '🎥 Drehung aufnehmen (MP4)', recording: 'Aufnahme…', savedVideo: '🎥 MP4-Video gespeichert', recordUnavailable: 'Dieser Browser kann kein MP4-Video aufnehmen', eliminate: 'Gewinner entfernen', eliminateActive: 'Eliminierung ON', eliminated: 'Aus dem Los entfernt · {n} übrig', allEliminated: 'Auslosung beendet! Alle Gewinner gewählt', eliminateHint: 'Der Gewinner wird nach jeder Drehung entfernt',
-                sound: 'Ton'
+                err: 'Fehler', savePh: 'Speichern...', record: '🎥 Drehung aufnehmen (MP4)', recording: 'Aufnahme…', savedVideo: '🎥 MP4-Video gespeichert', recordUnavailable: 'Dieser Browser kann kein MP4-Video aufnehmen', eliminate: 'Eliminierung: aus', eliminateActive: 'Eliminierung: ein', eliminated: 'Aus dem Los entfernt · {n} übrig', allEliminated: 'Auslosung beendet! Alle Gewinner gewählt', eliminateHint: 'Der Gewinner wird nach jeder Drehung entfernt',
+                sound: 'Ton',
+                confirmClear: 'Alle Bilder löschen?',
+                participants: 'Teilnehmer'
             },
             zh: {
                 login: '使用 Google 登录', logout: '退出登录',
@@ -2605,8 +2813,10 @@ spin();
                 saving: '保存中...', savedOk: '图片组已保存 ✓',
                 loadingSet: '加载中...', loadedOk: '图片组已加载 ✓',
                 delTitle: '删除图片组', deleting: '删除中...', delOk: '图片组已删除',
-                err: '错误', savePh: '保存中...', record: '🎥 录制旋转 (MP4)', recording: '录制中…', savedVideo: '🎥 已保存 MP4 视频', recordUnavailable: '此浏览器无法录制 MP4 视频', eliminate: '移除获胜者', eliminateActive: '淘汰模式开启', eliminated: '已从抽奖中移除 · 剩 {n}', allEliminated: '抽奖结束！所有获胜者已选出', eliminateHint: '每次转动后移除获胜者',
-                sound: '声音'
+                err: '错误', savePh: '保存中...', record: '🎥 录制旋转 (MP4)', recording: '录制中…', savedVideo: '🎥 已保存 MP4 视频', recordUnavailable: '此浏览器无法录制 MP4 视频', eliminate: '淘汰: 已关闭', eliminateActive: '淘汰: 已开启', eliminated: '已从抽奖中移除 · 剩 {n}', allEliminated: '抽奖结束！所有获胜者已选出', eliminateHint: '每次转动后移除获胜者',
+                sound: '声音',
+                confirmClear: '清除所有图片？',
+                participants: '参与者'
             },
             hi: {
                 login: 'Google से साइन इन करें', logout: 'साइन आउट',
@@ -2616,8 +2826,10 @@ spin();
                 saving: 'सेव हो रहा है...', savedOk: 'सेट सेव हो गया ✓',
                 loadingSet: 'सेट लोड हो रहा है...', loadedOk: 'सेट लोड हो गया ✓',
                 delTitle: 'सेट हटाएँ', deleting: 'हटाया जा रहा है...', delOk: 'सेट हटा दिया गया',
-                err: 'त्रुटि', savePh: 'सेव हो रहा है...', record: '🎥 घुमाव रिकॉर्ड करें (MP4)', recording: 'रिकॉर्ड हो रहा है…', savedVideo: '🎥 MP4 वीडियो सहेजा गया', recordUnavailable: 'यह ब्राउज़र MP4 वीडियो रिकॉर्ड नहीं कर सकता', eliminate: 'विजेता हटाएँ', eliminateActive: 'उन्मूलन चालू', eliminated: 'निकाले गए · बचे {n}', allEliminated: 'ड्रॉ खत्म! सभी विजेता चुने गए', eliminateHint: 'हर घुमाव पर विजेता हटाया जाता है',
-                sound: 'ध्वनि'
+                err: 'त्रुटि', savePh: 'सेव हो रहा है...', record: '🎥 घुमाव रिकॉर्ड करें (MP4)', recording: 'रिकॉर्ड हो रहा है…', savedVideo: '🎥 MP4 वीडियो सहेजा गया', recordUnavailable: 'यह ब्राउज़र MP4 वीडियो रिकॉर्ड नहीं कर सकता', eliminate: 'उन्मूलन: बंद', eliminateActive: 'उन्मूलन: चालू', eliminated: 'निकाले गए · बचे {n}', allEliminated: 'ड्रॉ खत्म! सभी विजेता चुने गए', eliminateHint: 'हर घुमाव पर विजेता हटाया जाता है',
+                sound: 'ध्वनि',
+                confirmClear: 'सभी चित्रों हटाएँ?',
+                participants: 'भागेदार'
             },
             ar: {
                 login: 'تسجيل الدخول عبر Google', logout: 'تسجيل الخروج',
@@ -2627,8 +2839,10 @@ spin();
                 saving: 'جارٍ الحفظ...', savedOk: 'تم حفظ المجموعة ✓',
                 loadingSet: 'جارٍ التحميل...', loadedOk: 'تم تحميل المجموعة ✓',
                 delTitle: 'حذف المجموعة', deleting: 'جارٍ الحذف...', delOk: 'تم حذف المجموعة',
-                err: 'خطأ', savePh: 'جارٍ الحفظ...', record: '🎥 تسجيل الدوران (MP4)', recording: 'جارٍ التسجيل…', savedVideo: '🎥 تم حفظ الفيديو MP4', recordUnavailable: 'لا يمكن لهذا المتصفح تسجيل فيديو MP4', eliminate: 'إزالة الفائز', eliminateActive: 'وضع الإقصاء ON', eliminated: 'أُزيل من السحب · بقي {n}', allEliminated: 'انتهى السحب! تم اختيار جميع الفائزين', eliminateHint: 'يُحذف الفائز بعد كل دورة',
-                sound: 'صوت'
+                err: 'خطأ', savePh: 'جارٍ الحفظ...', record: '🎥 تسجيل الدوران (MP4)', recording: 'جارٍ التسجيل…', savedVideo: '🎥 تم حفظ الفيديو MP4', recordUnavailable: 'لا يمكن لهذا المتصفح تسجيل فيديو MP4', eliminate: 'الإقصاء: معطّل', eliminateActive: 'الإقصاء: مفعّل', eliminated: 'أُزيل من السحب · بقي {n}', allEliminated: 'انتهى السحب! تم اختيار جميع الفائزين', eliminateHint: 'يُحذف الفائز بعد كل دورة',
+                sound: 'صوت',
+                confirmClear: 'مسح جميع الصور？',
+                participants: 'مشاركين'
             },
             bn: {
                 login: 'Google দিয়ে সাইন ইন করুন', logout: 'সাইন আউট',
@@ -2638,8 +2852,10 @@ spin();
                 saving: 'সংরক্ষণ হচ্ছে...', savedOk: 'সেট সংরক্ষিত হয়েছে ✓',
                 loadingSet: 'সেট লোড হচ্ছে...', loadedOk: 'সেট লোড হয়েছে ✓',
                 delTitle: 'সেট মুছুন', deleting: 'মুছে ফেলা হচ্ছে...', delOk: 'সেট মুছে ফেলা হয়েছে',
-                err: 'ত্রুটি', savePh: 'সংরক্ষণ হচ্ছে...', record: '🎥 ঘূর্ণন রেকর্ড করুন (MP4)', recording: 'রেকর্ড হচ্ছে…', savedVideo: '🎥 MP4 ভিডিও সংরক্ষিত', recordUnavailable: 'এই ব্রাউজারটি MP4 ভিডিও রেকর্ড করতে পারে না', eliminate: 'বিজয়ী সরান', eliminateActive: 'নির্মূল চালু', eliminated: 'তালিকা থেকে সরানো হয়েছে · বাকি {n}', allEliminated: 'ড্র শেষ! সব বিজয়ী বাছাই করা হয়েছে', eliminateHint: 'প্রতিটি ঘোরার পর বিজয়ী সরানো হয়',
-                sound: 'শব্দ'
+                err: 'ত্রুটি', savePh: 'সংরক্ষণ হচ্ছে...', record: '🎥 ঘূর্ণন রেকর্ড করুন (MP4)', recording: 'রেকর্ড হচ্ছে…', savedVideo: '🎥 MP4 ভিডিও সংরক্ষিত', recordUnavailable: 'এই ব্রাউজারটি MP4 ভিডিও রেকর্ড করতে পারে না', eliminate: 'নির্মূল: বন্ধ', eliminateActive: 'নির্মূল: চালু', eliminated: 'তালিকা থেকে সরানো হয়েছে · বাকি {n}', allEliminated: 'ড্র শেষ! সব বিজয়ী বাছাই করা হয়েছে', eliminateHint: 'প্রতিটি ঘোরার পর বিজয়ী সরানো হয়',
+                sound: 'শব্দ',
+                confirmClear: 'সব চিত্র মুছে ফেলবেন？',
+                participants: 'অংশত্রিক'
             },
             ru: {
                 login: 'Войти через Google', logout: 'Выйти',
@@ -2649,8 +2865,10 @@ spin();
                 saving: 'Сохранение...', savedOk: 'Набор сохранён ✓',
                 loadingSet: 'Загрузка набора...', loadedOk: 'Набор загружен ✓',
                 delTitle: 'Удалить набор', deleting: 'Удаление...', delOk: 'Набор удалён',
-                err: 'Ошибка', savePh: 'Сохранение...', record: '🎥 Записать вращение (MP4)', recording: 'Запись…', savedVideo: '🎥 Видео MP4 сохранено', recordUnavailable: 'Этот браузер не может записать видео MP4', eliminate: 'Убрать победителя', eliminateActive: 'Режим исключения ON', eliminated: 'Исключён из розыгрыша · осталось {n}', allEliminated: 'Розыгрыш завершён! Все победители выбраны', eliminateHint: 'Победитель убирается после каждого вращения',
-                sound: 'Звук'
+                err: 'Ошибка', savePh: 'Сохранение...', record: '🎥 Записать вращение (MP4)', recording: 'Запись…', savedVideo: '🎥 Видео MP4 сохранено', recordUnavailable: 'Этот браузер не может записать видео MP4', eliminate: 'Исключение: выкл', eliminateActive: 'Исключение: вкл', eliminated: 'Исключён из розыгрыша · осталось {n}', allEliminated: 'Розыгрыш завершён! Все победители выбраны', eliminateHint: 'Победитель убирается после каждого вращения',
+                sound: 'Звук',
+                confirmClear: 'Очистить все изображения？',
+                participants: 'участники'
             },
             ur: {
                 login: 'Google سے سائن ان کریں', logout: 'سائن آؤٹ',
@@ -2660,8 +2878,10 @@ spin();
                 saving: 'محفوظ ہو رہا ہے...', savedOk: 'سیٹ محفوظ ہو گئی ✓',
                 loadingSet: 'سیٹ لوڈ ہو رہی ہے...', loadedOk: 'سیٹ لوڈ ہو گئی ✓',
                 delTitle: 'سیٹ حذف کریں', deleting: 'حذف ہو رہا ہے...', delOk: 'سیٹ حذف ہو گئی',
-                err: 'خرابی', savePh: 'محفوظ ہو رہا ہے...', record: '🎥 گھماؤ ریکارڈ کریں (MP4)', recording: 'ریکارڈ ہو رہا ہے…', savedVideo: '🎥 MP4 ویڈیو محفوظ ہو گئی', recordUnavailable: 'یہ براؤزر MP4 ویڈیو ریکارڈ نہیں کر سکتا', eliminate: 'فاتح کو ہٹائیں', eliminateActive: 'اخراج موڈ آن', eliminated: 'قرعہ سے نکالا گیا · بقیہ {n}', allEliminated: 'قرعہ ختم! تمام فاتح منتخب ہوئے', eliminateHint: 'ہر چکر کے بعد فاتح ہٹایا جاتا ہے',
-                sound: 'آواز'
+                err: 'خرابی', savePh: 'محفوظ ہو رہا ہے...', record: '🎥 گھماؤ ریکارڈ کریں (MP4)', recording: 'ریکارڈ ہو رہا ہے…', savedVideo: '🎥 MP4 ویڈیو محفوظ ہو گئی', recordUnavailable: 'یہ براؤزر MP4 ویڈیو ریکارڈ نہیں کر سکتا', eliminate: 'اخراج: بند', eliminateActive: 'اخراج: فعال', eliminated: 'قرعہ سے نکالا گیا · بقیہ {n}', allEliminated: 'قرعہ ختم! تمام فاتح منتخب ہوئے', eliminateHint: 'ہر چکر کے بعد فاتح ہٹایا جاتا ہے',
+                sound: 'آواز',
+                confirmClear: 'تمام تصوير مسحه？',
+                participants: 'شريک'
             },
             id: {
                 login: 'Masuk dengan Google', logout: 'Keluar',
@@ -2671,8 +2891,10 @@ spin();
                 saving: 'Menyimpan...', savedOk: 'Set tersimpan ✓',
                 loadingSet: 'Memuat set...', loadedOk: 'Set dimuat ✓',
                 delTitle: 'Hapus set', deleting: 'Menghapus...', delOk: 'Set dihapus',
-                err: 'Kesalahan', savePh: 'Menyimpan...', record: '🎥 Rekam putaran (MP4)', recording: 'Merekam…', savedVideo: '🎥 Video MP4 disimpan', recordUnavailable: 'Browser ini tidak dapat merekam video MP4', eliminate: 'Hapus pemenang', eliminateActive: 'Eliminasi ON', eliminated: 'Dihapus dari undian · tersisa {n}', allEliminated: 'Undian selesai! Semua pemenang terpilih', eliminateHint: 'Pemenang dihapus setelah setiap putaran',
-                sound: 'Suara'
+                err: 'Kesalahan', savePh: 'Menyimpan...', record: '🎥 Rekam putaran (MP4)', recording: 'Merekam…', savedVideo: '🎥 Video MP4 disimpan', recordUnavailable: 'Browser ini tidak dapat merekam video MP4', eliminate: 'Eliminasi: mati', eliminateActive: 'Eliminasi: hidup', eliminated: 'Dihapus dari undian · tersisa {n}', allEliminated: 'Undian selesai! Semua pemenang terpilih', eliminateHint: 'Pemenang dihapus setelah setiap putaran',
+                sound: 'Suara',
+                confirmClear: 'Hapus semua gambar?',
+                participants: 'peserta'
             },
             ja: {
                 login: 'Googleでログイン', logout: 'ログアウト',
@@ -2682,8 +2904,10 @@ spin();
                 saving: '保存中...', savedOk: 'セットを保存しました ✓',
                 loadingSet: '読み込み中...', loadedOk: 'セットを読み込みました ✓',
                 delTitle: 'セットを削除', deleting: '削除中...', delOk: 'セットを削除しました',
-                err: 'エラー', savePh: '保存中...', record: '🎥 回転を録画 (MP4)', recording: '録画中…', savedVideo: '🎥 MP4動画を保存しました', recordUnavailable: 'このブラウザはMP4動画を録画できません', eliminate: '勝者を削除', eliminateActive: '除外モード ON', eliminated: '抽選から除外 · 残り {n}', allEliminated: '抽選終了！全勝者が選ばれました', eliminateHint: '毎回の回転後に勝者を除外します',
-                sound: 'サウンド'
+                err: 'エラー', savePh: '保存中...', record: '🎥 回転を録画 (MP4)', recording: '録画中…', savedVideo: '🎥 MP4動画を保存しました', recordUnavailable: 'このブラウザはMP4動画を録画できません', eliminate: '除外: オフ', eliminateActive: '除外: オン', eliminated: '抽選から除外 · 残り {n}', allEliminated: '抽選終了！全勝者が選ばれました', eliminateHint: '毎回の回転後に勝者を除外します',
+                sound: 'サウンド',
+                confirmClear: 'すべての画像を削除しますか？',
+                participants: '参加者'
             },
             pa: {
                 login: 'Google ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ', logout: 'ਸਾਈਨ ਆਊਟ',
@@ -2693,8 +2917,10 @@ spin();
                 saving: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...', savedOk: 'ਸੈੱਟ ਸੇਵ ਹੋ ਗਿਆ ✓',
                 loadingSet: 'ਸੈੱਟ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...', loadedOk: 'ਸੈੱਟ ਲੋਡ ਹੋ ਗਿਆ ✓',
                 delTitle: 'ਸੈੱਟ ਮਿਟਾਓ', deleting: 'ਮਿਟ ਰਿਹਾ ਹੈ...', delOk: 'ਸੈੱਟ ਮਿਟਾ ਦਿੱਤਾ ਗਿਆ',
-                err: 'ਗਲਤੀ', savePh: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...', record: '🎥 ਘੁੰਮਾਅ ਰਿਕਾਰਡ ਕਰੋ (MP4)', recording: 'ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…', savedVideo: '🎥 MP4 ਵੀਡੀਓ ਸੇਵ ਹੋ ਗਈ', recordUnavailable: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ MP4 ਵੀਡੀਓ ਰਿਕਾਰਡ ਨਹੀਂ ਕਰ ਸਕਦਾ', eliminate: 'ਜੇਤੂ ਹਟਾਓ', eliminateActive: 'ਖ਼ਾਤਮਾ ਚਾਲੂ', eliminated: 'ਲਾਟਰੀ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ · ਬਾਕੀ {n}', allEliminated: 'ਲਾਟਰੀ ਖਤਮ! ਸਾਰੇ ਜੇਤੂ ਚੁਣੇ ਗਏ', eliminateHint: 'ਹਰ ਘੁਮਾਅ ਤੋਂ ਬਾਅਦ ਜੇਤੂ ਹਟਾਇਆ ਜਾਂਦਾ ਹੈ',
-                sound: 'ਆਵਾਜ਼'
+                err: 'ਗਲਤੀ', savePh: 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...', record: '🎥 ਘੁੰਮਾਅ ਰਿਕਾਰਡ ਕਰੋ (MP4)', recording: 'ਰਿਕਾਰਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…', savedVideo: '🎥 MP4 ਵੀਡੀਓ ਸੇਵ ਹੋ ਗਈ', recordUnavailable: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ MP4 ਵੀਡੀਓ ਰਿਕਾਰਡ ਨਹੀਂ ਕਰ ਸਕਦਾ', eliminate: 'ਖ਼ਾਤਮਾ: ਬੰਦ', eliminateActive: 'ਖ਼ਾਤਮਾ: ਚਾਲੂ', eliminated: 'ਲਾਟਰੀ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ · ਬਾਕੀ {n}', allEliminated: 'ਲਾਟਰੀ ਖਤਮ! ਸਾਰੇ ਜੇਤੂ ਚੁਣੇ ਗਏ', eliminateHint: 'ਹਰ ਘੁਮਾਅ ਤੋਂ ਬਾਅਦ ਜੇਤੂ ਹਟਾਇਆ ਜਾਂਦਾ ਹੈ',
+                sound: 'ਆਵਾਜ਼',
+                confirmClear: 'ਸਾਰੀਏਇ ਤਸ੍ਵਰ ਸਾਫ ਕਰਨੇ ਹੈ？',
+                participants: 'ਭਾਗੇਦਾਰ'
             },
             jv: {
                 login: 'Mlebet nganggo Google', logout: 'Metu',
@@ -2704,8 +2930,10 @@ spin();
                 saving: 'Nyimpen...', savedOk: 'Set kesimpen ✓',
                 loadingSet: 'Mbukak set...', loadedOk: 'Set keunggah ✓',
                 delTitle: 'Busak set', deleting: 'Mbusa...', delOk: 'Set kebusak',
-                err: 'Kaluputan', savePh: 'Nyimpen...', record: '🎥 Rekam puteran (MP4)', recording: 'Rekam…', savedVideo: '🎥 Video MP4 disimpen', recordUnavailable: 'Browser iki ora bisa ngrekam video MP4', eliminate: 'Mbusak pemenang', eliminateActive: 'Eliminasi ON', eliminated: 'Dibuwang saka undian · isih {n}', allEliminated: 'Undian rampung! Kabeh pemenang dipilih', eliminateHint: 'Pemenang dibusak sawise saben puteran',
-                sound: 'Swara'
+                err: 'Kaluputan', savePh: 'Nyimpen...', record: '🎥 Rekam puteran (MP4)', recording: 'Rekam…', savedVideo: '🎥 Video MP4 disimpen', recordUnavailable: 'Browser iki ora bisa ngrekam video MP4', eliminate: 'Eliminasi: mati', eliminateActive: 'Eliminasi: urip', eliminated: 'Dibuwang saka undian · isih {n}', allEliminated: 'Undian rampung! Kabeh pemenang dipilih', eliminateHint: 'Pemenang dibusak sawise saben puteran',
+                sound: 'Swara',
+                confirmClear: 'Busak kabeh gambar?',
+                participants: 'peserta'
             },
             vi: {
                 login: 'Đăng nhập bằng Google', logout: 'Đăng xuất',
@@ -2715,8 +2943,10 @@ spin();
                 saving: 'Đang lưu...', savedOk: 'Đã lưu bộ ảnh ✓',
                 loadingSet: 'Đang tải bộ ảnh...', loadedOk: 'Đã tải bộ ảnh ✓',
                 delTitle: 'Xóa bộ ảnh', deleting: 'Đang xóa...', delOk: 'Đã xóa bộ ảnh',
-                err: 'Lỗi', savePh: 'Đang lưu...', record: '🎥 Quay video (MP4)', recording: 'Đang ghi…', savedVideo: '🎥 Đã lưu video MP4', recordUnavailable: 'Trình duyệt này không thể quay video MP4', eliminate: 'Xóa người thắng', eliminateActive: 'Chế độ loại ON', eliminated: 'Bị loại khỏi vòng quay · còn {n}', allEliminated: 'Kết thúc! Tất cả người thắng đã chọn', eliminateHint: 'Loại người thắng sau mỗi lượt quay',
-                sound: 'Âm thanh'
+                err: 'Lỗi', savePh: 'Đang lưu...', record: '🎥 Quay video (MP4)', recording: 'Đang ghi…', savedVideo: '🎥 Đã lưu video MP4', recordUnavailable: 'Trình duyệt này không thể quay video MP4', eliminate: 'Loại: tắt', eliminateActive: 'Loại: bật', eliminated: 'Bị loại khỏi vòng quay · còn {n}', allEliminated: 'Kết thúc! Tất cả người thắng đã chọn', eliminateHint: 'Loại người thắng sau mỗi lượt quay',
+                sound: 'Âm thanh',
+                confirmClear: 'Xóa tất cả ảnh？',
+                participants: 'thành viên'
             },
             te: {
                 login: 'Googleతో సైన్ ఇన్ చేయండి', logout: 'సైన్ అవుట్',
@@ -2726,8 +2956,10 @@ spin();
                 saving: 'సేవ్ అవుతోంది...', savedOk: 'సెట్ సేవ్ అయింది ✓',
                 loadingSet: 'సెట్ లోడ్ అవుతోంది...', loadedOk: 'సెట్ లోడ్ అయింది ✓',
                 delTitle: 'సెట్ తొలగించు', deleting: 'తొలగిస్తోంది...', delOk: 'సెట్ తొలగించబడింది',
-                err: 'దోషం', savePh: 'సేవ్ అవుతోంది...', record: '🎥 భ్రమణం రికార్డ్ చేయండి (MP4)', recording: 'రికార్డ్ చేస్తోంది…', savedVideo: '🎥 MP4 వీడియో సేవ్ చేయబడింది', recordUnavailable: 'ఈ బ్రౌజర్ MP4 వీడియోను రికార్డ్ చేయలేదు', eliminate: 'విజేతను తొలగించండి', eliminateActive: 'ఎలిమినేషన్ ఆన్', eliminated: 'డ్రా నుండి తొలగించబడింది · మిగిలినవి {n}', allEliminated: 'డ్రా ముగిసింది! అందరు విజేతలు ఎంపికయ్యారు', eliminateHint: 'ప్రతి భ్రమణంలో విజేతను తొలగిస్తుంది',
-                sound: 'ధ్వਨి'
+                err: 'దోషం', savePh: 'సేవ్ అవుతోంది...', record: '🎥 భ్రమణం రికార్డ్ చేయండి (MP4)', recording: 'రికార్డ్ చేస్తోంది…', savedVideo: '🎥 MP4 వీడియో సేవ్ చేయబడింది', recordUnavailable: 'ఈ బ్రౌజర్ MP4 వీడియోను రికార్డ్ చేయలేదు', eliminate: 'ఎలిమినేషన్: ఆఫ్', eliminateActive: 'ఎలిమినేషన్: ఆన్', eliminated: 'డ్రా నుండి తొలగించబడింది · మిగిలినవి {n}', allEliminated: 'డ్రా ముగిసింది! అందరు విజేతలు ఎంపికయ్యారు', eliminateHint: 'ప్రతి భ్రమణంలో విజేతను తొలగిస్తుంది',
+                sound: 'ధ్వਨి',
+                confirmClear: 'ฅมู สีราก ฤ฾มเกี่ยว่าง？',
+                participants: 'సభ్గమెఓలు'
             },
             ko: {
                 login: 'Google로 로그인', logout: '로그아웃',
@@ -2737,8 +2969,10 @@ spin();
                 saving: '저장 중...', savedOk: '세트 저장됨 ✓',
                 loadingSet: '세트 불러오는 중...', loadedOk: '세트 불러옴 ✓',
                 delTitle: '세트 삭제', deleting: '삭제 중...', delOk: '세트 삭제됨',
-                err: '오류', savePh: '저장 중...', record: '🎥 회전 녹화 (MP4)', recording: '녹화 중…', savedVideo: '🎥 MP4 동영상 저장됨', recordUnavailable: '이 브라우저는 MP4 동영상을 녹화할 수 없습니다', eliminate: '승자 제거', eliminateActive: '승자 제외 모드 ON', eliminated: '추첨에서 제외됨 · 남음 {n}', allEliminated: '추첨 종료! 모든 승자가 선택됨', eliminateHint: '매 회전 후 승자를 제거합니다',
-                sound: '소리'
+                err: '오류', savePh: '저장 중...', record: '🎥 회전 녹화 (MP4)', recording: '녹화 중…', savedVideo: '🎥 MP4 동영상 저장됨', recordUnavailable: '이 브라우저는 MP4 동영상을 녹화할 수 없습니다', eliminate: '제외: 꺼짐', eliminateActive: '제외: 켜짐', eliminated: '추첨에서 제외됨 · 남음 {n}', allEliminated: '추첨 종료! 모든 승자가 선택됨', eliminateHint: '매 회전 후 승자를 제거합니다',
+                sound: '소리',
+                confirmClear: '모든 이미지를 삭제하시겠습니까？',
+                participants: '참거자'
             },
             tr: {
                 login: 'Google ile giriş yap', logout: 'Çıkış yap',
@@ -2748,8 +2982,10 @@ spin();
                 saving: 'Kaydediliyor...', savedOk: 'Set kaydedildi ✓',
                 loadingSet: 'Set yükleniyor...', loadedOk: 'Set yüklendi ✓',
                 delTitle: 'Seti sil', deleting: 'Siliniyor...', delOk: 'Set silindi',
-                err: 'Hata', savePh: 'Kaydediliyor...', record: '🎥 Dönüşü kaydet (MP4)', recording: 'Kaydediliyor…', savedVideo: '🎥 MP4 video kaydedildi', recordUnavailable: 'Bu tarayıcı MP4 video kaydedemez', eliminate: 'Kazananı kaldır', eliminateActive: 'Elenme ON', eliminated: 'Çekilişten kaldırıldı · kalan {n}', allEliminated: 'Çekiliş bitti! Tüm kazananlar seçildi', eliminateHint: 'Her dönüşten sonra kazanan elenir',
-                sound: 'Ses'
+                err: 'Hata', savePh: 'Kaydediliyor...', record: '🎥 Dönüşü kaydet (MP4)', recording: 'Kaydediliyor…', savedVideo: '🎥 MP4 video kaydedildi', recordUnavailable: 'Bu tarayıcı MP4 video kaydedemez', eliminate: 'Elenme: kapalı', eliminateActive: 'Elenme: açık', eliminated: 'Çekilişten kaldırıldı · kalan {n}', allEliminated: 'Çekiliş bitti! Tüm kazananlar seçildi', eliminateHint: 'Her dönüşten sonra kazanan elenir',
+                sound: 'Ses',
+                confirmClear: 'Tüm resimleri temizle？',
+                participants: 'katılımcı'
             },
             fa: {
                 login: 'ورود با Google', logout: 'خروج',
@@ -2759,8 +2995,10 @@ spin();
                 saving: 'در حال ذخیره...', savedOk: 'مجموعه ذخیره شد ✓',
                 loadingSet: 'در حال بارگذاری...', loadedOk: 'مجموعه بارگذاری شد ✓',
                 delTitle: 'حذف مجموعه', deleting: 'در حال حذف...', delOk: 'مجموعه حذف شد',
-                err: 'خطا', savePh: 'در حال ذخیره...', record: '🎥 ضبط چرخش (MP4)', recording: 'در حال ضبط…', savedVideo: '🎥 ویدیوی MP4 ذخیره شد', recordUnavailable: 'این مرورگر نمیتواند ویدیوی MP4 ضبط کند', eliminate: 'حذف برنده', eliminateActive: 'حالت حذف برنده: روشن', eliminated: 'از قرعه‌کشی حذف شد · {n} باقی', allEliminated: 'قرعه‌کشی تمام شد! همه برنده‌ها انتخاب شدند', eliminateHint: 'برنده بعد از هر چرخش حذف می‌شود',
-                sound: 'صدا'
+                err: 'خطا', savePh: 'در حال ذخیره...', record: '🎥 ضبط چرخش (MP4)', recording: 'در حال ضبط…', savedVideo: '🎥 ویدیوی MP4 ذخیره شد', recordUnavailable: 'این مرورگر نمیتواند ویدیوی MP4 ضبط کند', eliminate: 'حذف: غیرفعال', eliminateActive: 'حذف: فعال', eliminated: 'از قرعه‌کشی حذف شد · {n} باقی', allEliminated: 'قرعه‌کشی تمام شد! همه برنده‌ها انتخاب شدند', eliminateHint: 'برنده بعد از هر چرخش حذف می‌شود',
+                sound: 'صدا',
+                confirmClear: 'همه تصاویر حذف شود？',
+                participants: 'مشترک'
             },
             mr: {
                 login: 'Google सह साइन इन करा', logout: 'साइन आउट',
@@ -2770,8 +3008,10 @@ spin();
                 saving: 'जतन होत आहे...', savedOk: 'संच जतन झाला ✓',
                 loadingSet: 'संच लोड होत आहे...', loadedOk: 'संच लोड झाला ✓',
                 delTitle: 'संच हटवा', deleting: 'हटवत आहे...', delOk: 'संच हटवला',
-                err: 'त्रुटी', savePh: 'जतन होत आहे...', record: '🎥 फेरी रेकॉर्ड करा (MP4)', recording: 'रेकॉर्डिंग…', savedVideo: '🎥 MP4 व्हिडिओ सेव्ह केला', recordUnavailable: 'हा ब्राउझर MP4 व्हिडिओ रेकॉर्ड करू शकत नाही', eliminate: 'विजेता काढा', eliminateActive: 'विजेता वगळणे चालू', eliminated: 'सोडतीतून काढले · उर्वरित {n}', allEliminated: 'सोडत संपली! सर्व विजेते निवडले', eliminateHint: 'प्रत्येक फेऱ्यानंतर विजेता काढला जातो',
-                sound: 'आवाज'
+                err: 'त्रुटी', savePh: 'जतन होत आहे...', record: '🎥 फेरी रेकॉर्ड करा (MP4)', recording: 'रेकॉर्डिंग…', savedVideo: '🎥 MP4 व्हिडिओ सेव्ह केला', recordUnavailable: 'हा ब्राउझर MP4 व्हिडिओ रेकॉर्ड करू शकत नाही', eliminate: 'विजेता वगळणे: बंद', eliminateActive: 'विजेता वगळणे: चालू', eliminated: 'सोडतीतून काढले · उर्वरित {n}', allEliminated: 'सोडत संपली! सर्व विजेते निवडले', eliminateHint: 'प्रत्येक फेऱ्यानंतर विजेता काढला जातो',
+                sound: 'आवाज',
+                confirmClear: 'सर्व इमेज़ साफ करणेका？',
+                participants: 'सभनगार'
             },
             ta: {
                 login: 'Google மூலம் உள்நுழைக', logout: 'வெளியேறு',
@@ -2781,8 +3021,10 @@ spin();
                 saving: 'சேமிக்கிறது...', savedOk: 'தொகுப்பு சேமிக்கப்பட்டது ✓',
                 loadingSet: 'தொகுப்பு ஏற்றப்படுகிறது...', loadedOk: 'தொகுப்பு ஏற்றப்பட்டது ✓',
                 delTitle: 'தொகுப்பை நீக்கு', deleting: 'நீக்குகிறது...', delOk: 'தொகுப்பு நீக்கப்பட்டது',
-                err: 'பிழை', savePh: 'சேமிக்கிறது...', record: '🎥 சுழற்சியைப் பதிவுசெய் (MP4)', recording: 'பதிவு செய்கிறது…', savedVideo: '🎥 MP4 வீடியோ சேமிக்கப்பட்டது', recordUnavailable: 'இந்த உலாவி MP4 வீடியோவை பதிவு செய்ய முடியாது', eliminate: 'வெற்றியாளரை அகற்று', eliminateActive: 'நீக்குதல் ஆன்', eliminated: 'ட்ராவிலிருந்து அகற்றப்பட்டது · மீதம் {n}', allEliminated: 'ட்ரா முடிந்தது! அனைத்து வெற்றியாளர்களும் தேர்வு', eliminateHint: 'ஒவ்வொரு சுழற்சிக்கும் பிறகு வெற்றியாளர் அகற்றப்படுவார்',
-                sound: 'ஒலி'
+                err: 'பிழை', savePh: 'சேமிக்கிறது...', record: '🎥 சுழற்சியைப் பதிவுசெய் (MP4)', recording: 'பதிவு செய்கிறது…', savedVideo: '🎥 MP4 வீடியோ சேமிக்கப்பட்டது', recordUnavailable: 'இந்த உலாவி MP4 வீடியோவை பதிவு செய்ய முடியாது', eliminate: 'நீக்குதல்: அணை', eliminateActive: 'நீக்குதல்: இயக்கம்', eliminated: 'ட்ராவிலிருந்து அகற்றப்பட்டது · மீதம் {n}', allEliminated: 'ட்ரா முடிந்தது! அனைத்து வெற்றியாளர்களும் தேர்வு', eliminateHint: 'ஒவ்வொரு சுழற்சிக்கும் பிறகு வெற்றியாளர் அகற்றப்படுவார்',
+                sound: 'ஒலி',
+                confirmClear: 'ฮาม์ โรยด้วย ใหม่ทั้งหมดใช้？',
+                participants: 'பற்ப஑வ்ரகிர்'
             },
             ha: {
                 login: 'Shiga da Google', logout: 'Fita',
@@ -2792,8 +3034,10 @@ spin();
                 saving: 'Ana ajiyewa...', savedOk: 'An ajiye saitin ✓',
                 loadingSet: 'Ana lodin saitin...', loadedOk: 'An loda saitin ✓',
                 delTitle: 'Share saitin', deleting: 'Ana sharewa...', delOk: 'An share saitin',
-                err: 'Kuskure', savePh: 'Ana ajiyewa...', record: '🎥 Rikodi juyi (MP4)', recording: 'Ana rikodi…', savedVideo: '🎥 An adana bidiyon MP4', recordUnavailable: 'Wannan burauza ba zai iya rikodin bidiyon MP4 ba', eliminate: 'Cire wanda ya ci', eliminateActive: 'Keɓewa ON', eliminated: 'An cire daga zabe · saura {n}', allEliminated: 'Zabe ya ƙare! Duk waɗanda suka ci an zaɓesu', eliminateHint: 'Ana cire wanda ya ci bayan kowane juyi',
-                sound: 'Sauti'
+                err: 'Kuskure', savePh: 'Ana ajiyewa...', record: '🎥 Rikodi juyi (MP4)', recording: 'Ana rikodi…', savedVideo: '🎥 An adana bidiyon MP4', recordUnavailable: 'Wannan burauza ba zai iya rikodin bidiyon MP4 ba', eliminate: 'Keɓewa: kashe', eliminateActive: 'Keɓewa: kunna', eliminated: 'An cire daga zabe · saura {n}', allEliminated: 'Zabe ya ƙare! Duk waɗanda suka ci an zaɓesu', eliminateHint: 'Ana cire wanda ya ci bayan kowane juyi',
+                sound: 'Sauti',
+                confirmClear: 'Share fakat duka hotuna?',
+                participants: 'masu shiga'
             },
             sw: {
                 login: 'Ingia kwa Google', logout: 'Toka',
@@ -2803,8 +3047,10 @@ spin();
                 saving: 'Inahifadhi...', savedOk: 'Seti imehifadhiwa ✓',
                 loadingSet: 'Inapakia seti...', loadedOk: 'Seti imepakiwa ✓',
                 delTitle: 'Futa seti', deleting: 'Inafuta...', delOk: 'Seti imefutwa',
-                err: 'Kosa', savePh: 'Inahifadhi...', record: '🎥 Rekodi mzunguko (MP4)', recording: 'Inarekodi…', savedVideo: '🎥 Video MP4 umehifadhiwa', recordUnavailable: 'Kivinjari hiki hakiwezi kurekodi video MP4', eliminate: 'Ondoa mshindi', eliminateActive: 'Uondoaji ON', eliminated: 'Ameondolewa kwenye droo · imebaki {n}', allEliminated: 'Droo imekamilika! Washindi wote wamechaguliwa', eliminateHint: 'Mshindi huondolewa baada ya kila mzunguko',
-                sound: 'Sauti'
+                err: 'Kosa', savePh: 'Inahifadhi...', record: '🎥 Rekodi mzunguko (MP4)', recording: 'Inarekodi…', savedVideo: '🎥 Video MP4 umehifadhiwa', recordUnavailable: 'Kivinjari hiki hakiwezi kurekodi video MP4', eliminate: 'Uondoaji: kuzima', eliminateActive: 'Uondoaji: kuwaka', eliminated: 'Ameondolewa kwenye droo · imebaki {n}', allEliminated: 'Droo imekamilika! Washindi wote wamechaguliwa', eliminateHint: 'Mshindi huondolewa baada ya kila mzunguko',
+                sound: 'Sauti',
+                confirmClear: 'Futa picha zote?',
+                participants: 'washiriki'
             },
             it: {
                 login: 'Accedi con Google', logout: 'Esci',
@@ -2814,8 +3060,10 @@ spin();
                 saving: 'Salvataggio...', savedOk: 'Set salvato ✓',
                 loadingSet: 'Caricamento set...', loadedOk: 'Set caricato ✓',
                 delTitle: 'Elimina set', deleting: 'Eliminazione...', delOk: 'Set eliminato',
-                err: 'Errore', savePh: 'Salvataggio...', record: '🎥 Registra il giro (MP4)', recording: 'Registrazione…', savedVideo: '🎥 Video MP4 salvato', recordUnavailable: 'Questo browser non può registrare video MP4', eliminate: 'Rimuovi il vincitore', eliminateActive: 'Eliminazione ON', eliminated: 'Rimosso dal sorteggio · restano {n}', allEliminated: 'Sorteggio terminato! Tutti i vincitori scelti', eliminateHint: 'Il vincitore viene rimosso dopo ogni giro',
-                sound: 'Audio'
+                err: 'Errore', savePh: 'Salvataggio...', record: '🎥 Registra il giro (MP4)', recording: 'Registrazione…', savedVideo: '🎥 Video MP4 salvato', recordUnavailable: 'Questo browser non può registrare video MP4', eliminate: 'Eliminazione: spenta', eliminateActive: 'Eliminazione: accesa', eliminated: 'Rimosso dal sorteggio · restano {n}', allEliminated: 'Sorteggio terminato! Tutti i vincitori scelti', eliminateHint: 'Il vincitore viene rimosso dopo ogni giro',
+                sound: 'Audio',
+                confirmClear: 'Cancella tutte le immagini?',
+                participants: 'partecipanti'
             }
         };
 
