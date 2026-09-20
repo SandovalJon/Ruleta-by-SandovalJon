@@ -847,11 +847,11 @@ canvas {
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
     <div class="shortcuts-popup" id="shortcutsPopup">
-        <div class="shortcuts-title">Atajos de teclado (escritorio)</div>
-        <div class="shortcut"><kbd>Espacio</kbd> Girar / Cerrar ganador</div>
-        <div class="shortcut"><kbd>Escape</kbd> Cerrar ganador</div>
-        <div class="shortcut"><kbd>S</kbd> Silenciar / Activar sonido</div>
-        <div class="shortcut"><kbd>E</kbd> Activar / Desactivar eliminación</div>
+        <div class="shortcuts-title" id="shortcutsTitlePopup"></div>
+        <div class="shortcut"><kbd>Espacio</kbd> <span id="shortcutSpace"></span></div>
+        <div class="shortcut"><kbd>Escape</kbd> <span id="shortcutEscape"></span></div>
+        <div class="shortcut"><kbd>S</kbd> <span id="shortcutS"></span></div>
+        <div class="shortcut"><kbd>E</kbd> <span id="shortcutE"></span></div>
     </div>
 
     <script>
@@ -947,7 +947,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Sonido',
                 confirmClear: '¿Limpiar todas las imágenes?',
                 participants: 'participantes',
-                onlyImages: 'Solo se aceptan archivos de imagen'
+                onlyImages: 'Solo se aceptan archivos de imagen',
+                shortcutsBtn: '⌨️ Atajos',
+                shortcutsTitle: 'Atajos de teclado (escritorio)',
+                keySpace: 'Girar / Cerrar ganador',
+                keyEscape: 'Cerrar ganador',
+                keyS: 'Silenciar / Activar sonido',
+                keyE: 'Activar / Desactivar eliminación',
+                remove: 'Eliminar'
             },
             en: {
                 title: '🎰 Image Roulette',
@@ -980,7 +987,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Sound',
                 confirmClear: 'Clear all images?',
                 participants: 'participants',
-                onlyImages: 'Only image files are accepted'
+                onlyImages: 'Only image files are accepted',
+                shortcutsBtn: '⌨️ Shortcuts',
+                shortcutsTitle: 'Keyboard shortcuts (desktop)',
+                keySpace: 'Spin / Close winner',
+                keyEscape: 'Close winner',
+                keyS: 'Mute / Unmute sound',
+                keyE: 'Toggle elimination',
+                remove: 'Remove'
             },
             pt: {
                 title: '🎰 Roleta de Imagens',
@@ -1013,7 +1027,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Som',
                 confirmClear: 'Limpar todas as imagens?',
                 participants: 'participantes',
-                onlyImages: 'Somente arquivos de imagem são aceitos'
+                onlyImages: 'Somente arquivos de imagem são aceitos',
+                shortcutsBtn: '⌨️ Atalhos',
+                shortcutsTitle: 'Atalhos de teclado (desktop)',
+                keySpace: 'Girar / Fechar vencedor',
+                keyEscape: 'Fechar vencedor',
+                keyS: 'Silenciar / Ativar som',
+                keyE: 'Ativar / Desativar eliminação',
+                remove: 'Remover'
             },
             fr: {
                 title: '🎰 Roulette à Images',
@@ -1046,7 +1067,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Son',
                 confirmClear: 'Effacer toutes les images?',
                 participants: 'participants',
-                onlyImages: 'Seuls les fichiers image sont acceptés'
+                onlyImages: 'Seuls les fichiers image sont acceptés',
+                shortcutsBtn: '⌨️ Raccourcis',
+                shortcutsTitle: 'Raccourcis clavier (bureau)',
+                keySpace: 'Tourner / Fermer gagnant',
+                keyEscape: 'Fermer gagnant',
+                keyS: 'Couper / Activer son',
+                keyE: 'Activer / Désactiver élimination',
+                remove: 'Retirer'
             },
             de: {
                 title: '🎰 Bild-Roulette',
@@ -1079,7 +1107,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Ton',
                 confirmClear: 'Alle Bilder löschen?',
                 participants: 'Teilnehmer',
-                onlyImages: 'Es werden nur Bilddateien akzeptiert'
+                onlyImages: 'Es werden nur Bilddateien akzeptiert',
+                shortcutsBtn: '⌨️ Tastenkürzel',
+                shortcutsTitle: 'Tastenkürzel (Desktop)',
+                keySpace: 'Drehen / Gewinner schließen',
+                keyEscape: 'Gewinner schließen',
+                keyS: 'Ton an/aus',
+                keyE: 'Eliminierung ein/aus',
+                remove: 'Entfernen'
             },
             zh: {
                 title: '🎰 图片轮盘',
@@ -1112,7 +1147,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: '声音',
                 confirmClear: '清除所有图片？',
                 participants: '参与者',
-                onlyImages: '只接受图片文件'
+                onlyImages: '只接受图片文件',
+                shortcutsBtn: '⌨️ 快捷键',
+                shortcutsTitle: '键盘快捷键（桌面）',
+                keySpace: '旋转 / 关闭获胜者',
+                keyEscape: '关闭获胜者',
+                keyS: '静音 / 取消静音',
+                keyE: '切换淘汰模式',
+                remove: '移除'
             },
             hi: {
                 title: '🎰 इमेज रूलेट',
@@ -1145,7 +1187,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'ध्वनि',
                 confirmClear: 'सभी चित्रों हटाएँ?',
                 participants: 'भागेदार',
-                onlyImages: 'केवल छवि फ़ाइलें स्वीकार की जाती हैं'
+                onlyImages: 'केवल छवि फ़ाइलें स्वीकार की जाती हैं',
+                shortcutsBtn: '⌨️ शॉर्टकट',
+                shortcutsTitle: 'कीबोर्ड शॉर्टकट (डेस्कटॉप)',
+                keySpace: 'घुमाएं / विजेता बंद करें',
+                keyEscape: 'विजेता बंद करें',
+                keyS: 'ध्वनि बंद / चालू',
+                keyE: 'उन्मूलन चालू / बंद',
+                remove: 'हटाएं'
             },
             ar: {
                 title: '🎰 روليت الصور',
@@ -1178,7 +1227,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'صوت',
                 confirmClear: 'مسح جميع الصور？',
                 participants: 'مشاركين',
-                onlyImages: 'يتم قبول ملفات الصور فقط'
+                onlyImages: 'يتم قبول ملفات الصور فقط',
+                shortcutsBtn: '⌨️ اختصارات',
+                shortcutsTitle: 'اختصارات لوحة المفاتيح (سطح المكتب)',
+                keySpace: 'دوران / إغلاق الفائز',
+                keyEscape: 'إغلاق الفائز',
+                keyS: 'كتم / تشغيل الصوت',
+                keyE: 'تفعيل / تعطيل الإقصاء',
+                remove: 'إزالة'
             },
             bn: {
                 title: '🎰 ইমেজ রুলেট',
@@ -1211,7 +1267,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'শব্দ',
                 confirmClear: 'সব চিত্র মুছে ফেলবেন？',
                 participants: 'অংশত্রিক',
-                onlyImages: 'শুধুমাত্র ছবির ফাইল গ্রহণ করা হয়'
+                onlyImages: 'শুধুমাত্র ছবির ফাইল গ্রহণ করা হয়',
+                shortcutsBtn: '⌨️ শর্টকাট',
+                shortcutsTitle: 'কীবোর্ড শর্টকাট (ডেস্কটপ)',
+                keySpace: 'ঘোরান / বিজয়ী বন্ধ',
+                keyEscape: 'বিজয়ী বন্ধ',
+                keyS: 'শব্দ বন্ধ / চালু',
+                keyE: 'নির্মূল চালু / বন্ধ',
+                remove: 'সরান'
             },
             ru: {
                 title: '🎰 Рулетка изображений',
@@ -1244,7 +1307,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Звук',
                 confirmClear: 'Очистить все изображения？',
                 participants: 'участники',
-                onlyImages: 'Принимаются только файлы изображений'
+                onlyImages: 'Принимаются только файлы изображений',
+                shortcutsBtn: '⌨️ Горячие клавиши',
+                shortcutsTitle: 'Горячие клавиши (ПК)',
+                keySpace: 'Вращать / Закрыть победителя',
+                keyEscape: 'Закрыть победителя',
+                keyS: 'Звук вкл/выкл',
+                keyE: 'Исключение вкл/выкл',
+                remove: 'Убрать'
             },
             ur: {
                 title: '🎰 امیج رولیٹ',
@@ -1277,7 +1347,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'آواز',
                 confirmClear: 'تمام تصوير مسحه？',
                 participants: 'شريک',
-                onlyImages: 'صرف تصاویر کی فائلیں قبول ہیں'
+                onlyImages: 'صرف تصاویر کی فائلیں قبول ہیں',
+                shortcutsBtn: '⌨️ شارٹ کٹ',
+                shortcutsTitle: 'کی بورڈ شارٹ کٹ (ڈیسکٹاپ)',
+                keySpace: 'گھمائیں / فاتح بند کریں',
+                keyEscape: 'فاتح بند کریں',
+                keyS: 'آواز بند / چالو',
+                keyE: 'اخراج چالو / بند',
+                remove: 'ہٹائیں'
             },
             id: {
                 title: '🎰 Roulette Gambar',
@@ -1310,7 +1387,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Suara',
                 confirmClear: 'Hapus semua gambar?',
                 participants: 'peserta',
-                onlyImages: 'Hanya file gambar yang diterima'
+                onlyImages: 'Hanya file gambar yang diterima',
+                shortcutsBtn: '⌨️ Pintasan',
+                shortcutsTitle: 'Pintasan keyboard (desktop)',
+                keySpace: 'Putar / Tutup pemenang',
+                keyEscape: 'Tutup pemenang',
+                keyS: 'Bisu / Aktifkan suara',
+                keyE: 'Aktifkan / Nonaktifkan eliminasi',
+                remove: 'Hapus'
             },
             ja: {
                 title: '🎰 画像ルーレット',
@@ -1343,7 +1427,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'サウンド',
                 confirmClear: 'すべての画像を削除しますか？',
                 participants: '参加者',
-                onlyImages: '画像ファイルのみ受け付けています'
+                onlyImages: '画像ファイルのみ受け付けています',
+                shortcutsBtn: '⌨️ キーボード',
+                shortcutsTitle: 'キーボードショートカット（デスクトップ）',
+                keySpace: '回転 / 勝者を閉じる',
+                keyEscape: '勝者を閉じる',
+                keyS: 'サウンド切替',
+                keyE: '除外モード切替',
+                remove: '削除'
             },
             pa: {
                 title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
@@ -1376,7 +1467,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'ਆਵਾਜ਼',
                 confirmClear: 'ਸਾਰੀਏਇ ਤਸ੍ਵਰ ਸਾਫ ਕਰਨੇ ਹੈ？',
                 participants: 'ਭਾਗੇਦਾਰ',
-                onlyImages: 'ਸਿਰਫ਼ ਤਸਵੀਰ ਫ਼ਾਇਲਾਂ ਹੀ ਸਵੀਕਾਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ'
+                onlyImages: 'ਸਿਰਫ਼ ਤਸਵੀਰ ਫ਼ਾਇਲਾਂ ਹੀ ਸਵੀਕਾਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ',
+                shortcutsBtn: '⌨️ ਸ਼ਾਰਟਕੱਟ',
+                shortcutsTitle: 'ਕੀਬੋਰਡ ਸ਼ਾਰਟਕੱਟ (ਡੈਸਕਟਾਪ)',
+                keySpace: 'ਘੁੰਮਾਓ / ਜੇਤੂ ਬੰਦ',
+                keyEscape: 'ਜੇਤੂ ਬੰਦ',
+                keyS: 'ਆਵਾਜ਼ ਬੰਦ / ਚਾਲੂ',
+                keyE: 'ਖ਼ਾਤਮਾ ਚਾਲੂ / ਬੰਦ',
+                remove: 'ਹਟਾਓ'
             },
             jv: {
                 title: '🎰 Roulette Gambar',
@@ -1409,7 +1507,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Swara',
                 confirmClear: 'Busak kabeh gambar?',
                 participants: 'peserta',
-                onlyImages: 'Mung file gambar sing ditampa'
+                onlyImages: 'Mung file gambar sing ditampa',
+                shortcutsBtn: '⌨️ Pintasan',
+                shortcutsTitle: 'Pintasan keyboard (desktop)',
+                keySpace: 'Puter / Tutup pemenang',
+                keyEscape: 'Tutup pemenang',
+                keyS: 'Bisu / Aktifke swara',
+                keyE: 'Aktifke / Nonaktifke eliminasi',
+                remove: 'Busak'
             },
             vi: {
                 title: '🎰 Vòng quay Hình ảnh',
@@ -1442,7 +1547,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Âm thanh',
                 confirmClear: 'Xóa tất cả ảnh？',
                 participants: 'thành viên',
-                onlyImages: 'Chỉ chấp nhận tệp hình ảnh'
+                onlyImages: 'Chỉ chấp nhận tệp hình ảnh',
+                shortcutsBtn: '⌨️ Phím tắt',
+                shortcutsTitle: 'Phím tắt bàn phím (máy tính)',
+                keySpace: 'Quay / Đóng người thắng',
+                keyEscape: 'Đóng người thắng',
+                keyS: 'Tắt / Bật âm thanh',
+                keyE: 'Bật / Tắt loại bỏ',
+                remove: 'Xóa'
             },
             te: {
                 title: '🎰 ఇమేజ్ రూలెట్',
@@ -1475,7 +1587,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'ధ్వਨి',
                 confirmClear: 'ฅมู สีราก ฤ฾มเกี่ยว่าง？',
                 participants: 'సభ్గమెఓలు',
-                onlyImages: 'కేవలం చిత్ర ఫైల్‌లు మాత్రమే స్వీకరించబడతాయి'
+                onlyImages: 'కేవలం చిత్ర ఫైల్‌లు మాత్రమే స్వీకరించబడతాయి',
+                shortcutsBtn: '⌨️ షార్ట్‌కట్‌లు',
+                shortcutsTitle: 'కీబోర్డ్ షార్ట్‌కట్‌లు (డెస్క్‌టాప్)',
+                keySpace: 'తిప్పండి / విజేతను మూసివేయండి',
+                keyEscape: 'విజేతను మూసివేయండి',
+                keyS: 'ధ్వని ఆఫ్ / ఆన్',
+                keyE: 'ఎలిమినేషన్ ఆన్ / ఆఫ్',
+                remove: 'తొలగించండి'
             },
             ko: {
                 title: '🎰 이미지 룰렛',
@@ -1508,7 +1627,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: '소리',
                 confirmClear: '모든 이미지를 삭제하시겠습니까？',
                 participants: '참거자',
-                onlyImages: '이미지 파일만 허용됩니다'
+                onlyImages: '이미지 파일만 허용됩니다',
+                shortcutsBtn: '⌨️ 단축키',
+                shortcutsTitle: '키보드 단축키 (데스크톱)',
+                keySpace: '회전 / 당첨자 닫기',
+                keyEscape: '당첨자 닫기',
+                keyS: '소리 켜기/끄기',
+                keyE: '제외 모드 켜기/끄기',
+                remove: '제거'
             },
             tr: {
                 title: '🎰 Görsel Ruleti',
@@ -1541,7 +1667,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Ses',
                 confirmClear: 'Tüm resimleri temizle？',
                 participants: 'katılımcı',
-                onlyImages: 'Yalnızca resim dosyaları kabul edilir'
+                onlyImages: 'Yalnızca resim dosyaları kabul edilir',
+                shortcutsBtn: '⌨️ Kısayollar',
+                shortcutsTitle: 'Klavye kısayolları (masaüstü)',
+                keySpace: 'Çevir / Kazananı kapat',
+                keyEscape: 'Kazananı kapat',
+                keyS: 'Sessiz / Ses aç',
+                keyE: 'Elemeyi aç / kapat',
+                remove: 'Kaldır'
             },
             fa: {
                 title: '🎰 رولت تصویر',
@@ -1574,7 +1707,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'صدا',
                 confirmClear: 'همه تصاویر حذف شود？',
                 participants: 'مشترک',
-                onlyImages: 'فقط فایل‌های تصویری پذیرفته می‌شوند'
+                onlyImages: 'فقط فایل‌های تصویری پذیرفته می‌شوند',
+                shortcutsBtn: '⌨️ میانبرها',
+                shortcutsTitle: 'میانبرهای صفحه کلید (دسکتاپ)',
+                keySpace: 'چرخش / بستن برنده',
+                keyEscape: 'بستن برنده',
+                keyS: 'بی‌صدا / روشن کردن صدا',
+                keyE: 'فعال / غیرفعال کردن حذف',
+                remove: 'حذف'
             },
             mr: {
                 title: '🎰 इमेज रूलेट',
@@ -1607,7 +1747,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'आवाज',
                 confirmClear: 'सर्व इमेज़ साफ करणेका？',
                 participants: 'सभनगार',
-                onlyImages: 'फक्त प्रतिमा फाइली स्वीकारल्या जातात'
+                onlyImages: 'फक्त प्रतिमा फाइली स्वीकारल्या जातात',
+                shortcutsBtn: '⌨️ शॉर्टकट',
+                shortcutsTitle: 'कीबोर्ड शॉर्टकट (डेस्कटॉप)',
+                keySpace: 'फिरवा / विजेता बंद',
+                keyEscape: 'विजेता बंद',
+                keyS: 'आवाज बंद / चालू',
+                keyE: 'वगळणे चालू / बंद',
+                remove: 'काढा'
             },
             ta: {
                 title: '🎰 பட ரவுலட்',
@@ -1640,7 +1787,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'ஒலி',
                 confirmClear: 'ฮาม์ โรยด้วย ใหม่ทั้งหมดใช้？',
                 participants: 'பற்ப஑வ்ரகிர்',
-                onlyImages: 'படக் கோப்புகள் மட்டுமே ஏற்றுக்கொள்ளப்படும்'
+                onlyImages: 'படக் கோப்புகள் மட்டுமே ஏற்றுக்கொள்ளப்படும்',
+                shortcutsBtn: '⌨️ குறுக்குவழிகள்',
+                shortcutsTitle: 'விசைப்பலகை குறுக்குவழிகள் (டெஸ்க்டாப்)',
+                keySpace: 'சுழற்சி / வெற்றியாளரை மூடு',
+                keyEscape: 'வெற்றியாளரை மூடு',
+                keyS: 'ஒலி அணை / இயக்கு',
+                keyE: 'நீக்குதல் இயக்கு / அணை',
+                remove: 'நீக்கு'
             },
             ha: {
                 title: '🎰 Roulette na Hotuna',
@@ -1673,7 +1827,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Sauti',
                 confirmClear: 'Share fakat duka hotuna?',
                 participants: 'masu shiga',
-                onlyImages: 'Ana karɓi fakolin hotuna kawai'
+                onlyImages: 'Ana karɓi fakolin hotuna kawai',
+                shortcutsBtn: '⌨️ Gajawanan keyboard',
+                shortcutsTitle: 'Gajawanan keyboard (desktop)',
+                keySpace: 'Juyi / Rufe mara cin gya',
+                keyEscape: 'Rufe mara cin gya',
+                keyS: 'Kallo / kunna sauti',
+                keyE: 'Kunna / kashe share',
+                remove: 'Cire'
             },
             sw: {
                 title: '🎰 Rulleti ya Picha',
@@ -1706,7 +1867,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Sauti',
                 confirmClear: 'Futa picha zote?',
                 participants: 'washiriki',
-                onlyImages: 'Faili za picha pekee zinazokebaliwa'
+                onlyImages: 'Faili za picha pekee zinazokebaliwa',
+                shortcutsBtn: '⌨️ Njia za haraka',
+                shortcutsTitle: 'Njia za haraka za kibodi (desktop)',
+                keySpace: 'Zungusha / Funga mshindi',
+                keyEscape: 'Funga mshindi',
+                keyS: 'Nyamazisha / Washa sauti',
+                keyE: 'Washa / Zima uondoaji',
+                remove: 'Ondoa'
             },
             it: {
                 title: '🎰 Ruota delle Immagini',
@@ -1739,7 +1907,14 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 sound: 'Audio',
                 confirmClear: 'Cancella tutte le immagini?',
                 participants: 'partecipanti',
-                onlyImages: 'Sono accettati solo file immagine'
+                onlyImages: 'Sono accettati solo file immagine',
+                shortcutsBtn: '⌨️ Scorciatoie',
+                shortcutsTitle: 'Scorciatoie da tastiera (desktop)',
+                keySpace: 'Gira / Chiudi vincitore',
+                keyEscape: 'Chiudi vincitore',
+                keyS: 'Muto / Attiva audio',
+                keyE: 'Attiva / Disattiva eliminazione',
+                remove: 'Rimuovi'
             }
         };
 
@@ -1761,6 +1936,13 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.title = t('sound');
             soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundBtn.classList.toggle('on', soundEnabled);
+            shortcutsBtn.textContent = t('shortcutsBtn');
+            shortcutsBtn.title = t('shortcutsTitle');
+            document.getElementById('shortcutsTitlePopup').textContent = t('shortcutsTitle');
+            document.getElementById('shortcutSpace').textContent = t('keySpace');
+            document.getElementById('shortcutEscape').textContent = t('keyEscape');
+            document.getElementById('shortcutS').textContent = t('keyS');
+            document.getElementById('shortcutE').textContent = t('keyE');
             document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
             document.querySelector('.theme-btn[data-theme="esmeralda"]').textContent = t('themeBtnEsmeralda');
             document.querySelector('.theme-btn[data-theme="atardecer"]').textContent = t('themeBtnAtardecer');
@@ -2112,7 +2294,7 @@ refreshMessages();
                 `<div class="preview-item" data-index="${index}">
                     <img src="${src}" alt="preview">
                     <div class="remove-overlay">
-                        <button class="remove-btn" data-index="${index}" title="Eliminar">✕</button>
+                        <button class="remove-btn" data-index="${index}" title="${t('remove')}">✕</button>
                     </div>
                 </div>`
             ).join('');
@@ -2810,7 +2992,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Sonido',
                 confirmClear: '¿Limpiar todas las imágenes?',
                 participants: 'participantes',
-                onlyImages: 'Solo se aceptan archivos de imagen'
+                onlyImages: 'Solo se aceptan archivos de imagen',
+                shortcutsBtn: '⌨️ Atajos',
+                shortcutsTitle: 'Atajos de teclado (escritorio)',
+                keySpace: 'Girar / Cerrar ganador',
+                keyEscape: 'Cerrar ganador',
+                keyS: 'Silenciar / Activar sonido',
+                keyE: 'Activar / Desactivar eliminación',
+                remove: 'Eliminar'
             },
             en: {
                 login: 'Sign in with Google', logout: 'Sign out',
@@ -2824,7 +3013,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Sound',
                 confirmClear: 'Clear all images?',
                 participants: 'participants',
-                onlyImages: 'Only image files are accepted'
+                onlyImages: 'Only image files are accepted',
+                shortcutsBtn: '⌨️ Shortcuts',
+                shortcutsTitle: 'Keyboard shortcuts (desktop)',
+                keySpace: 'Spin / Close winner',
+                keyEscape: 'Close winner',
+                keyS: 'Mute / Unmute sound',
+                keyE: 'Toggle elimination',
+                remove: 'Remove'
             },
             pt: {
                 login: 'Entrar com o Google', logout: 'Sair',
@@ -2838,7 +3034,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Som',
                 confirmClear: 'Limpar todas as imagens?',
                 participants: 'participantes',
-                onlyImages: 'Somente arquivos de imagem são aceitos'
+                onlyImages: 'Somente arquivos de imagem são aceitos',
+                shortcutsBtn: '⌨️ Atalhos',
+                shortcutsTitle: 'Atalhos de teclado (desktop)',
+                keySpace: 'Girar / Fechar vencedor',
+                keyEscape: 'Fechar vencedor',
+                keyS: 'Silenciar / Ativar som',
+                keyE: 'Ativar / Desativar eliminação',
+                remove: 'Remover'
             },
             fr: {
                 login: 'Se connecter avec Google', logout: 'Se déconnecter',
@@ -2852,7 +3055,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Son',
                 confirmClear: 'Effacer toutes les images?',
                 participants: 'participants',
-                onlyImages: 'Seuls les fichiers image sont acceptés'
+                onlyImages: 'Seuls les fichiers image sont acceptés',
+                shortcutsBtn: '⌨️ Raccourcis',
+                shortcutsTitle: 'Raccourcis clavier (bureau)',
+                keySpace: 'Tourner / Fermer gagnant',
+                keyEscape: 'Fermer gagnant',
+                keyS: 'Couper / Activer son',
+                keyE: 'Activer / Désactiver élimination',
+                remove: 'Retirer'
             },
             de: {
                 login: 'Mit Google anmelden', logout: 'Abmelden',
@@ -2866,7 +3076,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Ton',
                 confirmClear: 'Alle Bilder löschen?',
                 participants: 'Teilnehmer',
-                onlyImages: 'Es werden nur Bilddateien akzeptiert'
+                onlyImages: 'Es werden nur Bilddateien akzeptiert',
+                shortcutsBtn: '⌨️ Tastenkürzel',
+                shortcutsTitle: 'Tastenkürzel (Desktop)',
+                keySpace: 'Drehen / Gewinner schließen',
+                keyEscape: 'Gewinner schließen',
+                keyS: 'Ton an/aus',
+                keyE: 'Eliminierung ein/aus',
+                remove: 'Entfernen'
             },
             zh: {
                 login: '使用 Google 登录', logout: '退出登录',
@@ -2880,7 +3097,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: '声音',
                 confirmClear: '清除所有图片？',
                 participants: '参与者',
-                onlyImages: '只接受图片文件'
+                onlyImages: '只接受图片文件',
+                shortcutsBtn: '⌨️ 快捷键',
+                shortcutsTitle: '键盘快捷键（桌面）',
+                keySpace: '旋转 / 关闭获胜者',
+                keyEscape: '关闭获胜者',
+                keyS: '静音 / 取消静音',
+                keyE: '切换淘汰模式',
+                remove: '移除'
             },
             hi: {
                 login: 'Google से साइन इन करें', logout: 'साइन आउट',
@@ -2894,7 +3118,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'ध्वनि',
                 confirmClear: 'सभी चित्रों हटाएँ?',
                 participants: 'भागेदार',
-                onlyImages: 'केवल छवि फ़ाइलें स्वीकार की जाती हैं'
+                onlyImages: 'केवल छवि फ़ाइलें स्वीकार की जाती हैं',
+                shortcutsBtn: '⌨️ शॉर्टकट',
+                shortcutsTitle: 'कीबोर्ड शॉर्टकट (डेस्कटॉप)',
+                keySpace: 'घुमाएं / विजेता बंद करें',
+                keyEscape: 'विजेता बंद करें',
+                keyS: 'ध्वनि बंद / चालू',
+                keyE: 'उन्मूलन चालू / बंद',
+                remove: 'हटाएं'
             },
             ar: {
                 login: 'تسجيل الدخول عبر Google', logout: 'تسجيل الخروج',
@@ -2908,7 +3139,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'صوت',
                 confirmClear: 'مسح جميع الصور？',
                 participants: 'مشاركين',
-                onlyImages: 'يتم قبول ملفات الصور فقط'
+                onlyImages: 'يتم قبول ملفات الصور فقط',
+                shortcutsBtn: '⌨️ اختصارات',
+                shortcutsTitle: 'اختصارات لوحة المفاتيح (سطح المكتب)',
+                keySpace: 'دوران / إغلاق الفائز',
+                keyEscape: 'إغلاق الفائز',
+                keyS: 'كتم / تشغيل الصوت',
+                keyE: 'تفعيل / تعطيل الإقصاء',
+                remove: 'إزالة'
             },
             bn: {
                 login: 'Google দিয়ে সাইন ইন করুন', logout: 'সাইন আউট',
@@ -2922,7 +3160,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'শব্দ',
                 confirmClear: 'সব চিত্র মুছে ফেলবেন？',
                 participants: 'অংশত্রিক',
-                onlyImages: 'শুধুমাত্র ছবির ফাইল গ্রহণ করা হয়'
+                onlyImages: 'শুধুমাত্র ছবির ফাইল গ্রহণ করা হয়',
+                shortcutsBtn: '⌨️ শর্টকাট',
+                shortcutsTitle: 'কীবোর্ড শর্টকাট (ডেস্কটপ)',
+                keySpace: 'ঘোরান / বিজয়ী বন্ধ',
+                keyEscape: 'বিজয়ী বন্ধ',
+                keyS: 'শব্দ বন্ধ / চালু',
+                keyE: 'নির্মূল চালু / বন্ধ',
+                remove: 'সরান'
             },
             ru: {
                 login: 'Войти через Google', logout: 'Выйти',
@@ -2936,7 +3181,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Звук',
                 confirmClear: 'Очистить все изображения？',
                 participants: 'участники',
-                onlyImages: 'Принимаются только файлы изображений'
+                onlyImages: 'Принимаются только файлы изображений',
+                shortcutsBtn: '⌨️ Горячие клавиши',
+                shortcutsTitle: 'Горячие клавиши (ПК)',
+                keySpace: 'Вращать / Закрыть победителя',
+                keyEscape: 'Закрыть победителя',
+                keyS: 'Звук вкл/выкл',
+                keyE: 'Исключение вкл/выкл',
+                remove: 'Убрать'
             },
             ur: {
                 login: 'Google سے سائن ان کریں', logout: 'سائن آؤٹ',
@@ -2950,7 +3202,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'آواز',
                 confirmClear: 'تمام تصوير مسحه？',
                 participants: 'شريک',
-                onlyImages: 'صرف تصاویر کی فائلیں قبول ہیں'
+                onlyImages: 'صرف تصاویر کی فائلیں قبول ہیں',
+                shortcutsBtn: '⌨️ شارٹ کٹ',
+                shortcutsTitle: 'کی بورڈ شارٹ کٹ (ڈیسکٹاپ)',
+                keySpace: 'گھمائیں / فاتح بند کریں',
+                keyEscape: 'فاتح بند کریں',
+                keyS: 'آواز بند / چالو',
+                keyE: 'اخراج چالو / بند',
+                remove: 'ہٹائیں'
             },
             id: {
                 login: 'Masuk dengan Google', logout: 'Keluar',
@@ -2964,7 +3223,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Suara',
                 confirmClear: 'Hapus semua gambar?',
                 participants: 'peserta',
-                onlyImages: 'Hanya file gambar yang diterima'
+                onlyImages: 'Hanya file gambar yang diterima',
+                shortcutsBtn: '⌨️ Pintasan',
+                shortcutsTitle: 'Pintasan keyboard (desktop)',
+                keySpace: 'Putar / Tutup pemenang',
+                keyEscape: 'Tutup pemenang',
+                keyS: 'Bisu / Aktifkan suara',
+                keyE: 'Aktifkan / Nonaktifkan eliminasi',
+                remove: 'Hapus'
             },
             ja: {
                 login: 'Googleでログイン', logout: 'ログアウト',
@@ -2978,7 +3244,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'サウンド',
                 confirmClear: 'すべての画像を削除しますか？',
                 participants: '参加者',
-                onlyImages: '画像ファイルのみ受け付けています'
+                onlyImages: '画像ファイルのみ受け付けています',
+                shortcutsBtn: '⌨️ キーボード',
+                shortcutsTitle: 'キーボードショートカット（デスクトップ）',
+                keySpace: '回転 / 勝者を閉じる',
+                keyEscape: '勝者を閉じる',
+                keyS: 'サウンド切替',
+                keyE: '除外モード切替',
+                remove: '削除'
             },
             pa: {
                 login: 'Google ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ', logout: 'ਸਾਈਨ ਆਊਟ',
@@ -2992,7 +3265,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'ਆਵਾਜ਼',
                 confirmClear: 'ਸਾਰੀਏਇ ਤਸ੍ਵਰ ਸਾਫ ਕਰਨੇ ਹੈ？',
                 participants: 'ਭਾਗੇਦਾਰ',
-                onlyImages: 'ਸਿਰਫ਼ ਤਸਵੀਰ ਫ਼ਾਇਲਾਂ ਹੀ ਸਵੀਕਾਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ'
+                onlyImages: 'ਸਿਰਫ਼ ਤਸਵੀਰ ਫ਼ਾਇਲਾਂ ਹੀ ਸਵੀਕਾਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ',
+                shortcutsBtn: '⌨️ ਸ਼ਾਰਟਕੱਟ',
+                shortcutsTitle: 'ਕੀਬੋਰਡ ਸ਼ਾਰਟਕੱਟ (ਡੈਸਕਟਾਪ)',
+                keySpace: 'ਘੁੰਮਾਓ / ਜੇਤੂ ਬੰਦ',
+                keyEscape: 'ਜੇਤੂ ਬੰਦ',
+                keyS: 'ਆਵਾਜ਼ ਬੰਦ / ਚਾਲੂ',
+                keyE: 'ਖ਼ਾਤਮਾ ਚਾਲੂ / ਬੰਦ',
+                remove: 'ਹਟਾਓ'
             },
             jv: {
                 login: 'Mlebet nganggo Google', logout: 'Metu',
@@ -3006,7 +3286,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Swara',
                 confirmClear: 'Busak kabeh gambar?',
                 participants: 'peserta',
-                onlyImages: 'Mung file gambar sing ditampa'
+                onlyImages: 'Mung file gambar sing ditampa',
+                shortcutsBtn: '⌨️ Pintasan',
+                shortcutsTitle: 'Pintasan keyboard (desktop)',
+                keySpace: 'Puter / Tutup pemenang',
+                keyEscape: 'Tutup pemenang',
+                keyS: 'Bisu / Aktifke swara',
+                keyE: 'Aktifke / Nonaktifke eliminasi',
+                remove: 'Busak'
             },
             vi: {
                 login: 'Đăng nhập bằng Google', logout: 'Đăng xuất',
@@ -3020,7 +3307,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Âm thanh',
                 confirmClear: 'Xóa tất cả ảnh？',
                 participants: 'thành viên',
-                onlyImages: 'Chỉ chấp nhận tệp hình ảnh'
+                onlyImages: 'Chỉ chấp nhận tệp hình ảnh',
+                shortcutsBtn: '⌨️ Phím tắt',
+                shortcutsTitle: 'Phím tắt bàn phím (máy tính)',
+                keySpace: 'Quay / Đóng người thắng',
+                keyEscape: 'Đóng người thắng',
+                keyS: 'Tắt / Bật âm thanh',
+                keyE: 'Bật / Tắt loại bỏ',
+                remove: 'Xóa'
             },
             te: {
                 login: 'Googleతో సైన్ ఇన్ చేయండి', logout: 'సైన్ అవుట్',
@@ -3034,7 +3328,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'ధ్వਨి',
                 confirmClear: 'ฅมู สีราก ฤ฾มเกี่ยว่าง？',
                 participants: 'సభ్గమెఓలు',
-                onlyImages: 'కేవలం చిత్ర ఫైల్‌లు మాత్రమే స్వీకరించబడతాయి'
+                onlyImages: 'కేవలం చిత్ర ఫైల్‌లు మాత్రమే స్వీకరించబడతాయి',
+                shortcutsBtn: '⌨️ షార్ట్‌కట్‌లు',
+                shortcutsTitle: 'కీబోర్డ్ షార్ట్‌కట్‌లు (డెస్క్‌టాప్)',
+                keySpace: 'తిప్పండి / విజేతను మూసివేయండి',
+                keyEscape: 'విజేతను మూసివేయండి',
+                keyS: 'ధ్వని ఆఫ్ / ఆన్',
+                keyE: 'ఎలిమినేషన్ ఆన్ / ఆఫ్',
+                remove: 'తొలగించండి'
             },
             ko: {
                 login: 'Google로 로그인', logout: '로그아웃',
@@ -3048,7 +3349,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: '소리',
                 confirmClear: '모든 이미지를 삭제하시겠습니까？',
                 participants: '참거자',
-                onlyImages: '이미지 파일만 허용됩니다'
+                onlyImages: '이미지 파일만 허용됩니다',
+                shortcutsBtn: '⌨️ 단축키',
+                shortcutsTitle: '키보드 단축키 (데스크톱)',
+                keySpace: '회전 / 당첨자 닫기',
+                keyEscape: '당첨자 닫기',
+                keyS: '소리 켜기/끄기',
+                keyE: '제외 모드 켜기/끄기',
+                remove: '제거'
             },
             tr: {
                 login: 'Google ile giriş yap', logout: 'Çıkış yap',
@@ -3062,7 +3370,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Ses',
                 confirmClear: 'Tüm resimleri temizle？',
                 participants: 'katılımcı',
-                onlyImages: 'Yalnızca resim dosyaları kabul edilir'
+                onlyImages: 'Yalnızca resim dosyaları kabul edilir',
+                shortcutsBtn: '⌨️ Kısayollar',
+                shortcutsTitle: 'Klavye kısayolları (masaüstü)',
+                keySpace: 'Çevir / Kazananı kapat',
+                keyEscape: 'Kazananı kapat',
+                keyS: 'Sessiz / Ses aç',
+                keyE: 'Elemeyi aç / kapat',
+                remove: 'Kaldır'
             },
             fa: {
                 login: 'ورود با Google', logout: 'خروج',
@@ -3076,7 +3391,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'صدا',
                 confirmClear: 'همه تصاویر حذف شود？',
                 participants: 'مشترک',
-                onlyImages: 'فقط فایل‌های تصویری پذیرفته می‌شوند'
+                onlyImages: 'فقط فایل‌های تصویری پذیرفته می‌شوند',
+                shortcutsBtn: '⌨️ میانبرها',
+                shortcutsTitle: 'میانبرهای صفحه کلید (دسکتاپ)',
+                keySpace: 'چرخش / بستن برنده',
+                keyEscape: 'بستن برنده',
+                keyS: 'بی‌صدا / روشن کردن صدا',
+                keyE: 'فعال / غیرفعال کردن حذف',
+                remove: 'حذف'
             },
             mr: {
                 login: 'Google सह साइन इन करा', logout: 'साइन आउट',
@@ -3090,7 +3412,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'आवाज',
                 confirmClear: 'सर्व इमेज़ साफ करणेका？',
                 participants: 'सभनगार',
-                onlyImages: 'फक्त प्रतिमा फाइली स्वीकारल्या जातात'
+                onlyImages: 'फक्त प्रतिमा फाइली स्वीकारल्या जातात',
+                shortcutsBtn: '⌨️ शॉर्टकट',
+                shortcutsTitle: 'कीबोर्ड शॉर्टकट (डेस्कटॉप)',
+                keySpace: 'फिरवा / विजेता बंद',
+                keyEscape: 'विजेता बंद',
+                keyS: 'आवाज बंद / चालू',
+                keyE: 'वगळणे चालू / बंद',
+                remove: 'काढा'
             },
             ta: {
                 login: 'Google மூலம் உள்நுழைக', logout: 'வெளியேறு',
@@ -3104,7 +3433,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'ஒலி',
                 confirmClear: 'ฮาม์ โรยด้วย ใหม่ทั้งหมดใช้？',
                 participants: 'பற்ப஑வ்ரகிர்',
-                onlyImages: 'படக் கோப்புகள் மட்டுமே ஏற்றுக்கொள்ளப்படும்'
+                onlyImages: 'படக் கோப்புகள் மட்டுமே ஏற்றுக்கொள்ளப்படும்',
+                shortcutsBtn: '⌨️ குறுக்குவழிகள்',
+                shortcutsTitle: 'விசைப்பலகை குறுக்குவழிகள் (டெஸ்க்டாப்)',
+                keySpace: 'சுழற்சி / வெற்றியாளரை மூடு',
+                keyEscape: 'வெற்றியாளரை மூடு',
+                keyS: 'ஒலி அணை / இயக்கு',
+                keyE: 'நீக்குதல் இயக்கு / அணை',
+                remove: 'நீக்கு'
             },
             ha: {
                 login: 'Shiga da Google', logout: 'Fita',
@@ -3118,7 +3454,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Sauti',
                 confirmClear: 'Share fakat duka hotuna?',
                 participants: 'masu shiga',
-                onlyImages: 'Ana karɓi fakolin hotuna kawai'
+                onlyImages: 'Ana karɓi fakolin hotuna kawai',
+                shortcutsBtn: '⌨️ Gajawanan keyboard',
+                shortcutsTitle: 'Gajawanan keyboard (desktop)',
+                keySpace: 'Juyi / Rufe mara cin gya',
+                keyEscape: 'Rufe mara cin gya',
+                keyS: 'Kallo / kunna sauti',
+                keyE: 'Kunna / kashe share',
+                remove: 'Cire'
             },
             sw: {
                 login: 'Ingia kwa Google', logout: 'Toka',
@@ -3132,7 +3475,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Sauti',
                 confirmClear: 'Futa picha zote?',
                 participants: 'washiriki',
-                onlyImages: 'Faili za picha pekee zinazokebaliwa'
+                onlyImages: 'Faili za picha pekee zinazokebaliwa',
+                shortcutsBtn: '⌨️ Njia za haraka',
+                shortcutsTitle: 'Njia za haraka za kibodi (desktop)',
+                keySpace: 'Zungusha / Funga mshindi',
+                keyEscape: 'Funga mshindi',
+                keyS: 'Nyamazisha / Washa sauti',
+                keyE: 'Washa / Zima uondoaji',
+                remove: 'Ondoa'
             },
             it: {
                 login: 'Accedi con Google', logout: 'Esci',
@@ -3146,7 +3496,14 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 sound: 'Audio',
                 confirmClear: 'Cancella tutte le immagini?',
                 participants: 'partecipanti',
-                onlyImages: 'Sono accettati solo file immagine'
+                onlyImages: 'Sono accettati solo file immagine',
+                shortcutsBtn: '⌨️ Scorciatoie',
+                shortcutsTitle: 'Scorciatoie da tastiera (desktop)',
+                keySpace: 'Gira / Chiudi vincitore',
+                keyEscape: 'Chiudi vincitore',
+                keyS: 'Muto / Attiva audio',
+                keyE: 'Attiva / Disattiva eliminazione',
+                remove: 'Rimuovi'
             }
         };
 
