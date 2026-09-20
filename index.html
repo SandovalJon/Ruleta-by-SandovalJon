@@ -2421,6 +2421,41 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
             }
         });
 
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.code === 'Space' && !isSpinning) {
+                e.preventDefault();
+                if (winnerIndex >= 0) {
+                    winnerIndex = -1;
+                    winnerZoom = 0;
+                    isHovering = false;
+                    rouletteWrapper.classList.remove('winner-mode');
+                    drawRoulette();
+                    refreshMessages();
+                } else {
+                    canvas.click();
+                }
+            }
+            if (e.code === 'Escape') {
+                if (winnerIndex >= 0) {
+                    winnerIndex = -1;
+                    winnerZoom = 0;
+                    isHovering = false;
+                    rouletteWrapper.classList.remove('winner-mode');
+                    drawRoulette();
+                    refreshMessages();
+                }
+            }
+            if (e.code === 'KeyS' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                soundBtn.click();
+            }
+            if (e.code === 'KeyE' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                elimBtn.click();
+            }
+        });
+
         canvas.addEventListener('mouseenter', () => {
             isHovering = true;
             drawRoulette();
