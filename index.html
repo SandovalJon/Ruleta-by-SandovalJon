@@ -2302,7 +2302,11 @@ const wheelCache = document.createElement('canvas');
             const minNeed = elimMode ? 1 : 2;
             if (isSpinning || loadedImages.length < minNeed) return;
 
-isSpinning = true;
+            if (elimMode && winnerIndex >= 0) {
+                eliminateWinner();
+            }
+
+            isSpinning = true;
             refreshMessages();
 
             const spinDuration = 3000 + cryptoRand() * 4000;
@@ -2363,7 +2367,6 @@ rouletteWrapper.classList.add('winner-mode');
                     spinTimeout = requestAnimationFrame(animateWinner);
                 } else {
                     finishRecording();
-                    if (elimMode && winnerIndex >= 0) eliminateWinner();
                 }
             }
 
@@ -2470,16 +2473,20 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
 
         canvas.addEventListener('click', () => {
             if (isSpinning) return;
-if (winnerIndex >= 0) {
-                winnerIndex = -1;
-                winnerZoom = 0;
-                isHovering = false;
-                rouletteWrapper.classList.remove('winner-mode');
-                drawRoulette();
-                refreshMessages();
+            if (winnerIndex >= 0) {
+                if (elimMode) {
+                    eliminateWinner();
+                } else {
+                    winnerIndex = -1;
+                    winnerZoom = 0;
+                    isHovering = false;
+                    rouletteWrapper.classList.remove('winner-mode');
+                    drawRoulette();
+                    refreshMessages();
+                }
                 return;
             }
-spin();
+            spin();
         });
 
         recordBtn.addEventListener('click', () => {
