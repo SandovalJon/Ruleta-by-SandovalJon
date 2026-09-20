@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookbook Modular - SandovalJon</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --accent: #58a6ff;
+    --gold: #f0c040;
+    --text: #c9d1d9;
+    --border: #30363d;
+    --code-bg: #0d1117;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 20px;
+  }
+  h1 {
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 2rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--gold);
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+  }
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-bottom: 40px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .toc h2 { color: var(--gold); margin-bottom: 12px; font-size: 1.1rem; }
+  .toc ol { padding-left: 22px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .module {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 30px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .module h2 {
+    color: #fff;
+    font-size: 1.25rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag-css { background: #264f78; color: #79c0ff; }
+  .tag-js { background: #3b4d1a; color: #a5d6a7; }
+  .tag-firebase { background: #5c2d0e; color: #ffab70; }
+  .tag-media { background: #4a1a5e; color: #d8a8f0; }
+  .module .desc { color: #8b949e; margin-bottom: 14px; font-size: 0.92rem; }
+  .subsec { margin-bottom: 16px; }
+  .subsec h3 {
+    color: var(--gold);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    color: #e6edf3;
+  }
+  code { font-family: inherit; }
+  footer {
+    text-align: center;
+    color: #484f58;
+    margin-top: 40px;
+    padding: 20px;
+    font-size: 0.85rem;
+  }
+  footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<h1>Cookbook Modular</h1>
+<p class="subtitle">Bloques de código independientes y reutilizables</p>
+
+<nav class="toc">
+  <h2>Índice</h2>
+  <ol>
+    <li><a href="#mod1">Tema oscuro / claro</a></li>
+    <li><a href="#mod2">Idiomas (i18n)</a></li>
+    <li><a href="#mod3">Botón de sonido</a></li>
+    <li><a href="#mod4">Web Audio - efectos</a></li>
+    <li><a href="#mod5">Drag &amp; Drop</a></li>
+    <li><a href="#mod6">Procesamiento de imágenes</a></li>
+    <li><a href="#mod7">localStorage</a></li>
+    <li><a href="#mod8">Crypto random</a></li>
+    <li><a href="#mod9">Google Login</a></li>
+    <li><a href="#mod10">Firestore</a></li>
+    <li><a href="#mod11">Grabar canvas a MP4</a></li>
+    <li><a href="#mod12">Grabar con audio</a></li>
+    <li><a href="#mod13">Canvas dibujar/animar</a></li>
+    <li><a href="#mod14">Firma by SandovalJon</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== MODULO 1 ==================== -->
+<section class="module" id="mod1">
+  <h2><span class="tag tag-css">CSS</span><span class="tag tag-js">JS</span> 1. Tema oscuro / claro</h2>
+  <p class="desc">Sistema de temas con variables CSS, cambio por <code>data-theme</code> en body y persistencia en localStorage.</p>
+
+  <div class="subsec"><h3>CSS</h3>
+<pre><code>:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --accent: #58a6ff;
+  --text: #c9d1d9;
+}
+body[data-theme="claro"] {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --accent: #0969da;
+  --text: #1f2328;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}</code></pre>
+  </div>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>function initTheme() {
+  const saved = localStorage.getItem('theme') || 'oscuro';
+  document.body.setAttribute('data-theme', saved);
+}
+
+function toggleTheme() {
+  const current = document.body.getAttribute('data-theme');
+  const next = current === 'oscuro' ? 'claro' : 'oscuro';
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+
+initTheme();</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 2 ==================== -->
+<section class="module" id="mod2">
+  <h2><span class="tag tag-js">JS</span> 2. Idiomas (i18n) — 25 idiomas</h2>
+  <p class="desc">Sistema de traducciones con 25 idiomas, objeto de claves <code>L</code>, función <code>t()</code>, <code>setLanguage</code> y detección automática del idioma del navegador.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>const L = {
+  es: {
+    title: '🎰 Ruleta de Imágenes',
+    drop: 'Arrastra imágenes aquí',
+    empty: 'Agrega imágenes para comenzar',
+    winner: '🎉 ¡GANADOR! 🎉',
+    sound: 'Sonido'
+  },
+  en: {
+    title: '🎰 Image Roulette',
+    drop: 'Drag images here',
+    empty: 'Add images to start',
+    winner: '🎉 WINNER! 🎉',
+    sound: 'Sound'
+  },
+  pt: {
+    title: '🎰 Roleta de Imagens',
+    drop: 'Arraste imagens aqui',
+    empty: 'Adicione imagens para começar',
+    winner: '🎉 VENCEDOR! 🎉',
+    sound: 'Som'
+  },
+  fr: {
+    title: '🎰 Roulette à Images',
+    drop: 'Glissez des images ici',
+    empty: 'Ajoutez des images pour commencer',
+    winner: '🎉 GAGNANT! 🎉',
+    sound: 'Son'
+  },
+  de: {
+    title: '🎰 Bild-Roulette',
+    drop: 'Bilder hierher ziehen',
+    empty: 'Füge Bilder hinzu, um zu starten',
+    winner: '🎉 GEWINNER! 🎉',
+    sound: 'Ton'
+  },
+  zh: {
+    title: '🎰 图片轮盘',
+    drop: '将图片拖放到这里',
+    empty: '添加图片开始',
+    winner: '🎉 获胜者！🎉',
+    sound: '声音'
+  },
+  hi: {
+    title: '🎰 इमेज रूलेट',
+    drop: 'यहां चित्र खींचें',
+    empty: 'शुरू करने के लिए चित्र जोड़ें',
+    winner: '🎉 विजेता! 🎉',
+    sound: 'ध्वनि'
+  },
+  ar: {
+    title: '🎰 روليت الصور',
+    drop: 'اسحب الصور هنا',
+    empty: 'أضف الصور للبدء',
+    winner: '🎉 الفائز! 🎉',
+    sound: 'صوت'
+  },
+  bn: {
+    title: '🎰 ইমেজ রুলেট',
+    drop: 'এখানে ছবি টেনে আনুন',
+    empty: 'শুরু করতে ছবি যোগ করুন',
+    winner: '🎉 বিজয়ী! 🎉',
+    sound: 'শব্দ'
+  },
+  ru: {
+    title: '🎰 Рулетка изображений',
+    drop: 'Перетащите изображения сюда',
+    empty: 'Добавьте изображения для начала',
+    winner: '🎉 ПОБЕДИТЕЛЬ! 🎉',
+    sound: 'Звук'
+  },
+  ur: {
+    title: '🎰 امیج رولیٹ',
+    drop: 'تصاویر یہاں گھسیٹیں',
+    empty: 'شروع کرنے کے لیے تصاویر شامل کریں',
+    winner: '🎉 فاتح! 🎉',
+    sound: 'آواز'
+  },
+  id: {
+    title: '🎰 Roulette Gambar',
+    drop: 'Seret gambar ke sini',
+    empty: 'Tambahkan gambar untuk memulai',
+    winner: '🎉 PEMENANG! 🎉',
+    sound: 'Suara'
+  },
+  ja: {
+    title: '🎰 画像ルーレット',
+    drop: 'ここに画像をドラッグ',
+    empty: '画像を追加して開始',
+    winner: '🎉 勝者！🎉',
+    sound: 'サウンド'
+  },
+  pa: {
+    title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
+    drop: 'ਚਿੱਤਰ ਇੱਥੇ ਖਿੱਚੋ',
+    empty: 'ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਚਿੱਤਰ ਜੋੜੋ',
+    winner: '🎉 ਜੇਤੂ! 🎉',
+    sound: 'ਆਵਾਜ਼'
+  },
+  jv: {
+    title: '🎰 Roulette Gambar',
+    drop: 'Sèrèt gambar ing kéné',
+    empty: 'Tambah gambar kanggo miwiti',
+    winner: '🎉 PEMENANG! 🎉',
+    sound: 'Swara'
+  },
+  vi: {
+    title: '🎰 Vòng quay Hình ảnh',
+    drop: 'Kéo hình ảnh vào đây',
+    empty: 'Thêm hình ảnh để bắt đầu',
+    winner: '🎉 NGƯỜI CHIẾN THẮNG! 🎉',
+    sound: 'Âm thanh'
+  },
+  te: {
+    title: '🎰 ఇమేజ్ రూలెట్',
+    drop: 'చిత్రాలను ఇక్కడ లాగండి',
+    empty: 'ప్రారంభించడానికి చిత్రాలను జోడించండి',
+    winner: '🎉 విజేత! 🎉',
+    sound: 'ధ్వని'
+  },
+  ko: {
+    title: '🎰 이미지 룰렛',
+    drop: '이미지를 여기로 끌어다 놓으세요',
+    empty: '시작하려면 이미지를 추가하세요',
+    winner: '🎉 승자! 🎉',
+    sound: '소리'
+  },
+  tr: {
+    title: '🎰 Görsel Ruleti',
+    drop: 'Resimleri buraya sürükleyin',
+    empty: 'Başlamak için resim ekleyin',
+    winner: '🎉 KAZANAN! 🎉',
+    sound: 'Ses'
+  },
+  fa: {
+    title: '🎰 رولت تصویر',
+    drop: 'تصاویر را اینجا بکشید',
+    empty: 'برای شروع تصاویر را اضافه کنید',
+    winner: '🎉 برنده! 🎉',
+    sound: 'صدا'
+  },
+  mr: {
+    title: '🎰 इमेज रूलेट',
+    drop: 'चित्र येथे ड्रॅग करा',
+    empty: 'सुरू करण्यासाठी चित्रे जोडा',
+    winner: '🎉 विजेता! 🎉',
+    sound: 'आवाज'
+  },
+  ta: {
+    title: '🎰 பட ரவுலட்',
+    drop: 'படங்களை இங்கே இழுக்கவும்',
+    empty: 'தொடங்க படங்களைச் சேர்க்கவும்',
+    winner: '🎉 வெற்றியாளர்! 🎉',
+    sound: 'ஒலி'
+  },
+  ha: {
+    title: '🎰 Roulette na Hotuna',
+    drop: 'Jawo hotuna nan',
+    empty: 'Ƙara hotuna don farawa',
+    winner: '🎉 NASARA! 🎉',
+    sound: 'Sauti'
+  },
+  sw: {
+    title: '🎰 Rulleti ya Picha',
+    drop: 'Buruta picha hapa',
+    empty: 'Ongeza picha kuanza',
+    winner: '🎉 MSHINDI! 🎉',
+    sound: 'Sauti'
+  },
+  it: {
+    title: '🎰 Ruota delle Immagini',
+    drop: 'Trascina le immagini qui',
+    empty: 'Aggiungi immagini per iniziare',
+    winner: '🎉 VINCITORE! 🎉',
+    sound: 'Audio'
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || detectLang();
+
+function detectLang() {
+  const nav = navigator.language.slice(0, 2);
+  return L[nav] ? nav : 'es';
+}
+
+function t(key) {
+  return L[currentLang][key];
+}
+
+function setLanguage(lang) {
+  if (!L[lang]) lang = 'es';
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key) || key;
+  });
+}
+
+setLanguage(currentLang);</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 3 ==================== -->
+<section class="module" id="mod3">
+  <h2><span class="tag tag-js">JS</span> 3. Botón de sonido</h2>
+  <p class="desc">Toggle de sonido on/off con persistencia en localStorage y actualización visual del ícono.</p>
+
+  <div class="subsec"><h3>HTML</h3>
+<pre><code>&lt;button id="soundBtn" onclick="toggleSound()"&gt;
+  &lt;span id="soundIcon"&gt;🔊&lt;/span&gt;
+&lt;/button&gt;</code></pre>
+  </div>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>let soundEnabled = localStorage.getItem('sound') !== 'off';
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('sound', soundEnabled ? 'on' : 'off');
+  updateSoundIcon();
+}
+
+function updateSoundIcon() {
+  const icon = document.getElementById('soundIcon');
+  if (icon) icon.textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+updateSoundIcon();</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 4 ==================== -->
+<section class="module" id="mod4">
+  <h2><span class="tag tag-js">JS</span> 4. Web Audio - efectos</h2>
+  <p class="desc">Efectos de sonido sintetizados con Web Audio API. Sin archivos externos, todo generado por código.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>let audioCtx, masterGain;
+
+function getAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.connect(audioCtx.destination);
+    masterGain.gain.value = 0.5;
+  }
+  return audioCtx;
+}
+
+function playTick() {
+  if (!soundEnabled) return;
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.frequency.value = 1800;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.05);
+}
+
+function playWinSound() {
+  if (!soundEnabled) return;
+  const ctx = getAudio();
+  [523, 659, 784, 1047].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    const t = ctx.currentTime + i * 0.12;
+    gain.gain.setValueAtTime(0.3, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.start(t);
+    osc.stop(t + 0.3);
+  });
+}
+
+function playWhoosh() {
+  if (!soundEnabled) return;
+  const ctx = getAudio();
+  const bufferSize = ctx.sampleRate * 0.3;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i &lt; bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 800;
+  source.connect(filter);
+  filter.connect(masterGain);
+  source.start();
+}
+
+function playErrorSound() {
+  if (!soundEnabled) return;
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.frequency.value = 200;
+  osc.type = 'square';
+  gain.gain.setValueAtTime(0.2, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.4);
+}
+
+function playNotif() {
+  if (!soundEnabled) return;
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.frequency.value = 880;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.25, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.15);
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 5 ==================== -->
+<section class="module" id="mod5">
+  <h2><span class="tag tag-html">HTML</span><span class="tag tag-js">JS</span> 5. Drag &amp; Drop</h2>
+  <p class="desc">Zona de arrastrar y soltar archivos con input alternativo. Manejo de eventos dragover, dragleave y drop.</p>
+
+  <div class="subsec"><h3>CSS</h3>
+<pre><code>.drop-zone {
+  border: 2px dashed #58a6ff;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.drop-zone.dragover {
+  background: rgba(88, 166, 255, 0.1);
+  border-color: #f0c040;
+}</code></pre>
+  </div>
+
+  <div class="subsec"><h3>HTML</h3>
+<pre><code>&lt;div class="drop-zone" id="dropZone"&gt;
+  &lt;p&gt;Arrastra archivos aquí o&lt;/p&gt;
+  &lt;input type="file" id="fileInput" multiple
+    onchange="handleFiles(this.files)"&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>const dropZone = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', e =&gt; {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () =&gt; {
+  dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', e =&gt; {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+  for (const file of files) {
+    console.log('Archivo:', file.name, file.size);
+  }
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 6 ==================== -->
+<section class="module" id="mod6">
+  <h2><span class="tag tag-js">JS</span> 6. Procesamiento de imágenes</h2>
+  <p class="desc">Redimensionamiento de imágenes hasta 800px y generación de miniaturas con Canvas.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>function processImage(file, maxPx = 800) {
+  return new Promise(resolve =&gt; {
+    const reader = new FileReader();
+    reader.onload = e =&gt; {
+      const img = new Image();
+      img.onload = () =&gt; {
+        let w = img.width, h = img.height;
+        if (w &gt; maxPx || h &gt; maxPx) {
+          if (w &gt; h) { h = h * maxPx / w; w = maxPx; }
+          else { w = w * maxPx / h; h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function makeThumb(file, size = 100) {
+  return processImage(file, size);
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 7 ==================== -->
+<section class="module" id="mod7">
+  <h2><span class="tag tag-js">JS</span> 7. localStorage</h2>
+  <p class="desc">Funciones wrapper para guardar, cargar y eliminar datos en localStorage con serialización JSON.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>function save(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.error('Error guardando:', e);
+    return false;
+  }
+}
+
+function load(key, fallback = null) {
+  try {
+    const data = localStorage.getItem(key);
+    return data !== null ? JSON.parse(data) : fallback;
+  } catch (e) {
+    console.error('Error cargando:', e);
+    return fallback;
+  }
+}
+
+function remove(key) {
+  localStorage.removeItem(key);
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 8 ==================== -->
+<section class="module" id="mod8">
+  <h2><span class="tag tag-js">JS</span> 8. Crypto random</h2>
+  <p class="desc">Generación de números aleatorios criptográficamente seguros: float, entero en rango, elección de array y shuffle Fisher-Yates.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>function cryptoRand() {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return array[0] / 4294967296;
+}
+
+function cryptoInt(min, max) {
+  return Math.floor(cryptoRand() * (max - min + 1)) + min;
+}
+
+function cryptoChoice(arr) {
+  return arr[cryptoInt(0, arr.length - 1)];
+}
+
+function cryptoShuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i &gt; 0; i--) {
+    const j = cryptoInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 9 ==================== -->
+<section class="module" id="mod9">
+  <h2><span class="tag tag-firebase">Firebase</span> 9. Google Login</h2>
+  <p class="desc">Autenticación con Google usando Firebase Auth. Login, logout, listener de estado y manejo de UI.</p>
+
+  <div class="subsec"><h3>HTML</h3>
+<pre><code>&lt;div id="loginSection"&gt;
+  &lt;button onclick="doLogin()"&gt;Iniciar con Google&lt;/button&gt;
+&lt;/div&gt;
+&lt;div id="userSection" style="display:none"&gt;
+  &lt;span id="userName"&gt;&lt;/span&gt;
+  &lt;img id="userPhoto" width="40" style="border-radius:50%"&gt;
+  &lt;button onclick="doLogout()"&gt;Cerrar&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+function doLogin() {
+  auth.signInWithPopup(provider).catch(err =&gt; {
+    console.error('Error login:', err);
+  });
+}
+
+function doLogout() {
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(user =&gt; {
+  if (user) {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('userSection').style.display = 'block';
+    document.getElementById('userName').textContent = user.displayName;
+    document.getElementById('userPhoto').src = user.photoURL;
+  } else {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('userSection').style.display = 'none';
+  }
+});</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 10 ==================== -->
+<section class="module" id="mod10">
+  <h2><span class="tag tag-firebase">Firebase</span> 10. Firestore</h2>
+  <p class="desc">Operaciones CRUD con Firestore: guardar, cargar, listar documentos del usuario y eliminar.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>const db = firebase.firestore();
+
+async function saveDoc(collection, id, data) {
+  await db.collection(collection).doc(id).set(data, { merge: true });
+}
+
+async function loadDoc(collection, id) {
+  const snap = await db.collection(collection).doc(id).get();
+  return snap.exists ? snap.data() : null;
+}
+
+async function loadUserDocs(collection, uid) {
+  const snap = await db.collection(collection)
+    .where('uid', '==', uid)
+    .orderBy('createdAt', 'desc')
+    .get();
+  return snap.docs.map(doc =&gt; ({ id: doc.id, ...doc.data() }));
+}
+
+async function deleteDoc(collection, id) {
+  await db.collection(collection).doc(id).delete();
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 11 ==================== -->
+<section class="module" id="mod11">
+  <h2><span class="tag tag-media">MediaRecorder</span> 11. Grabar canvas a MP4</h2>
+  <p class="desc">Grabación de canvas HTML a archivo usando MediaRecorder con captureStream. Inicio, parada y descarga.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>let mediaRecorder;
+let recordedChunks = [];
+
+function startRecording(canvas, fps = 30) {
+  const stream = canvas.captureStream(fps);
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(stream, {
+    mimeType: 'video/webm;codecs=vp9'
+  });
+  mediaRecorder.ondataavailable = e =&gt; {
+    if (e.data.size &gt; 0) recordedChunks.push(e.data);
+  };
+  mediaRecorder.start();
+}
+
+function stopRecording() {
+  return new Promise(resolve =&gt; {
+    mediaRecorder.onstop = () =&gt; {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      resolve(blob);
+    };
+    mediaRecorder.stop();
+  });
+}
+
+async function downloadBlob(blob, filename = 'grabacion.webm') {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 12 ==================== -->
+<section class="module" id="mod12">
+  <h2><span class="tag tag-media">MediaRecorder</span> 12. Grabar con audio</h2>
+  <p class="desc">Grabación combinada de canvas + audio usando MediaStreamDestination conectado a masterGain.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>let combinedRecorder;
+let combinedChunks = [];
+
+function startRecordingWithAudio(canvas, masterGainNode, fps = 30) {
+  const ctx = getAudio();
+  const dest = ctx.createMediaStreamDestination();
+  masterGainNode.connect(dest);
+
+  const videoStream = canvas.captureStream(fps);
+  const tracks = [
+    ...videoStream.getVideoTracks(),
+    ...dest.stream.getAudioTracks()
+  ];
+  const combinedStream = new MediaStream(tracks);
+
+  combinedChunks = [];
+  combinedRecorder = new MediaRecorder(combinedStream, {
+    mimeType: 'video/webm;codecs=vp9,opus'
+  });
+  combinedRecorder.ondataavailable = e =&gt; {
+    if (e.data.size &gt; 0) combinedChunks.push(e.data);
+  };
+  combinedRecorder.start();
+}
+
+function stopRecordingWithAudio() {
+  return new Promise(resolve =&gt; {
+    combinedRecorder.onstop = () =&gt; {
+      const blob = new Blob(combinedChunks, { type: 'video/webm' });
+      resolve(blob);
+    };
+    combinedRecorder.stop();
+  });
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 13 ==================== -->
+<section class="module" id="mod13">
+  <h2><span class="tag tag-js">JS</span> 13. Canvas dibujar/animar</h2>
+  <p class="desc">Configuración de canvas 2D, dibujado de imagen circular con clip, función de easing y loop de animación con requestAnimationFrame.</p>
+
+  <div class="subsec"><h3>JS</h3>
+<pre><code>function setupCanvas(canvas, w, h) {
+  canvas.width = w;
+  canvas.height = h;
+  return canvas.getContext('2d');
+}
+
+function drawImageCircle(ctx, img, cx, cy, radius) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+  const size = radius * 2;
+  ctx.drawImage(img, cx - radius, cy - radius, size, size);
+  ctx.restore();
+}
+
+function easeOut(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function animateLoop(callback) {
+  let startTime = null;
+  function loop(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    callback(elapsed, timestamp);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MODULO 14 ==================== -->
+<section class="module" id="mod14">
+  <h2><span class="tag tag-js">JS</span> 14. Firma by SandovalJon</h2>
+  <p class="desc">Pie de página con firma del autor.</p>
+
+  <div class="subsec"><h3>HTML</h3>
+<pre><code>&lt;footer style="text-align:center;color:#484f58;
+  margin-top:40px;padding:20px;font-size:0.85rem;"&gt;
+  by SandovalJon
+&lt;/footer&gt;</code></pre>
+  </div>
+</section>
+
+<footer>
+  <p>by <span>SandovalJon</span> - Cookbook Modular</p>
+</footer>
+
+</body>
+</html>
