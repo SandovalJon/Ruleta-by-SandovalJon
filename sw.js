@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruleta-v1';
+const CACHE_NAME = 'ruleta-v2';
 const urlsToCache = [
     '/',
     '/Ruleta-by-SandovalJon/',
@@ -32,12 +32,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    
-    if (url.origin !== location.origin) {
-        return;
-    }
-    
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
@@ -45,7 +39,7 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 }
                 return fetch(event.request).then((response) => {
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                    if (!response || response.status !== 200) {
                         return response;
                     }
                     const responseToCache = response.clone();
@@ -53,6 +47,10 @@ self.addEventListener('fetch', (event) => {
                         cache.put(event.request, responseToCache);
                     });
                     return response;
+                }).catch(() => {
+                    if (event.request.destination === 'document') {
+                        return caches.match('/Ruleta-by-SandovalJon/index.html');
+                    }
                 });
             })
     );
