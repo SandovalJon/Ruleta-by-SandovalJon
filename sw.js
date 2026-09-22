@@ -3,7 +3,9 @@ const urlsToCache = [
     '/',
     '/Ruleta-by-SandovalJon/',
     '/Ruleta-by-SandovalJon/index.html',
-    '/Ruleta-by-SandovalJon/manifest.json'
+    '/Ruleta-by-SandovalJon/manifest.json',
+    '/Ruleta-by-SandovalJon/icon-192.png',
+    '/Ruleta-by-SandovalJon/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -30,6 +32,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+    
+    if (url.origin !== location.origin) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
