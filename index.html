@@ -175,6 +175,25 @@
             color: var(--text-muted);
         }
 
+        @media (max-width: 600px) {
+            .drop-zone {
+                width: 100%;
+                min-height: 180px;
+                padding: 30px 20px;
+                border-width: 4px;
+                border-radius: 16px;
+            }
+            .drop-zone-icon {
+                font-size: 5rem;
+            }
+            .drop-zone-text {
+                font-size: 1.2rem;
+            }
+            .drop-zone small {
+                font-size: 0.9rem;
+            }
+        }
+
         .preview-images {
             display: flex;
             flex-wrap: wrap;
@@ -187,6 +206,28 @@
         .preview-item {
             position: relative;
             border-radius: 8px;
+            cursor: grab;
+            transition: transform 0.2s, opacity 0.2s;
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .preview-item:active {
+            cursor: grabbing;
+        }
+
+        .preview-item[draggable="true"]:hover {
+            transform: scale(1.05);
         }
 
         .preview-item img {
@@ -302,6 +343,16 @@ canvas {
         @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px var(--gold-soft-strong), 0 0 40px var(--gold-glow); }
             50% { box-shadow: 0 0 28px var(--gold-soft-strong), 0 0 75px var(--gold-glow); }
+        }
+
+        .roulette-wrapper.elim-mode canvas {
+            border: 4px solid #f85149;
+            box-shadow: 0 0 20px rgba(248, 81, 73, 0.4);
+        }
+
+        .roulette-wrapper.elim-mode.winner-mode canvas {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
         }
 
         .result {
@@ -532,10 +583,6 @@ canvas {
             }
             .container {
                 gap: 24px;
-            }
-            .drop-zone {
-                width: 100%;
-                max-width: 300px;
             }
             .preview-images {
                 max-width: 100%;
@@ -2376,7 +2423,7 @@ refreshMessages();
         }
         function updatePreview() {
             previewImages.innerHTML = images.map((src, index) => 
-                `<div class="preview-item" data-index="${index}">
+                `<div class="preview-item" data-index="${index}" draggable="true">
                     <img src="${src}" alt="preview">
                     <div class="remove-overlay">
                         <button class="remove-btn" data-index="${index}" title="${t('remove')}">✕</button>
@@ -2404,6 +2451,55 @@ function removeImage(index) {
             if (!item) return;
             const index = parseInt(item.dataset.index, 10);
             if (!isNaN(index)) removeImage(index);
+        });
+
+        let draggedIndex = null;
+
+        previewImages.addEventListener('dragstart', (e) => {
+            const item = e.target.closest('.preview-item');
+            if (!item) return;
+            draggedIndex = parseInt(item.dataset.index, 10);
+            item.style.opacity = '0.5';
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        previewImages.addEventListener('dragend', (e) => {
+            const item = e.target.closest('.preview-item');
+            if (item) item.style.opacity = '1';
+            draggedIndex = null;
+        });
+
+        previewImages.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        previewImages.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const item = e.target.closest('.preview-item');
+            if (!item || draggedIndex === null) return;
+            const dropIndex = parseInt(item.dataset.index, 10);
+            if (isNaN(dropIndex) || draggedIndex === dropIndex) return;
+
+            const movedImage = images.splice(draggedIndex, 1)[0];
+            const movedLoaded = loadedImages.splice(draggedIndex, 1)[0];
+            const movedThumb = thumbImages.splice(draggedIndex, 1)[0];
+
+            images.splice(dropIndex, 0, movedImage);
+            loadedImages.splice(dropIndex, 0, movedLoaded);
+            thumbImages.splice(dropIndex, 0, movedThumb);
+
+            if (winnerIndex === draggedIndex) {
+                winnerIndex = dropIndex;
+            } else if (draggedIndex < winnerIndex && dropIndex >= winnerIndex) {
+                winnerIndex--;
+            } else if (draggedIndex > winnerIndex && dropIndex <= winnerIndex) {
+                winnerIndex++;
+            }
+
+            updatePreview();
+            rebuildWheel();
+            refreshMessages();
         });
 
 const wheelCache = document.createElement('canvas');
@@ -2695,6 +2791,7 @@ rouletteWrapper.classList.add('winner-mode');
             elimBtn.classList.toggle('on', elimMode);
             elimBtn.textContent = elimMode ? t('eliminateActive') : t('eliminate');
             elimBtn.title = t('eliminate');
+            rouletteWrapper.classList.toggle('elim-mode', elimMode);
             refreshMessages();
         });
 
