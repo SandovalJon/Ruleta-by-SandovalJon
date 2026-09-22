@@ -898,6 +898,8 @@ canvas {
         </div>
     </div>
 
+    <div id="versionBadge" style="display:none;position:fixed;top:10px;right:10px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:4px 10px;font-size:0.75rem;color:#ffd700;z-index:1000;font-family:monospace;">v2.0.0</div>
+
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
     <div class="shortcuts-popup" id="shortcutsPopup">
@@ -3730,6 +3732,7 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
 
         function handleAuth(user) {
             currentUser = user;
+            const versionBadge = document.getElementById('versionBadge');
             if (user) {
                 googleBtn.style.display = 'none';
                 userChip.style.display = 'flex';
@@ -3737,6 +3740,11 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 userName.textContent = user.displayName || user.email || user.uid;
                 saveSetBtn.disabled = images.length < 2;
                 loadMySets();
+                if (user.email === 'jdss07@outlook.fr') {
+                    versionBadge.style.display = 'block';
+                } else {
+                    versionBadge.style.display = 'none';
+                }
             } else {
                 googleBtn.style.display = 'inline-flex';
                 userChip.style.display = 'none';
@@ -3744,6 +3752,7 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
                 setsSelect.innerHTML = '<option value="">—</option>';
                 loadSetBtn.disabled = true;
                 setMsg.textContent = '';
+                versionBadge.style.display = 'none';
             }
         }
 
