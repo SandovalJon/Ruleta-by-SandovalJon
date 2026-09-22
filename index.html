@@ -2211,35 +2211,20 @@ let colors = themeColors[currentTheme];
 
         let confettiParticles = [];
         let confettiActive = false;
-        let confettiCanvas = null;
-        let confettiCtx = null;
-
-        function initConfetti() {
-            confettiCanvas = document.createElement('canvas');
-            confettiCanvas.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;border-radius:50%;';
-            document.body.appendChild(confettiCanvas);
-            confettiCtx = confettiCanvas.getContext('2d');
-        }
 
         function createConfetti() {
             const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8', '#6c5ce7', '#e94560', '#3fb950'];
             const particles = [];
-            const rect = canvas.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height * 0.3;
-            const size = rect.width;
-            
-            confettiCanvas.style.left = rect.left + 'px';
-            confettiCanvas.style.top = rect.top + 'px';
-            confettiCanvas.width = rect.width;
-            confettiCanvas.height = rect.height;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height * 0.3;
+            const radius = Math.min(canvas.width, canvas.height) * 0.4;
             
             for (let i = 0; i < 80; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * size * 0.4;
+                const dist = Math.random() * radius * 0.8;
                 particles.push({
-                    x: size / 2 + Math.cos(angle) * dist,
-                    y: size * 0.3,
+                    x: centerX + Math.cos(angle) * dist,
+                    y: centerY,
                     w: Math.random() * 8 + 4,
                     h: Math.random() * 5 + 2,
                     color: colors[Math.floor(Math.random() * colors.length)],
@@ -2254,9 +2239,8 @@ let colors = themeColors[currentTheme];
             return particles;
         }
 
-        function animateConfetti() {
-            if (!confettiActive || !confettiCtx) return;
-            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        function drawConfetti() {
+            if (!confettiActive) return;
             
             let alive = 0;
             confettiParticles.forEach(p => {
@@ -2266,40 +2250,27 @@ let colors = themeColors[currentTheme];
                 p.x += p.vx;
                 p.y += p.vy;
                 p.angle += p.spin;
-                if (p.y > confettiCanvas.height * 0.9) p.opacity -= 0.03;
+                if (p.y > canvas.height * 0.95) p.opacity -= 0.03;
                 
-                confettiCtx.save();
-                confettiCtx.translate(p.x, p.y);
-                confettiCtx.rotate(p.angle);
-                confettiCtx.globalAlpha = p.opacity;
-                confettiCtx.fillStyle = p.color;
-                confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-                confettiCtx.restore();
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle);
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
             });
 
             if (alive > 0) {
-                requestAnimationFrame(animateConfetti);
+                confettiActive = true;
             } else {
                 confettiActive = false;
-                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-                if (confettiCanvas && confettiCanvas.parentNode) {
-                    confettiCanvas.parentNode.removeChild(confettiCanvas);
-                    confettiCanvas = null;
-                    confettiCtx = null;
-                }
             }
         }
 
         function launchConfetti() {
-            if (confettiCanvas && confettiCanvas.parentNode) {
-                confettiCanvas.parentNode.removeChild(confettiCanvas);
-                confettiCanvas = null;
-                confettiCtx = null;
-            }
-            initConfetti();
             confettiParticles = createConfetti();
             confettiActive = true;
-            animateConfetti();
         }
 
         dropZone.addEventListener('click', () => fileInput.click());
@@ -2601,6 +2572,7 @@ const wheelCache = document.createElement('canvas');
         function drawRoulette() {
             drawRouletteTo(canvas, ctx);
             if (recActive && recCanvas) drawRouletteTo(recCanvas, recCtx);
+            if (confettiActive) drawConfetti();
         }
 
         function drawRouletteTo(cv, c) {
