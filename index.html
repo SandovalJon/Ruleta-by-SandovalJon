@@ -347,26 +347,6 @@ canvas {
             transform: scale(1.05);
         }
 
-        .cinema-mode::before,
-        .cinema-mode::after {
-            content: '';
-            position: fixed;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: #000;
-            z-index: 9998;
-            animation: cinemaBars 0.5s ease-out;
-        }
-
-        .cinema-mode::before { top: 0; }
-        .cinema-mode::after { bottom: 0; }
-
-        @keyframes cinemaBars {
-            from { height: 0; }
-            to { height: 60px; }
-        }
-
         @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px var(--gold-soft-strong), 0 0 40px var(--gold-glow); }
             50% { box-shadow: 0 0 28px var(--gold-soft-strong), 0 0 75px var(--gold-glow); }
@@ -2777,7 +2757,6 @@ rouletteWrapper.classList.add('winner-mode');
                     playWinSound();
                     launchConfetti();
                     document.body.style.animation = 'celebrationShake 0.5s ease-out';
-                    document.body.classList.add('cinema-mode');
                     setTimeout(() => { document.body.style.animation = ''; }, 500);
                 }
                 drawRoulette();
@@ -2885,7 +2864,6 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
         canvas.addEventListener('click', () => {
             if (isSpinning) return;
             if (winnerIndex >= 0) {
-                document.body.classList.remove('cinema-mode');
                 if (elimMode) {
                     eliminateWinner();
                 } else {
