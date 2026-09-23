@@ -347,9 +347,35 @@ canvas {
             transform: scale(1.05);
         }
 
+        .cinema-mode::before,
+        .cinema-mode::after {
+            content: '';
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #000;
+            z-index: 9998;
+            animation: cinemaBars 0.5s ease-out;
+        }
+
+        .cinema-mode::before { top: 0; }
+        .cinema-mode::after { bottom: 0; }
+
+        @keyframes cinemaBars {
+            from { height: 0; }
+            to { height: 60px; }
+        }
+
         @keyframes gold-pulse {
             0%, 100% { box-shadow: 0 0 15px var(--gold-soft-strong), 0 0 40px var(--gold-glow); }
             50% { box-shadow: 0 0 28px var(--gold-soft-strong), 0 0 75px var(--gold-glow); }
+        }
+
+        @keyframes celebrationShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
 
         .roulette-wrapper.elim-mode canvas {
@@ -2694,10 +2720,20 @@ const wheelCache = document.createElement('canvas');
             spinSlices = loadedImages.length;
             playWhoosh(spinDuration / 1000);
 
+            let crazyColors = ['#e94560', '#0f3460', '#533483', '#16c79a', '#ffd700', '#ff6b6b', '#4ecdc4'];
+            let crazyIndex = 0;
+
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinDuration, 1);
                 const easeOut = 1 - Math.pow(1 - progress, 3);
+                
+                if (progress < 0.5) {
+                    const hue = (elapsed * 0.5) % 360;
+                    document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 15%) 0%, hsl(${(hue + 60) % 360}, 60%, 20%) 50%, hsl(${(hue + 120) % 360}, 50%, 25%) 100%)`;
+                } else if (progress >= 0.99) {
+                    document.body.style.background = '';
+                }
                 
                 currentRotation = startRotation + totalRotation * easeOut;
                 const sliceStep = (Math.PI * 2) / spinSlices;
@@ -2740,6 +2776,9 @@ rouletteWrapper.classList.add('winner-mode');
                 if (progress === 0) {
                     playWinSound();
                     launchConfetti();
+                    document.body.style.animation = 'celebrationShake 0.5s ease-out';
+                    document.body.classList.add('cinema-mode');
+                    setTimeout(() => { document.body.style.animation = ''; }, 500);
                 }
                 drawRoulette();
 
@@ -2846,6 +2885,7 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => {
         canvas.addEventListener('click', () => {
             if (isSpinning) return;
             if (winnerIndex >= 0) {
+                document.body.classList.remove('cinema-mode');
                 if (elimMode) {
                     eliminateWinner();
                 } else {
