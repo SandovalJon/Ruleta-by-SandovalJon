@@ -496,53 +496,6 @@ canvas {
             opacity: 0.7;
         }
 
-        .shortcuts-popup {
-            display: none;
-            position: fixed;
-            top: 10px;
-            right: 20px;
-            background: var(--bg-2, #1a1a2e);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 16px 20px;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        .shortcuts-popup.visible {
-            display: block;
-        }
-
-        .shortcuts-popup .shortcuts-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .shortcuts-popup .shortcut {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin: 5px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .shortcuts-popup .shortcut kbd {
-            display: inline-block;
-            min-width: 60px;
-            padding: 3px 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-align: center;
-        }
-
         
 
         .shortcuts-title {
@@ -893,22 +846,11 @@ canvas {
 
     <div class="footer">
         by <span>SandovalJon</span>
-        <div style="margin-top: 10px;">
-            <button class="record-btn elim-btn" id="shortcutsBtn" title="Atajos de teclado (solo escritorio)" aria-label="Mostrar atajos de teclado">⌨️ Atajos de teclado</button>
-        </div>
     </div>
 
     <div id="versionBadge" style="display:none;position:fixed;top:10px;right:10px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:4px 10px;font-size:0.75rem;color:#ffd700;z-index:1000;font-family:monospace;">v2.0.0</div>
 
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-
-    <div class="shortcuts-popup" id="shortcutsPopup">
-        <div class="shortcuts-title" id="shortcutsTitlePopup"></div>
-        <div class="shortcut"><kbd>Espacio</kbd> <span id="shortcutSpace"></span></div>
-        <div class="shortcut"><kbd>Escape</kbd> <span id="shortcutEscape"></span></div>
-        <div class="shortcut"><kbd>S</kbd> <span id="shortcutS"></span></div>
-        <div class="shortcut"><kbd>E</kbd> <span id="shortcutE"></span></div>
-    </div>
 
     <script>
         const dropZone = document.getElementById('dropZone');
@@ -1992,13 +1934,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.title = t('sound');
             soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundBtn.classList.toggle('on', soundEnabled);
-            shortcutsBtn.textContent = t('shortcutsBtn');
-            shortcutsBtn.title = t('shortcutsTitle');
-            document.getElementById('shortcutsTitlePopup').textContent = t('shortcutsTitle');
-            document.getElementById('shortcutSpace').textContent = t('keySpace');
-            document.getElementById('shortcutEscape').textContent = t('keyEscape');
-            document.getElementById('shortcutS').textContent = t('keyS');
-            document.getElementById('shortcutE').textContent = t('keyE');
             document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
             document.querySelector('.theme-btn[data-theme="esmeralda"]').textContent = t('themeBtnEsmeralda');
             document.querySelector('.theme-btn[data-theme="atardecer"]').textContent = t('themeBtnAtardecer');
@@ -2801,18 +2736,6 @@ rouletteWrapper.classList.add('winner-mode');
             soundBtn.title = t('sound');
             try { localStorage.setItem('roulette-sound', soundEnabled ? '1' : '0'); } catch (e) {}
             if (soundEnabled) getAudio();
-        });
-
-document.getElementById('shortcutsBtn').addEventListener('click', () => {
-            document.getElementById('shortcutsPopup').classList.toggle('visible');
-        });
-
-        document.addEventListener('click', (e) => {
-            const popup = document.getElementById('shortcutsPopup');
-            const btn = document.getElementById('shortcutsBtn');
-            if (!popup.contains(e.target) && e.target !== btn) {
-                popup.classList.remove('visible');
-            }
         });
 
         document.addEventListener('keydown', (e) => {
