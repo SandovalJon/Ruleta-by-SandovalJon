@@ -339,26 +339,6 @@ canvas {
             50% { box-shadow: 0 0 28px var(--gold-soft-strong), 0 0 75px var(--gold-glow); }
         }
 
-        .movie-fade {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000;
-            z-index: 9998;
-            opacity: 0;
-            animation: movieFade 2s ease-in-out forwards;
-            pointer-events: none;
-        }
-
-        @keyframes movieFade {
-            0% { opacity: 0; }
-            30% { opacity: 0.8; }
-            70% { opacity: 0.8; }
-            100% { opacity: 0; }
-        }
-
         .roulette-wrapper.elim-mode canvas {
             border: 4px solid #f85149;
             box-shadow: 0 0 20px rgba(248, 81, 73, 0.4);
@@ -2751,10 +2731,6 @@ rouletteWrapper.classList.add('winner-mode');
                 if (progress === 0) {
                     playWinSound();
                     launchConfetti();
-                    const fade = document.createElement('div');
-                    fade.className = 'movie-fade';
-                    document.body.appendChild(fade);
-                    setTimeout(() => { fade.remove(); }, 2500);
                 }
                 drawRoulette();
 
