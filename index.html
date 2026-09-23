@@ -33,41 +33,6 @@
             --text-hint: #bbb;
         }
 
-        body[data-theme="esmeralda"] {
-            --bg-1: #0a1f1a;
-            --bg-2: #0d2b23;
-            --bg-3: #123d30;
-            --accent: #2ecc71;
-            --accent-dark: #1fa85b;
-            --accent-light: #58d68d;
-            --accent-soft: rgba(46, 204, 113, 0.1);
-            --accent-soft-strong: rgba(46, 204, 113, 0.3);
-            --accent-glow-1: rgba(46, 204, 113, 0.5);
-            --accent-glow-2: rgba(46, 204, 113, 0.3);
-            --accent-glow-3: rgba(46, 204, 113, 0.4);
-            --accent-glow-4: rgba(46, 204, 113, 0.6);
-            --gold: #f1c40f;
-            --gold-soft: rgba(241, 196, 15, 0.2);
-            --gold-soft-strong: rgba(241, 196, 15, 0.25);
-            --gold-glow: rgba(241, 196, 15, 0.3);
-        }
-
-        body[data-theme="atardecer"] {
-            --bg-1: #261014;
-            --bg-2: #33141b;
-            --bg-3: #471d22;
-            --accent: #ff8c42;
-            --accent-dark: #e06e23;
-            --accent-light: #ffb266;
-            --accent-soft: rgba(255, 140, 66, 0.1);
-            --accent-soft-strong: rgba(255, 140, 66, 0.3);
-            --accent-glow-1: rgba(255, 140, 66, 0.5);
-            --accent-glow-2: rgba(255, 140, 66, 0.3);
-            --accent-glow-3: rgba(255, 140, 66, 0.4);
-            --accent-glow-4: rgba(255, 140, 66, 0.6);
-            --gold: #ffd700;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -768,10 +733,9 @@ canvas {
         </div>
     </div>
 
-    <div class="theme-switcher" id="themeSwitcher">
-        <button class="theme-btn active" data-theme="noche" title="Paleta nocturna">🌙 Noche</button>
-        <button class="theme-btn" data-theme="esmeralda" title="Paleta verde">💎 Esmeralda</button>
-        <button class="theme-btn" data-theme="atardecer" title="Paleta cálida">🌅 Atardecer</button>
+<div class="theme-switcher" id="themeSwitcher">
+            <button class="theme-btn active" data-theme="noche" title="Paleta nocturna">🌙 Noche</button>
+            <button class="theme-btn" data-theme="claro" title="Paleta clara">☀️ Claro</button>
         <select id="langSelect" class="lang-select" title="Idioma / Language">
             <option value="es">Español</option>
             <option value="en">English</option>
@@ -927,9 +891,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 ¡GANADOR! 🎉',
                 hint: '👆 Pulsa la ruleta para jugar de nuevo',
                 themeBtnNoche: '🌙 Noche',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Esmeralda',
                 themeBtnAtardecer: '🌅 Atardecer',
                 themeNoche: 'Paleta nocturna',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Paleta verde',
                 themeAtardecer: 'Paleta cálida',
                 record: '🎥 Grabar girada (MP4)',
@@ -967,9 +933,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 WINNER! 🎉',
                 hint: '👆 Tap the wheel to play again',
                 themeBtnNoche: '🌙 Night',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Emerald',
                 themeBtnAtardecer: '🌅 Sunset',
                 themeNoche: 'Night palette',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Emerald palette',
                 themeAtardecer: 'Sunset palette',
                 record: '🎥 Record spin (MP4)',
@@ -1007,9 +975,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 VENCEDOR! 🎉',
                 hint: '👆 Toque na roleta para jogar de novo',
                 themeBtnNoche: '🌙 Noite',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Esmeralda',
                 themeBtnAtardecer: '🌅 Pôr do sol',
                 themeNoche: 'Paleta noturna',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Paleta esmeralda',
                 themeAtardecer: 'Paleta pôr do sol',
                 record: '🎥 Gravar giro (MP4)',
@@ -1047,9 +1017,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 GAGNANT! 🎉',
                 hint: '👆 Touchez la roue pour rejouer',
                 themeBtnNoche: '🌙 Nuit',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Émeraude',
                 themeBtnAtardecer: '🌅 Coucher de soleil',
                 themeNoche: 'Palette nocturne',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Palette émeraude',
                 themeAtardecer: 'Palette coucher de soleil',
                 record: '🎥 Enregistrer le tour (MP4)',
@@ -1087,9 +1059,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 GEWINNER! 🎉',
                 hint: '👆 Tippe auf das Rad, um neu zu spielen',
                 themeBtnNoche: '🌙 Nacht',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Smaragd',
                 themeBtnAtardecer: '🌅 Sonnenuntergang',
                 themeNoche: 'Nachts-Palette',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Smaragd-Palette',
                 themeAtardecer: 'Sonnenuntergang-Palette',
                 record: '🎥 Drehung aufnehmen (MP4)',
@@ -1127,9 +1101,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 获胜者！🎉',
                 hint: '👆 点击转盘再次游戏',
                 themeBtnNoche: '🌙 夜晚',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 翡翠',
                 themeBtnAtardecer: '🌅 日落',
                 themeNoche: '夜晚调色板',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: '翡翠调色板',
                 themeAtardecer: '日落调色板',
                 record: '🎥 录制旋转 (MP4)',
@@ -1167,9 +1143,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 विजेता! 🎉',
                 hint: '👆 फिर से खेलने के लिए पहिए को टैप करें',
                 themeBtnNoche: '🌙 रात',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 पन्ना',
                 themeBtnAtardecer: '🌅 सूर्यास्त',
                 themeNoche: 'रात का पैलेट',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'पन्ना पैलेट',
                 themeAtardecer: 'सूर्यास्त पैलेट',
                 record: '🎥 घुमाव रिकॉर्ड करें (MP4)',
@@ -1207,9 +1185,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 الفائز! 🎉',
                 hint: '👆 اضغط على العجلة للعب مرة أخرى',
                 themeBtnNoche: '🌙 ليل',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 زمرد',
                 themeBtnAtardecer: '🌅 غروب',
                 themeNoche: 'لوحة ليلية',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'لوحة زمردية',
                 themeAtardecer: 'لوحة غروب',
                 record: '🎥 تسجيل الدوران (MP4)',
@@ -1247,9 +1227,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 বিজয়ী! 🎉',
                 hint: '👆 আবার খেলতে চাকায় ট্যাপ করুন',
                 themeBtnNoche: '🌙 রাত',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 পান্না',
                 themeBtnAtardecer: '🌅 সূর্যাস্ত',
                 themeNoche: 'রাতের প্যালেট',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'পান্না প্যালেট',
                 themeAtardecer: 'সূর্যাস্ত প্যালেট',
                 record: '🎥 ঘূর্ণন রেকর্ড করুন (MP4)',
@@ -1287,9 +1269,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 ПОБЕДИТЕЛЬ! 🎉',
                 hint: '👆 Нажмите на колесо, чтобы сыграть снова',
                 themeBtnNoche: '🌙 Ночь',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Изумруд',
                 themeBtnAtardecer: '🌅 Закат',
                 themeNoche: 'Ночная палитра',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Изумрудная палитра',
                 themeAtardecer: 'Палитра заката',
                 record: '🎥 Записать вращение (MP4)',
@@ -1327,9 +1311,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 فاتح! 🎉',
                 hint: '👆 دوبارہ کھیلنے کے لیے پہیے کو تھپتھپائیں',
                 themeBtnNoche: '🌙 رات',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 زمرد',
                 themeBtnAtardecer: '🌅 غروب آفتاب',
                 themeNoche: 'رات کا پیلیٹ',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'زمرد پیلیٹ',
                 themeAtardecer: 'غروب آفتاب پیلیٹ',
                 record: '🎥 گھماؤ ریکارڈ کریں (MP4)',
@@ -1367,9 +1353,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 PEMENANG! 🎉',
                 hint: '👆 Ketuk roda untuk bermain lagi',
                 themeBtnNoche: '🌙 Malam',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Zamrud',
                 themeBtnAtardecer: '🌅 Matahari terbenam',
                 themeNoche: 'Palet malam',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Palet zamrud',
                 themeAtardecer: 'Palet matahari terbenam',
                 record: '🎥 Rekam putaran (MP4)',
@@ -1407,9 +1395,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 勝者！🎉',
                 hint: '👆 もう一度プレイするにはルーレットをタップ',
                 themeBtnNoche: '🌙 夜',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 エメラルド',
                 themeBtnAtardecer: '🌅 夕日',
                 themeNoche: '夜のパレット',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'エメラルドのパレット',
                 themeAtardecer: '夕日のパレット',
                 record: '🎥 回転を録画 (MP4)',
@@ -1447,9 +1437,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 ਜੇਤੂ! 🎉',
                 hint: '👆 ਦੁਬਾਰਾ ਖੇਡਣ ਲਈ ਪਹੀਏ ਨੂੰ ਟੈਪ ਕਰੋ',
                 themeBtnNoche: '🌙 ਰਾਤ',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 ਪੰਨਾ',
                 themeBtnAtardecer: '🌅 ਸੂਰਜ ਡੁੱਬਣਾ',
                 themeNoche: 'ਰਾਤ ਦਾ ਪੈਲੇਟ',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'ਪੰਨਾ ਪੈਲੇਟ',
                 themeAtardecer: 'ਸੂਰਜ ਡੁੱਬਣ ਪੈਲੇਟ',
                 record: '🎥 ਘੁੰਮਾਅ ਰਿਕਾਰਡ ਕਰੋ (MP4)',
@@ -1487,9 +1479,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 PEMENANG! 🎉',
                 hint: '👆 Tutul rodha kanggo main manèh',
                 themeBtnNoche: '🌙 Wengi',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Zamrud',
                 themeBtnAtardecer: '🌅 Srengéngé ngumpla',
                 themeNoche: 'Palèt wengi',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Palèt zamrud',
                 themeAtardecer: 'Palèt srengéngé ngumpla',
                 record: '🎥 Rekam puteran (MP4)',
@@ -1527,9 +1521,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 NGƯỜI CHIẾN THẮNG! 🎉',
                 hint: '👆 Chạm vào vòng quay để chơi lại',
                 themeBtnNoche: '🌙 Đêm',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Ngọc lục bảo',
                 themeBtnAtardecer: '🌅 Hoàng hôn',
                 themeNoche: 'Bảng màu đêm',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Bảng màu ngọc lục bảo',
                 themeAtardecer: 'Bảng màu hoàng hôn',
                 record: '🎥 Quay video (MP4)',
@@ -1567,9 +1563,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 విజేత! 🎉',
                 hint: '👆 మళ్లీ ఆడటానికి చక్రాన్ని నొక్కండి',
                 themeBtnNoche: '🌙 రాత్రి',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 పచ్చ',
                 themeBtnAtardecer: '🌅 సూర్యాస్తమయం',
                 themeNoche: 'రాత్రి పాలెట్',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'పచ్చ పాలెట్',
                 themeAtardecer: 'సూర్యాస్తమయ పాలెట్',
                 record: '🎥 భ్రమణం రికార్డ్ చేయండి (MP4)',
@@ -1607,9 +1605,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 승자! 🎉',
                 hint: '👆 다시 플레이하려면 휠을 탭하세요',
                 themeBtnNoche: '🌙 밤',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 에메랄드',
                 themeBtnAtardecer: '🌅 석양',
                 themeNoche: '밤 팔레트',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: '에메랄드 팔레트',
                 themeAtardecer: '석양 팔레트',
                 record: '🎥 회전 녹화 (MP4)',
@@ -1647,9 +1647,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 KAZANAN! 🎉',
                 hint: '👆 Tekrar oynamak için tekerleğe dokunun',
                 themeBtnNoche: '🌙 Gece',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Zümrüt',
                 themeBtnAtardecer: '🌅 Gün batımı',
                 themeNoche: 'Gece paleti',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Zümrüt paleti',
                 themeAtardecer: 'Gün batımı paleti',
                 record: '🎥 Dönüşü kaydet (MP4)',
@@ -1687,9 +1689,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 برنده! 🎉',
                 hint: '👆 برای بازی دوباره روی چرخ ضربه بزنید',
                 themeBtnNoche: '🌙 شب',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 زمرد',
                 themeBtnAtardecer: '🌅 غروب',
                 themeNoche: 'پالت شب',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'پالت زمردی',
                 themeAtardecer: 'پالت غروب',
                 record: '🎥 ضبط چرخش (MP4)',
@@ -1727,9 +1731,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 विजेता! 🎉',
                 hint: '👆 पुन्हा खेळण्यासाठी चाकावर टॅप करा',
                 themeBtnNoche: '🌙 रात्र',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 पाचू',
                 themeBtnAtardecer: '🌅 सूर्यास्त',
                 themeNoche: 'रात्रीचा पॅलेट',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'पाचू पॅलेट',
                 themeAtardecer: 'सूर्यास्त पॅलेट',
                 record: '🎥 फेरी रेकॉर्ड करा (MP4)',
@@ -1767,9 +1773,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 வெற்றியாளர்! 🎉',
                 hint: '👆 மீண்டும் விளையாட வீலைத் தட்டவும்',
                 themeBtnNoche: '🌙 இரவு',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 மரகதம்',
                 themeBtnAtardecer: '🌅 சூரிய அஸ்தமனம்',
                 themeNoche: 'இரவு தட்டு',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'மரகத தட்டு',
                 themeAtardecer: 'சூரிய அஸ்தமன தட்டு',
                 record: '🎥 சுழற்சியைப் பதிவுசெய் (MP4)',
@@ -1807,9 +1815,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 NASARA! 🎉',
                 hint: '👆 Danna mota don sake bugawa',
                 themeBtnNoche: '🌙 Dare',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Emerald',
                 themeBtnAtardecer: '🌅 Faɗuwar rana',
                 themeNoche: 'Pallet dare',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Pallet emerald',
                 themeAtardecer: 'Pallet faɗuwar rana',
                 record: '🎥 Rikodi juyi (MP4)',
@@ -1847,9 +1857,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 MSHINDI! 🎉',
                 hint: '👆 Gonga gurudumu kucheza tena',
                 themeBtnNoche: '🌙 Usiku',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Zamaradi',
                 themeBtnAtardecer: '🌅 Machweo',
                 themeNoche: 'Rangi za usiku',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Rangi za zumaridi',
                 themeAtardecer: 'Rangi za machweo',
                 record: '🎥 Rekodi mzunguko (MP4)',
@@ -1887,9 +1899,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 winner: '🎉 VINCITORE! 🎉',
                 hint: '👆 Tocca la ruota per giocare di nuovo',
                 themeBtnNoche: '🌙 Notte',
+                themeBtnClaro: '☀️ Claro',
                 themeBtnEsmeralda: '💎 Smeraldo',
                 themeBtnAtardecer: '🌅 Tramonto',
                 themeNoche: 'Paletta notturna',
+                themeClaro: 'Paleta clara',
                 themeEsmeralda: 'Paletta smeraldo',
                 themeAtardecer: 'Paletta tramonto',
                 record: '🎥 Registra il giro (MP4)',
@@ -1934,11 +1948,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundBtn.classList.toggle('on', soundEnabled);
             document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
-            document.querySelector('.theme-btn[data-theme="esmeralda"]').textContent = t('themeBtnEsmeralda');
-            document.querySelector('.theme-btn[data-theme="atardecer"]').textContent = t('themeBtnAtardecer');
+            document.querySelector('.theme-btn[data-theme="claro"]').textContent = t('themeBtnClaro');
             document.querySelector('.theme-btn[data-theme="noche"]').title = t('themeNoche');
-            document.querySelector('.theme-btn[data-theme="esmeralda"]').title = t('themeEsmeralda');
-            document.querySelector('.theme-btn[data-theme="atardecer"]').title = t('themeAtardecer');
+            document.querySelector('.theme-btn[data-theme="claro"]').title = t('themeClaro');
             langSelect.value = lang;
             refreshMessages();
         }
@@ -2001,15 +2013,10 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4',
                 '#ffeaa7', '#dfe6e9', '#fd79a8', '#6c5ce7'
             ],
-            esmeralda: [
-                '#2ecc71', '#1abc9c', '#3498db', '#27ae60',
-                '#52be80', '#17a589', '#5dade2', '#82e0aa',
-                '#a9dfbf', '#1e8449', '#148f77', '#2e86c1'
-            ],
-            atardecer: [
-                '#ff8c42', '#ff4757', '#ffa502', '#e74c3c',
-                '#ffb266', '#ff6348', '#f39c12', '#ed7d31',
-                '#ff9f43', '#d35400', '#fd9644', '#e67e22'
+            claro: [
+                '#e74c3c', '#3498db', '#9b59b6', '#1abc9c',
+                '#e91e63', '#00bcd4', '#2196f3', '#26a69a',
+                '#f1c40f', '#ecf0f1', '#e84393', '#6c5ce7'
             ]
         };
 
