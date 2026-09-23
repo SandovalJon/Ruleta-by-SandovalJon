@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Ruleta de Imágenes</title>
     <style>
-        :root {
+        :root, body[data-theme="noche"] {
             --bg-1: #1a1a2e;
             --bg-2: #16213e;
             --bg-3: #0f3460;
@@ -31,6 +31,28 @@
             --gold-glow: rgba(255, 215, 0, 0.3);
             --text-muted: #ccc;
             --text-hint: #bbb;
+        }
+
+        body[data-theme="claro"] {
+            --bg-1: #f5f5f5;
+            --bg-2: #ffffff;
+            --bg-3: #e0e0e0;
+            --accent: #1976d2;
+            --accent-dark: #1565c0;
+            --accent-light: #42a5f5;
+            --accent-soft: rgba(25, 118, 210, 0.1);
+            --accent-soft-strong: rgba(25, 118, 210, 0.3);
+            --accent-glow-1: rgba(25, 118, 210, 0.5);
+            --accent-glow-2: rgba(25, 118, 210, 0.3);
+            --accent-glow-3: rgba(25, 118, 210, 0.4);
+            --accent-glow-4: rgba(25, 118, 210, 0.6);
+            --gold: #f39c12;
+            --gold-soft: rgba(243, 156, 18, 0.2);
+            --gold-soft-strong: rgba(243, 156, 18, 0.25);
+            --gold-glow: rgba(243, 156, 18, 0.3);
+            --text-muted: #666;
+            --text-hint: #888;
+            color: #333;
         }
 
         * {
