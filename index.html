@@ -55,6 +55,25 @@
             color: #333;
         }
 
+        body[data-theme="esmeralda"] {
+            --bg-1: #0a1f1a;
+            --bg-2: #0d2b23;
+            --bg-3: #123d30;
+            --accent: #2ecc71;
+            --accent-dark: #1fa85b;
+            --accent-light: #58d68d;
+            --accent-soft: rgba(46, 204, 113, 0.1);
+            --accent-soft-strong: rgba(46, 204, 113, 0.3);
+            --accent-glow-1: rgba(46, 204, 113, 0.5);
+            --accent-glow-2: rgba(46, 204, 113, 0.3);
+            --accent-glow-3: rgba(46, 204, 113, 0.4);
+            --accent-glow-4: rgba(46, 204, 113, 0.6);
+            --gold: #f1c40f;
+            --gold-soft: rgba(241, 196, 15, 0.2);
+            --gold-soft-strong: rgba(241, 196, 15, 0.25);
+            --gold-glow: rgba(241, 196, 15, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -2040,6 +2059,11 @@ const themeColors = {
                 '#e91e63', '#00bcd4', '#2196f3', '#26a69a',
                 '#f1c40f', '#ecf0f1', '#e84393', '#6c5ce7'
             ],
+            esmeralda: [
+                '#2ecc71', '#1abc9c', '#3498db', '#27ae60',
+                '#52be80', '#17a589', '#5dade2', '#82e0aa',
+                '#a9dfbf', '#1e8449', '#148f77', '#2e86c1'
+            ],
             circo: [
                 '#ff0000', '#ff8800', '#ffff00', '#00ff00',
                 '#00ffff', '#0088ff', '#8800ff', '#ff00ff',
@@ -3721,8 +3745,18 @@ rouletteWrapper.classList.add('winner-mode');
                 loadMySets();
                 if (user.email === 'jdss07@outlook.fr') {
                     versionBadge.style.display = 'block';
+                    if (!document.querySelector('.theme-btn[data-theme="esmeralda"]')) {
+                        const emeraldBtn = document.createElement('button');
+                        emeraldBtn.className = 'theme-btn';
+                        emeraldBtn.dataset.theme = 'esmeralda';
+                        emeraldBtn.title = 'Paleta esmeralda';
+                        emeraldBtn.textContent = '🍀 Esmeralda';
+                        document.querySelector('.theme-switcher').appendChild(emeraldBtn);
+                    }
                 } else {
                     versionBadge.style.display = 'none';
+                    const emeraldBtn = document.querySelector('.theme-btn[data-theme="esmeralda"]');
+                    if (emeraldBtn) emeraldBtn.remove();
                 }
             } else {
                 googleBtn.style.display = 'inline-flex';
