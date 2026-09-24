@@ -806,6 +806,7 @@ canvas {
             <option value="sw">Kiswahili</option>
             <option value="it">Italiano</option>
         </select>
+        <button onclick="checkForUpdates()" style="padding:5px 10px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:8px;color:#ffd700;font-size:0.82rem;cursor:pointer;" title="Buscar actualizaciones">🔄</button>
     </div>
     
     <div class="container">
@@ -851,12 +852,10 @@ canvas {
         </div>
     </div>
 
-    <div class="footer">
+<div class="footer">
         by <span>SandovalJon</span>
-        <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">
-            v2.0.0
-            <button onclick="checkForUpdates()" style="margin-left:8px;padding:2px 8px;background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.3);border-radius:4px;color:#ffd700;font-size:0.7rem;cursor:pointer;">🔄 Actualizar</button>
-        </div>
+        <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">v2.0.0</div>
+    </div>
         <button id="updateBtn" style="display:none;margin-top:8px;padding:4px 12px;font-size:0.75rem;background:var(--accent);color:#fff;border:none;border-radius:12px;cursor:pointer;">🔄 Actualizar</button>
     </div>
 
