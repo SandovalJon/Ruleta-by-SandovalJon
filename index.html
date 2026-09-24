@@ -775,7 +775,10 @@ canvas {
     </div>
 
 <div class="theme-switcher" id="themeSwitcher">
-            <button class="theme-btn active" id="themeToggle" title="Cambiar tema">🌙</button>
+            <select class="lang-select" id="themeSelect" title="Tema">
+                <option value="noche">🌙 Noche</option>
+                <option value="claro">☀️ Claro</option>
+            </select>
         <select id="langSelect" class="lang-select" title="Idioma / Language">
             <option value="es">Español</option>
             <option value="en">English</option>
@@ -1987,9 +1990,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.title = t('sound');
             soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundBtn.classList.toggle('on', soundEnabled);
-            const themeBtn = document.getElementById('themeToggle');
-            const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
-            themeBtn.textContent = themeIcons[currentTheme] || '🌙';
+            document.getElementById('themeSelect').value = currentTheme;
             langSelect.value = lang;
             refreshMessages();
         }
@@ -2078,24 +2079,15 @@ function setTheme(theme) {
             currentTheme = theme;
             document.body.dataset.theme = theme;
             colors = themeColors[theme];
-            const themeBtn = document.getElementById('themeToggle');
-            const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
-            themeBtn.textContent = themeIcons[theme] || '🌙';
+            document.getElementById('themeSelect').value = theme;
             rebuildWheel();
             try {
                 localStorage.setItem('roulette-theme', theme);
             } catch (e) {}
         }
 
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
-            let themes = ['noche', 'claro'];
-            if (window.isDev && themeColors['esmeralda']) {
-                themes.push('esmeralda');
-            }
-            const currentIndex = themes.indexOf(currentTheme);
-            const nextIndex = (currentIndex + 1) % themes.length;
-            setTheme(themes[nextIndex]);
+        document.getElementById('themeSelect').addEventListener('change', (e) => {
+            setTheme(e.target.value);
         });
 
 let colors = themeColors[currentTheme];
@@ -2106,9 +2098,7 @@ let colors = themeColors[currentTheme];
                 document.body.dataset.theme = savedTheme;
                 currentTheme = savedTheme;
                 colors = themeColors[savedTheme];
-                const themeBtn = document.getElementById('themeToggle');
-                const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
-                themeBtn.textContent = themeIcons[savedTheme] || '🌙';
+                document.getElementById('themeSelect').value = savedTheme;
             }
         } catch (e) {}
 
@@ -3750,12 +3740,18 @@ rouletteWrapper.classList.add('winner-mode');
                 if (user.email === 'jdss07@outlook.fr') {
                     versionBadge.style.display = 'block';
                     window.isDev = true;
+                    const themeSelect = document.getElementById('themeSelect');
+                    if (!document.querySelector('#themeSelect option[value="esmeralda"]')) {
+                        const opt = document.createElement('option');
+                        opt.value = 'esmeralda';
+                        opt.textContent = '🍀 Esmeralda';
+                        themeSelect.appendChild(opt);
+                    }
                 } else {
                     versionBadge.style.display = 'none';
                     window.isDev = false;
-                    if (!themeColors['esmeralda']) {
-                        delete themeColors['esmeralda'];
-                    }
+                    const emeraldOpt = document.querySelector('#themeSelect option[value="esmeralda"]');
+                    if (emeraldOpt) emeraldOpt.remove();
                 }
             } else {
                 googleBtn.style.display = 'inline-flex';
