@@ -2130,9 +2130,13 @@ let colors = themeColors[currentTheme];
                             caches.delete(cacheName);
                         });
                         btn.textContent = '✅';
+                        const msg = document.createElement('span');
+                        msg.textContent = ' ¡Actualizado!';
+                        msg.style.cssText = 'color:#ffd700;font-size:0.8rem;margin-left:5px;';
+                        btn.parentNode.appendChild(msg);
                         setTimeout(() => {
                             window.location.reload(true);
-                        }, 500);
+                        }, 1000);
                     });
                 }).catch(() => {
                     btn.textContent = '❌';
@@ -2144,9 +2148,13 @@ let colors = themeColors[currentTheme];
                 });
             } else {
                 btn.textContent = '✅';
+                const msg = document.createElement('span');
+                msg.textContent = ' Ya tienes la última versión';
+                msg.style.cssText = 'color:#ffd700;font-size:0.8rem;margin-left:5px;';
+                btn.parentNode.appendChild(msg);
                 setTimeout(() => {
                     window.location.reload(true);
-                }, 500);
+                }, 1000);
             }
         }
 
