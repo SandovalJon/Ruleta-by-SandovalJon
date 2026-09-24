@@ -775,8 +775,7 @@ canvas {
     </div>
 
 <div class="theme-switcher" id="themeSwitcher">
-            <button class="theme-btn active" data-theme="noche" title="Paleta nocturna">🌙 Noche</button>
-            <button class="theme-btn" data-theme="claro" title="Paleta clara">☀️ Claro</button>
+            <button class="theme-btn active" id="themeToggle" title="Cambiar tema">🌙</button>
         <select id="langSelect" class="lang-select" title="Idioma / Language">
             <option value="es">Español</option>
             <option value="en">English</option>
@@ -1988,10 +1987,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.title = t('sound');
             soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundBtn.classList.toggle('on', soundEnabled);
-            document.querySelector('.theme-btn[data-theme="noche"]').textContent = t('themeBtnNoche');
-            document.querySelector('.theme-btn[data-theme="claro"]').textContent = t('themeBtnClaro');
-            document.querySelector('.theme-btn[data-theme="noche"]').title = t('themeNoche');
-            document.querySelector('.theme-btn[data-theme="claro"]').title = t('themeClaro');
+            const themeBtn = document.getElementById('themeToggle');
+            const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
+            themeBtn.textContent = themeIcons[currentTheme] || '🌙';
             langSelect.value = lang;
             refreshMessages();
         }
@@ -2080,18 +2078,24 @@ function setTheme(theme) {
             currentTheme = theme;
             document.body.dataset.theme = theme;
             colors = themeColors[theme];
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.theme === theme);
-            });
+            const themeBtn = document.getElementById('themeToggle');
+            const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
+            themeBtn.textContent = themeIcons[theme] || '🌙';
             rebuildWheel();
             try {
                 localStorage.setItem('roulette-theme', theme);
             } catch (e) {}
         }
 
-        themeSwitcher.addEventListener('click', (e) => {
-            const btn = e.target.closest('.theme-btn');
-            if (btn) setTheme(btn.dataset.theme);
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            let themes = ['noche', 'claro'];
+            if (window.isDev && themeColors['esmeralda']) {
+                themes.push('esmeralda');
+            }
+            const currentIndex = themes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % themes.length;
+            setTheme(themes[nextIndex]);
         });
 
 let colors = themeColors[currentTheme];
@@ -2099,12 +2103,12 @@ let colors = themeColors[currentTheme];
         try {
             const savedTheme = localStorage.getItem('roulette-theme');
             if (savedTheme && themeColors[savedTheme]) {
-                document.querySelectorAll('.theme-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === savedTheme);
-                });
                 document.body.dataset.theme = savedTheme;
                 currentTheme = savedTheme;
                 colors = themeColors[savedTheme];
+                const themeBtn = document.getElementById('themeToggle');
+                const themeIcons = { noche: '🌙', claro: '☀️', esmeralda: '🍀' };
+                themeBtn.textContent = themeIcons[savedTheme] || '🌙';
             }
         } catch (e) {}
 
@@ -3745,18 +3749,13 @@ rouletteWrapper.classList.add('winner-mode');
                 loadMySets();
                 if (user.email === 'jdss07@outlook.fr') {
                     versionBadge.style.display = 'block';
-                    if (!document.querySelector('.theme-btn[data-theme="esmeralda"]')) {
-                        const emeraldBtn = document.createElement('button');
-                        emeraldBtn.className = 'theme-btn';
-                        emeraldBtn.dataset.theme = 'esmeralda';
-                        emeraldBtn.title = 'Paleta esmeralda';
-                        emeraldBtn.textContent = '🍀 Esmeralda';
-                        document.querySelector('.theme-switcher').appendChild(emeraldBtn);
-                    }
+                    window.isDev = true;
                 } else {
                     versionBadge.style.display = 'none';
-                    const emeraldBtn = document.querySelector('.theme-btn[data-theme="esmeralda"]');
-                    if (emeraldBtn) emeraldBtn.remove();
+                    window.isDev = false;
+                    if (!themeColors['esmeralda']) {
+                        delete themeColors['esmeralda'];
+                    }
                 }
             } else {
                 googleBtn.style.display = 'inline-flex';
