@@ -853,7 +853,11 @@ canvas {
 
     <div class="footer">
         by <span>SandovalJon</span>
-        <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">v2.0.0</div>
+        <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">
+            v2.0.0
+            <button onclick="checkForUpdates()" style="margin-left:8px;padding:2px 8px;background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.3);border-radius:4px;color:#ffd700;font-size:0.7rem;cursor:pointer;">🔄 Actualizar</button>
+        </div>
+        <button id="updateBtn" style="display:none;margin-top:8px;padding:4px 12px;font-size:0.75rem;background:var(--accent);color:#fff;border:none;border-radius:12px;cursor:pointer;">🔄 Actualizar</button>
     </div>
 
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
@@ -2108,6 +2112,24 @@ let colors = themeColors[currentTheme];
             setLanguage(L[detected] ? detected : 'es');
         } catch (e) {
             setLanguage('es');
+        }
+
+        function checkForUpdates() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                    registrations.forEach((reg) => {
+                        reg.unregister();
+                    });
+                    caches.keys().then((cacheNames) => {
+                        cacheNames.forEach((cacheName) => {
+                            caches.delete(cacheName);
+                        });
+                        window.location.reload(true);
+                    });
+                });
+            } else {
+                window.location.reload(true);
+            }
         }
 
         function cryptoRand() {
