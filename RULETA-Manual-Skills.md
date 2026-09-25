@@ -5,7 +5,7 @@
 | Campo | Valor |
 |-------|-------|
 | Nombre | Ruleta de Imágenes |
-| Versión | v2.1.0 |
+| Versión | v3.0.0 |
 | URL | https://sandovaljon.github.io/Ruleta-by-SandovalJon/ |
 | Repo | https://github.com/SandovalJon/Ruleta-by-SandovalJon |
 | Stack | HTML5, CSS3, JS vanilla, Canvas 2D, Web Audio, Firebase |
@@ -69,7 +69,7 @@
 
 ## 8. Estado y pendientes
 
-**Versión actual:** v2.1.0 (2026-09-24)
+**Versión actual:** v3.0.0 (2026-09-24)
 
 **Pendientes:**
 - Ideas: importar CSV, modo pantalla completa, modo pesos
