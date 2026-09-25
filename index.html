@@ -2637,20 +2637,11 @@ const wheelCache = document.createElement('canvas');
                 return;
             }
 
-            const MAX_VISIBLE = 12;
-            let visibleIndices = allActiveIndices;
-            if (allActiveIndices.length > MAX_VISIBLE) {
-                visibleIndices = cryptoShuffle([...allActiveIndices]).slice(0, MAX_VISIBLE);
-                window.visibleIndices = visibleIndices;
-            } else {
-                window.visibleIndices = allActiveIndices;
-            }
+            const sliceAngle = (Math.PI * 2) / allActiveIndices.length;
 
-            const sliceAngle = (Math.PI * 2) / visibleIndices.length;
-
-            visibleIndices.forEach((originalIndex, visibleIndex) => {
+            allActiveIndices.forEach((originalIndex, activeIndex) => {
                 const img = loadedImages[originalIndex];
-                const startAngle = visibleIndex * sliceAngle;
+                const startAngle = activeIndex * sliceAngle;
                 const endAngle = startAngle + sliceAngle;
                 const midAngle = startAngle + sliceAngle / 2;
                 const thumb = thumbImages[originalIndex] || img;
@@ -2659,7 +2650,7 @@ const wheelCache = document.createElement('canvas');
                 c.moveTo(ox, oy);
                 c.arc(ox, oy, radius, startAngle, endAngle);
                 c.closePath();
-                c.fillStyle = colors[visibleIndex % colors.length];
+                c.fillStyle = colors[activeIndex % colors.length];
                 c.fill();
                 c.strokeStyle = '#fff';
                 c.lineWidth = 3 * sf;
@@ -2809,7 +2800,7 @@ const wheelCache = document.createElement('canvas');
             const startRotation = currentRotation;
             lastTickAngle = currentRotation;
             rebuildWheel();
-            spinSlices = window.visibleIndices ? window.visibleIndices.length : getActiveCount();
+            spinSlices = activeCount;
             playWhoosh(spinDuration / 1000);
 
             let crazyColors = ['#e94560', '#0f3460', '#533483', '#16c79a', '#ffd700', '#ff6b6b', '#4ecdc4'];
@@ -2846,23 +2837,23 @@ const wheelCache = document.createElement('canvas');
         }
 
         function finishSpin() {
-            const visibleIdx = window.visibleIndices || getActiveIndices();
-            const visibleCount = visibleIdx.length;
-            if (visibleCount === 0) {
+            const activeIndices = getActiveIndices();
+            const activeCount = activeIndices.length;
+            if (activeCount === 0) {
                 isSpinning = false;
                 refreshMessages();
                 return;
             }
             
-            const sliceAngle = (Math.PI * 2) / visibleCount;
+            const sliceAngle = (Math.PI * 2) / activeCount;
             const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
             const pointerAngle = ((Math.PI * 3 / 2 - normalizedRotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % visibleCount;
+            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % activeCount;
 
             rouletteWrapper.classList.add('winner-mode');
             isSpinning = false;
 
-            winnerIndex = visibleIdx[selectedIndex];
+            winnerIndex = activeIndices[selectedIndex];
             winnerZoom = 0;
             refreshMessages();
             const zoomStart = Date.now();
