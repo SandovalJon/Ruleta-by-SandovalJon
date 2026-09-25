@@ -4065,6 +4065,7 @@ googleBtn.addEventListener('click', () => {
                 uid: currentUser.uid,
                 name: name,
                 count: images.length,
+                eliminated: [...eliminatedIndices],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
                 const batch = fbDB.batch();
@@ -4090,17 +4091,30 @@ googleBtn.addEventListener('click', () => {
             loadSetBtn.disabled = true;
             setMsg.textContent = tt('loadingSet');
 
-            fbDB.collection('sets').doc(setId).collection('images')
-                .where('uid', '==', currentUser.uid)
-                .orderBy('index').get()
-                .then((snap) => {
-                    const dataUrls = [];
-                    snap.forEach((doc) => {
-                        if (doc.exists) dataUrls.push(doc.data().dataUrl);
-                    });
-                    resetAndSetImages(dataUrls);
-                    setMsg.textContent = tt('loadedOk');
-                    setTimeout(() => { setMsg.textContent = ''; loadSetBtn.disabled = false; }, 1800);
+            fbDB.collection('sets').doc(setId).get()
+                .then((setDoc) => {
+                    if (!setDoc.exists) throw new Error('Set not found');
+                    const setData = setDoc.data();
+                    const eliminatedArr = setData.eliminated || [];
+                    
+                    return fbDB.collection('sets').doc(setId).collection('images')
+                        .where('uid', '==', currentUser.uid)
+                        .orderBy('index').get()
+                        .then((snap) => {
+                            const dataUrls = [];
+                            snap.forEach((doc) => {
+                                if (doc.exists) dataUrls.push(doc.data().dataUrl);
+                            });
+                            resetAndSetImages(dataUrls);
+                            eliminatedIndices = new Set(eliminatedArr);
+                            saveEliminationState();
+                            autoSaveImages();
+                            updatePreview();
+                            rebuildWheel();
+                            refreshMessages();
+                            setMsg.textContent = tt('loadedOk');
+                            setTimeout(() => { setMsg.textContent = ''; loadSetBtn.disabled = false; }, 1800);
+                        });
                 })
                 .catch((e) => {
                     setMsg.textContent = tt('err') + ': ' + e.message;
