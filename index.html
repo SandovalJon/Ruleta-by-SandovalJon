@@ -2848,7 +2848,11 @@ const wheelCache = document.createElement('canvas');
         function finishSpin() {
             const visibleIdx = window.visibleIndices || getActiveIndices();
             const visibleCount = visibleIdx.length;
-            if (visibleCount === 0) return;
+            if (visibleCount === 0) {
+                isSpinning = false;
+                refreshMessages();
+                return;
+            }
             
             const sliceAngle = (Math.PI * 2) / visibleCount;
             const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
