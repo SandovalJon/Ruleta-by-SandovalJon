@@ -2395,6 +2395,7 @@ clearBtn.addEventListener('click', () => {
             thumbImages = [];
             eliminatedIndices.clear();
             saveEliminationState();
+            clearImagesDB();
             previewImages.innerHTML = '';
             rouletteWrapper.classList.remove('winner-mode');
             isHovering = false;
@@ -2409,6 +2410,7 @@ clearBtn.addEventListener('click', () => {
         document.getElementById('restoreBtn').addEventListener('click', () => {
             eliminatedIndices.clear();
             saveEliminationState();
+            autoSaveImages();
             updatePreview();
             rebuildWheel();
             refreshMessages();
@@ -2485,6 +2487,7 @@ clearBtn.addEventListener('click', () => {
                             isLoading = false;
                         }
                         updatePreview();
+                        autoSaveImages();
                         if (isLoading) {
                             drawRoulette();
                         } else {
@@ -2882,6 +2885,7 @@ const wheelCache = document.createElement('canvas');
             updatePreview();
             rebuildWheel();
             saveEliminationState();
+            autoSaveImages();
             clearTimeout(elimNoteTimer);
             const activeCount = getActiveIndices().length;
             elimNote = activeCount === 0 ? t('allEliminated') : t('eliminated').replace('{n}', activeCount);
@@ -2931,6 +2935,89 @@ const wheelCache = document.createElement('canvas');
         }
 
         loadEliminationState();
+
+        const DB_NAME = 'RuletaDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'images';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'index' });
+                    }
+                };
+            });
+        }
+
+        async function saveImagesToDB() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear();
+                images.forEach((dataUrl, index) => {
+                    store.put({ index, dataUrl });
+                });
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+                db.close();
+            } catch (e) {}
+        }
+
+        async function loadImagesFromDB() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.getAll();
+                const results = await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+                db.close();
+                if (results && results.length > 0) {
+                    results.sort((a, b) => a.index - b.index);
+                    images = results.map(r => r.dataUrl);
+                    loadAllImages();
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function clearImagesDB() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear();
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+                db.close();
+            } catch (e) {}
+        }
+
+        let saveTimeout = null;
+        function autoSaveImages() {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveImagesToDB();
+                saveEliminationState();
+            }, 1000);
+        }
+
+        loadImagesFromDB();
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
