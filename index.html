@@ -2625,8 +2625,8 @@ const wheelCache = document.createElement('canvas');
 
             c.clearRect(0, 0, cache.width, cache.height);
 
-            const activeIndices = getActiveIndices();
-            if (activeIndices.length === 0) {
+            const allActiveIndices = getActiveIndices();
+            if (allActiveIndices.length === 0) {
                 c.beginPath();
                 c.arc(ox, oy, radius, 0, Math.PI * 2);
                 c.fillStyle = '#333';
@@ -2637,11 +2637,20 @@ const wheelCache = document.createElement('canvas');
                 return;
             }
 
-            const sliceAngle = (Math.PI * 2) / activeIndices.length;
+            const MAX_VISIBLE = 12;
+            let visibleIndices = allActiveIndices;
+            if (allActiveIndices.length > MAX_VISIBLE) {
+                visibleIndices = cryptoShuffle([...allActiveIndices]).slice(0, MAX_VISIBLE);
+                window.visibleIndices = visibleIndices;
+            } else {
+                window.visibleIndices = allActiveIndices;
+            }
 
-            activeIndices.forEach((originalIndex, activeIndex) => {
+            const sliceAngle = (Math.PI * 2) / visibleIndices.length;
+
+            visibleIndices.forEach((originalIndex, visibleIndex) => {
                 const img = loadedImages[originalIndex];
-                const startAngle = activeIndex * sliceAngle;
+                const startAngle = visibleIndex * sliceAngle;
                 const endAngle = startAngle + sliceAngle;
                 const midAngle = startAngle + sliceAngle / 2;
                 const thumb = thumbImages[originalIndex] || img;
@@ -2650,7 +2659,7 @@ const wheelCache = document.createElement('canvas');
                 c.moveTo(ox, oy);
                 c.arc(ox, oy, radius, startAngle, endAngle);
                 c.closePath();
-                c.fillStyle = colors[activeIndex % colors.length];
+                c.fillStyle = colors[visibleIndex % colors.length];
                 c.fill();
                 c.strokeStyle = '#fff';
                 c.lineWidth = 3 * sf;
@@ -2799,7 +2808,8 @@ const wheelCache = document.createElement('canvas');
             const startTime = Date.now();
             const startRotation = currentRotation;
             lastTickAngle = currentRotation;
-            spinSlices = activeCount;
+            rebuildWheel();
+            spinSlices = window.visibleIndices ? window.visibleIndices.length : getActiveCount();
             playWhoosh(spinDuration / 1000);
 
             let crazyColors = ['#e94560', '#0f3460', '#533483', '#16c79a', '#ffd700', '#ff6b6b', '#4ecdc4'];
@@ -2836,19 +2846,19 @@ const wheelCache = document.createElement('canvas');
         }
 
         function finishSpin() {
-            const activeIndices = getActiveIndices();
-            const activeCount = activeIndices.length;
-            if (activeCount === 0) return;
+            const visibleIdx = window.visibleIndices || getActiveIndices();
+            const visibleCount = visibleIdx.length;
+            if (visibleCount === 0) return;
             
-            const sliceAngle = (Math.PI * 2) / activeCount;
+            const sliceAngle = (Math.PI * 2) / visibleCount;
             const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
             const pointerAngle = ((Math.PI * 3 / 2 - normalizedRotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % activeCount;
+            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % visibleCount;
 
             rouletteWrapper.classList.add('winner-mode');
             isSpinning = false;
 
-            winnerIndex = activeIndices[selectedIndex];
+            winnerIndex = visibleIdx[selectedIndex];
             winnerZoom = 0;
             refreshMessages();
             const zoomStart = Date.now();
