@@ -2115,8 +2115,10 @@ let colors = themeColors[currentTheme];
 
         function checkForUpdates() {
             const btn = document.querySelector('[onclick="checkForUpdates()"]');
-            const originalText = btn.textContent;
-            btn.textContent = '⏳';
+            btn.textContent = 'Verificando...';
+            btn.style.background = 'rgba(88,166,255,0.2)';
+            btn.style.borderColor = 'rgba(88,166,255,0.5)';
+            btn.style.color = '#58a6ff';
             btn.disabled = true;
             
             if ('serviceWorker' in navigator) {
@@ -2128,32 +2130,36 @@ let colors = themeColors[currentTheme];
                         cacheNames.forEach((cacheName) => {
                             caches.delete(cacheName);
                         });
-                        btn.textContent = '✅';
+                        btn.textContent = 'Ya tienes la última versión';
+                        btn.style.background = 'rgba(63,185,80,0.2)';
+                        btn.style.borderColor = 'rgba(63,185,80,0.5)';
+                        btn.style.color = '#3fb950';
                         setTimeout(() => {
                             window.location.reload(true);
-                        }, 1000);
+                        }, 2000);
                     });
                 }).catch(() => {
-                    btn.textContent = '❌';
+                    btn.textContent = 'Error al verificar';
+                    btn.style.background = 'rgba(248,81,73,0.2)';
+                    btn.style.borderColor = 'rgba(248,81,73,0.5)';
+                    btn.style.color = '#f85149';
                     setTimeout(() => {
-                        btn.textContent = originalText;
+                        btn.textContent = '🔄';
+                        btn.style.background = '';
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
                         btn.disabled = false;
                     }, 2000);
                 });
             } else {
-                btn.textContent = '✅';
+                btn.textContent = 'Ya tienes la última versión';
+                btn.style.background = 'rgba(63,185,80,0.2)';
+                btn.style.borderColor = 'rgba(63,185,80,0.5)';
+                btn.style.color = '#3fb950';
                 setTimeout(() => {
                     window.location.reload(true);
-                }, 1000);
+                }, 2000);
             }
-        }
-
-        function showUpdateMsg(text) {
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-2);border:1px solid var(--accent);border-radius:10px;padding:12px 24px;color:var(--text);font-size:0.9rem;z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-            toast.textContent = text;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3000);
         }
 
         function cryptoRand() {
