@@ -243,6 +243,32 @@
             transform: scale(1.05);
         }
 
+        .preview-item.eliminated {
+            cursor: default;
+        }
+
+        .preview-item.eliminated:hover {
+            transform: none;
+        }
+
+        .eliminated-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: #3fb950;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(63, 185, 80, 0.5);
+        }
+
         .preview-item img {
             width: 70px;
             height: 70px;
@@ -820,6 +846,7 @@ canvas {
             </div>
 <div class="preview-images" id="previewImages"></div>
             <button class="clear-btn" id="clearBtn" aria-label="Limpiar todas las imágenes">🗑️ Limpiar</button>
+            <button class="record-btn" id="restoreBtn" style="display:none;" aria-label="Restaurar eliminadas">♻️ Restaurar</button>
             <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)" aria-label="Grabar girada en video MP4">🎥 Grabar girada (MP4)</button>
             <button class="record-btn elim-btn" id="elimBtn" title="Eliminar ganador" aria-label="Activar modo eliminación">🎯 Eliminar ganador</button>
             <button class="record-btn elim-btn" id="soundBtn" title="Sonido" aria-label="Activar o desactivar sonido">🔊</button>
@@ -877,6 +904,7 @@ canvas {
 let images = [];
         let loadedImages = [];
         let thumbImages = [];
+        let eliminatedIndices = new Set();
         let isSpinning = false;
         let currentRotation = 0;
         let spinTimeout = null;
@@ -2001,11 +2029,20 @@ const themeSwitcher = document.getElementById('themeSwitcher');
         function refreshMessages() {
             const counter = document.getElementById('participantCounter');
             const countEl = document.getElementById('participantCount');
+            const restoreBtn = document.getElementById('restoreBtn');
+            const activeCount = getActiveCount();
+            const eliminatedCount = getEliminatedCount();
+            
             if (loadedImages.length > 0) {
                 counter.style.display = 'inline-flex';
-                countEl.textContent = loadedImages.length;
+                countEl.textContent = activeCount;
+                if (eliminatedCount > 0) {
+                    countEl.textContent += `/${loadedImages.length}`;
+                }
+                restoreBtn.style.display = eliminatedCount > 0 ? 'inline-flex' : 'none';
             } else {
                 counter.style.display = 'none';
+                restoreBtn.style.display = 'none';
             }
 
             if (recActive) {
@@ -2035,10 +2072,10 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             }
             if (loadedImages.length === 0) {
                 result.textContent = t('empty');
-            } else if (loadedImages.length === 1 && !elimMode) {
+            } else if (activeCount < 2 && !elimMode) {
                 result.textContent = t('min');
             } else {
-                result.textContent = t('preview').replace('{n}', loadedImages.length);
+                result.textContent = t('preview').replace('{n}', activeCount);
             }
             if (elimMode && winnerIndex < 0) {
                 resultHint.textContent = t('eliminateHint');
@@ -2356,6 +2393,8 @@ clearBtn.addEventListener('click', () => {
             images = [];
             loadedImages = [];
             thumbImages = [];
+            eliminatedIndices.clear();
+            saveEliminationState();
             previewImages.innerHTML = '';
             rouletteWrapper.classList.remove('winner-mode');
             isHovering = false;
@@ -2365,6 +2404,14 @@ clearBtn.addEventListener('click', () => {
             rebuildWheel();
             refreshMessages();
             if (typeof updateSaveBtn === 'function') updateSaveBtn();
+        });
+
+        document.getElementById('restoreBtn').addEventListener('click', () => {
+            eliminatedIndices.clear();
+            saveEliminationState();
+            updatePreview();
+            rebuildWheel();
+            refreshMessages();
         });
 
         const MAX_IMAGE = 800;
@@ -2461,14 +2508,18 @@ refreshMessages();
             });
         }
         function updatePreview() {
-            previewImages.innerHTML = images.map((src, index) => 
-                `<div class="preview-item" data-index="${index}" draggable="true">
-                    <img src="${src}" alt="preview">
-                    <div class="remove-overlay">
-                        <button class="remove-btn" data-index="${index}" title="${t('remove')}">✕</button>
-                    </div>
-                </div>`
-            ).join('');
+            previewImages.innerHTML = images.map((src, index) => {
+                const isEliminated = eliminatedIndices.has(index);
+                return `<div class="preview-item ${isEliminated ? 'eliminated' : ''}" data-index="${index}" draggable="${!isEliminated}">
+                    <img src="${src}" alt="preview" style="${isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : ''}">
+                    ${isEliminated 
+                        ? '<div class="eliminated-badge">✓</div>' 
+                        : `<div class="remove-overlay">
+                            <button class="remove-btn" data-index="${index}" title="${t('remove')}">✕</button>
+                          </div>`
+                    }
+                </div>`;
+            }).join('');
         }
 
 function removeImage(index) {
@@ -2571,7 +2622,8 @@ const wheelCache = document.createElement('canvas');
 
             c.clearRect(0, 0, cache.width, cache.height);
 
-            if (loadedImages.length === 0) {
+            const activeIndices = getActiveIndices();
+            if (activeIndices.length === 0) {
                 c.beginPath();
                 c.arc(ox, oy, radius, 0, Math.PI * 2);
                 c.fillStyle = '#333';
@@ -2582,19 +2634,20 @@ const wheelCache = document.createElement('canvas');
                 return;
             }
 
-            const sliceAngle = (Math.PI * 2) / loadedImages.length;
+            const sliceAngle = (Math.PI * 2) / activeIndices.length;
 
-            loadedImages.forEach((img, index) => {
-                const startAngle = index * sliceAngle;
+            activeIndices.forEach((originalIndex, activeIndex) => {
+                const img = loadedImages[originalIndex];
+                const startAngle = activeIndex * sliceAngle;
                 const endAngle = startAngle + sliceAngle;
                 const midAngle = startAngle + sliceAngle / 2;
-                const thumb = thumbImages[index] || img;
+                const thumb = thumbImages[originalIndex] || img;
 
                 c.beginPath();
                 c.moveTo(ox, oy);
                 c.arc(ox, oy, radius, startAngle, endAngle);
                 c.closePath();
-                c.fillStyle = colors[index % colors.length];
+                c.fillStyle = colors[activeIndex % colors.length];
                 c.fill();
                 c.strokeStyle = '#fff';
                 c.lineWidth = 3 * sf;
@@ -2727,8 +2780,9 @@ const wheelCache = document.createElement('canvas');
         }
 
         function spin() {
+            const activeCount = getActiveCount();
             const minNeed = elimMode ? 1 : 2;
-            if (isSpinning || loadedImages.length < minNeed) return;
+            if (isSpinning || activeCount < minNeed) return;
 
             if (elimMode && winnerIndex >= 0) {
                 eliminateWinner();
@@ -2742,7 +2796,7 @@ const wheelCache = document.createElement('canvas');
             const startTime = Date.now();
             const startRotation = currentRotation;
             lastTickAngle = currentRotation;
-            spinSlices = loadedImages.length;
+            spinSlices = activeCount;
             playWhoosh(spinDuration / 1000);
 
             let crazyColors = ['#e94560', '#0f3460', '#533483', '#16c79a', '#ffd700', '#ff6b6b', '#4ecdc4'];
@@ -2779,15 +2833,19 @@ const wheelCache = document.createElement('canvas');
         }
 
         function finishSpin() {
-            const sliceAngle = (Math.PI * 2) / loadedImages.length;
+            const activeIndices = getActiveIndices();
+            const activeCount = activeIndices.length;
+            if (activeCount === 0) return;
+            
+            const sliceAngle = (Math.PI * 2) / activeCount;
             const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
             const pointerAngle = ((Math.PI * 3 / 2 - normalizedRotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % loadedImages.length;
+            const selectedIndex = Math.floor(pointerAngle / sliceAngle) % activeCount;
 
-rouletteWrapper.classList.add('winner-mode');
+            rouletteWrapper.classList.add('winner-mode');
             isSpinning = false;
 
-            winnerIndex = selectedIndex;
+            winnerIndex = activeIndices[selectedIndex];
             winnerZoom = 0;
             refreshMessages();
             const zoomStart = Date.now();
@@ -2816,17 +2874,17 @@ rouletteWrapper.classList.add('winner-mode');
 
         function eliminateWinner() {
             if (winnerIndex < 0) return;
-            images.splice(winnerIndex, 1);
-            loadedImages.splice(winnerIndex, 1);
-            thumbImages.splice(winnerIndex, 1);
+            eliminatedIndices.add(winnerIndex);
             winnerIndex = -1;
             winnerZoom = 0;
             isHovering = false;
             rouletteWrapper.classList.remove('winner-mode');
             updatePreview();
             rebuildWheel();
+            saveEliminationState();
             clearTimeout(elimNoteTimer);
-            elimNote = loadedImages.length === 0 ? t('allEliminated') : t('eliminated').replace('{n}', loadedImages.length);
+            const activeCount = getActiveIndices().length;
+            elimNote = activeCount === 0 ? t('allEliminated') : t('eliminated').replace('{n}', activeCount);
             elimNoteTimer = setTimeout(() => {
                 elimNote = '';
                 elimNoteTimer = null;
@@ -2844,6 +2902,35 @@ rouletteWrapper.classList.add('winner-mode');
             rouletteWrapper.classList.toggle('elim-mode', elimMode);
             refreshMessages();
         });
+
+        function getActiveIndices() {
+            return images.map((_, i) => i).filter(i => !eliminatedIndices.has(i));
+        }
+
+        function getActiveCount() {
+            return getActiveIndices().length;
+        }
+
+        function getEliminatedCount() {
+            return eliminatedIndices.size;
+        }
+
+        function saveEliminationState() {
+            try {
+                localStorage.setItem('roulette-eliminated', JSON.stringify([...eliminatedIndices]));
+            } catch (e) {}
+        }
+
+        function loadEliminationState() {
+            try {
+                const saved = localStorage.getItem('roulette-eliminated');
+                if (saved) {
+                    eliminatedIndices = new Set(JSON.parse(saved));
+                }
+            } catch (e) {}
+        }
+
+        loadEliminationState();
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
@@ -2913,7 +3000,7 @@ rouletteWrapper.classList.add('winner-mode');
         recordBtn.addEventListener('click', () => {
             if (recActive || isSpinning) return;
             const minNeed = elimMode ? 1 : 2;
-            if (loadedImages.length < minNeed) {
+            if (getActiveCount() < minNeed) {
                 result.textContent = t('min');
                 return;
             }
