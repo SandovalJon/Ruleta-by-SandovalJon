@@ -3377,12 +3377,17 @@ const wheelCache = document.createElement('canvas');
     </script>
 
     <script>
+        // Limpieza: desregistrar service workers antiguos y borrar cachés
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then((reg) => console.log('SW registered:', reg.scope))
-                    .catch((err) => console.log('SW failed:', err));
-            });
+            navigator.serviceWorker.getRegistrations().then((regs) => {
+                if (regs.length > 0) {
+                    Promise.all(regs.map((r) => r.unregister())).then(() => {
+                        if (typeof caches !== 'undefined') {
+                            caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))));
+                        }
+                    });
+                }
+            }).catch(() => {});
         }
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
