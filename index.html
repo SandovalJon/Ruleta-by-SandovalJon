@@ -4078,7 +4078,25 @@ googleBtn.addEventListener('click', () => {
                 .catch((e) => { setMsg.textContent = tt('err') + ': ' + e.message; });
         }
 
-        function saveCurrentSet() {
+        async function compressImage(dataUrl, maxDim = 300, quality = 0.5) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                    const w = Math.round(img.width * scale);
+                    const h = Math.round(img.height * scale);
+                    const c = document.createElement('canvas');
+                    c.width = w;
+                    c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    resolve(c.toDataURL('image/webp', quality));
+                };
+                img.onerror = () => resolve(dataUrl);
+                img.src = dataUrl;
+            });
+        }
+
+        async function saveCurrentSet() {
             if (!fbDB || !currentUser) return;
             if (images.length < 2) {
                 setMsg.textContent = tt('saveNeed');
@@ -4096,11 +4114,13 @@ googleBtn.addEventListener('click', () => {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
                 const batch = fbDB.batch();
-                images.forEach((dataUrl, i) => {
-                    const imgRef = setRef.collection('images').doc(String(i));
-                    batch.set(imgRef, { uid: currentUser.uid, index: i, dataUrl: dataUrl });
+                const compressPromises = images.map((dataUrl, i) => {
+                    return compressImage(dataUrl).then((compressed) => {
+                        const imgRef = setRef.collection('images').doc(String(i));
+                        batch.set(imgRef, { uid: currentUser.uid, index: i, dataUrl: compressed });
+                    });
                 });
-                return batch.commit().then(() => setRef);
+                return Promise.all(compressPromises).then(() => batch.commit()).then(() => setRef);
             }).then(() => {
                 setMsg.textContent = tt('savedOk');
                 setTimeout(() => { setMsg.textContent = ''; }, 2200);
