@@ -3046,30 +3046,7 @@ const wheelCache = document.createElement('canvas');
             }, 1000);
         }
 
-        async function tryLoadPreviousSession() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const countReq = store.count();
-                const count = await new Promise((resolve) => {
-                    countReq.onsuccess = () => resolve(countReq.result);
-                    countReq.onerror = () => resolve(0);
-                });
-                db.close();
-                
-                if (count > 0) {
-                    const load = confirm(t('loadPrevious') || '¿Cargar sesión anterior?');
-                    if (load) {
-                        await loadImagesFromDB();
-                    } else {
-                        await clearImagesDB();
-                    }
-                }
-            } catch (e) {}
-        }
-
-        tryLoadPreviousSession();
+        loadImagesFromDB();
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
