@@ -4113,6 +4113,7 @@ googleBtn.addEventListener('click', () => {
                 eliminated: [...eliminatedIndices],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
+                console.log('SAVE SET eliminated:', [...eliminatedIndices]);
                 const batch = fbDB.batch();
                 const compressPromises = images.map((dataUrl, i) => {
                     return compressImage(dataUrl).then((compressed) => {
@@ -4143,6 +4144,7 @@ googleBtn.addEventListener('click', () => {
                     if (!setDoc.exists) throw new Error('Set not found');
                     const setData = setDoc.data();
                     const eliminatedArr = setData.eliminated || [];
+                    console.log('LOAD SET:', setId, 'eliminated:', eliminatedArr, 'count:', setData.count);
                     
                     return fbDB.collection('sets').doc(setId).collection('images')
                         .where('uid', '==', currentUser.uid)
@@ -4152,10 +4154,11 @@ googleBtn.addEventListener('click', () => {
                             snap.forEach((doc) => {
                                 if (doc.exists) dataUrls.push(doc.data().dataUrl);
                             });
+                            console.log('LOADED IMAGES:', dataUrls.length);
                             resetAndSetImages(dataUrls);
                             eliminatedIndices = new Set(eliminatedArr);
+                            console.log('RESTORED ELIMINATED:', [...eliminatedIndices]);
                             saveEliminationState();
-                            autoSaveImages();
                             updatePreview();
                             rebuildWheel();
                             refreshMessages();
