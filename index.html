@@ -3050,8 +3050,6 @@ const wheelCache = document.createElement('canvas');
             }, 1000);
         }
 
-        indexedDB.deleteDatabase(DB_NAME);
-
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
             soundBtn.classList.toggle('on', soundEnabled);
