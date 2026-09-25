@@ -2995,7 +2995,26 @@ const wheelCache = document.createElement('canvas');
                 if (results && results.length > 0) {
                     results.sort((a, b) => a.index - b.index);
                     images = results.map(r => r.dataUrl);
-                    loadAllImages();
+                    loadedImages = [];
+                    thumbImages = [];
+                    const loadPromises = images.map((dataUrl, i) => {
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                loadedImages[i] = img;
+                                thumbImages[i] = makeThumb(img, 128);
+                                resolve();
+                            };
+                            img.onerror = () => resolve();
+                            img.src = dataUrl;
+                        });
+                    });
+                    await Promise.all(loadPromises);
+                    loadedImages = loadedImages.filter(Boolean);
+                    thumbImages = thumbImages.filter(Boolean);
+                    updatePreview();
+                    rebuildWheel();
+                    refreshMessages();
                     return true;
                 }
                 return false;
@@ -3027,7 +3046,30 @@ const wheelCache = document.createElement('canvas');
             }, 1000);
         }
 
-        loadImagesFromDB();
+        async function tryLoadPreviousSession() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const countReq = store.count();
+                const count = await new Promise((resolve) => {
+                    countReq.onsuccess = () => resolve(countReq.result);
+                    countReq.onerror = () => resolve(0);
+                });
+                db.close();
+                
+                if (count > 0) {
+                    const load = confirm(t('loadPrevious') || '¿Cargar sesión anterior?');
+                    if (load) {
+                        await loadImagesFromDB();
+                    } else {
+                        await clearImagesDB();
+                    }
+                }
+            } catch (e) {}
+        }
+
+        tryLoadPreviousSession();
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
