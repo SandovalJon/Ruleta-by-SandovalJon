@@ -5,7 +5,7 @@
 | Campo | Valor |
 |-------|-------|
 | Nombre | Ruleta de Imágenes |
-| Versión | v3.0.0 |
+| Versión | v3.0.1 |
 | URL | https://sandovaljon.github.io/Ruleta-by-SandovalJon/ |
 | Repo | https://github.com/SandovalJon/Ruleta-by-SandovalJon |
 | Stack | HTML5, CSS3, JS vanilla, Canvas 2D, Web Audio, Firebase |
@@ -25,17 +25,19 @@
 ## 3. Capacidades
 
 - Girar ruleta (animación 3-7s)
-- Subir hasta 25 imágenes
+- Subir hasta 100 imágenes
 - Reordenar con drag & drop
-- Eliminar modo (borde rojo)
-- 3 temas (Noche, Claro, Esmeralda dev)
+- Modo eliminación persistente (marca ganadores con ✓, no los borra)
+- Restaurar eliminados (botón ♻️)
+- Máximo 12 imágenes visibles por giro (selección justa de todas las activas)
+- 2 temas (Noche, Claro) + Esmeralda (solo dev)
 - 25 idiomas
 - Sonido on/off (persistente)
 - Grabar MP4 800x800 con audio
 - Confeti animado
 - Efecto ruleta loca (colores cambiantes)
-- PWA offline
-- Botón actualizar
+- Sets guardan/cargan estado de eliminación (Firebase)
+- Instalable como app (manifest)
 
 ## 4. APIs/claves/recursos
 
@@ -56,8 +58,8 @@
 
 - Repo: GitHub → GitHub Pages
 - Deploy: push a main → Pages auto-deploy
-- PWA: manifest.json + sw.js
-- Actualizar: botón 🔄 limpia cache
+- App: manifest.json (instalable). Sin service worker (eliminado por problemas de caché).
+- Actualizar: botón 🔄 limpia cache (visible para dev jdss07@outlook.fr)
 
 ## 7. Skills y lecciones
 
@@ -66,12 +68,15 @@
 3. Eliminación: no automática, esperar siguiente giro
 4. Traducciones: script Node para 25 idiomas
 5. Sonido: Web Audio requiere gesto del usuario
+6. Service worker autodestructivo: versiones viejas quedan atrapadas en caché. El sw.js actual se desregistra y limpia caches al activarse.
+7. finishSpin sin resetear isSpinning: si no hay imágenes visibles, la función retornaba temprano dejando isSpinning=true permanente. Fix: resetear antes del early return.
+8. indexedDB.deleteDatabase al inicio: causaba errores async en beforeunload. Fix: eliminar el borrado, no persistir imágenes entre sesiones.
 
 ## 8. Estado y pendientes
 
-**Versión actual:** v3.0.0 (2026-09-24)
+**Versión actual:** v3.0.1 (2026-09-25)
 
 **Pendientes:**
 - Ideas: importar CSV, modo pantalla completa, modo pesos
 - Mejoras: reordenar previews, animaciones de entrada
-- Feedback: usuario satisfecho con funcionalidad actual
+- Fixes aplicados: SW autodestructivo, isSpinning reset, límite 100 img, max 12 visibles

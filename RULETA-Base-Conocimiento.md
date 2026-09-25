@@ -6,14 +6,14 @@
 - **Stack:** HTML5, CSS3, JavaScript vanilla, Web Audio API, Canvas 2D
 - **Repo:** https://github.com/SandovalJon/Ruleta-by-SandovalJon
 - **URL:** https://sandovaljon.github.io/Ruleta-by-SandovalJon/
-- **Versión:** v3.0.0
-- **Fecha:** 2026-09-24
-- **Último commit:** 6e7207f
+- **Versión:** v3.0.1
+- **Fecha:** 2026-09-25
+- **Último commit:** bea8a0c
 
 ## 2. ARQUITECTURA
 
 - **Entry point:** index.html (SPA single-file)
-- **PWA:** manifest.json + sw.js (service worker para offline)
+- **PWA:** manifest.json (instalable). El service worker (sw.js) es autodestructivo: limpia cachés viejas, se desregistra y recarga. No hay modo offline (Firebase requiere red).
 - **Firebase:** Auth (Google) + Firestore (guardar/cargar sets)
 - **Audio:** Web Audio API (tick, whoosh, win sound, notif, error)
 - **Canvas:** Ruleta animada con requestAnimationFrame
