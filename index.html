@@ -3050,10 +3050,7 @@ const wheelCache = document.createElement('canvas');
             }, 1000);
         }
 
-        window.addEventListener('beforeunload', () => {
-            clearImagesDB();
-            localStorage.removeItem('roulette-eliminated');
-        });
+        indexedDB.deleteDatabase(DB_NAME);
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
