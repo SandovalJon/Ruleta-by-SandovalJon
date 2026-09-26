@@ -2388,8 +2388,10 @@ let colors = themeColors[currentTheme];
             confettiActive = true;
         }
 
-        if (dropZone) {
-            dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('click', () => {
+                console.log('DROPZONE CLICK');
+                document.getElementById('fileInput').click();
+            });
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('dragover');
@@ -2400,15 +2402,15 @@ let colors = themeColors[currentTheme];
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
+                console.log('DROP', e.dataTransfer.files.length);
                 handleFiles(e.dataTransfer.files);
             });
         }
 
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) handleFiles(e.target.files);
-            });
-        }
+        fileInput.addEventListener('change', (e) => {
+            console.log('FILE INPUT CHANGE', e.target.files.length);
+            if (e.target.files.length > 0) handleFiles(e.target.files);
+        });
 
 clearBtn.addEventListener('click', () => {
             if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
