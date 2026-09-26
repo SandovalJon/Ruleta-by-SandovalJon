@@ -2497,12 +2497,10 @@ images = [];
                         const dataUrl = e.target.result;
                         images.push(dataUrl);
                         fileNames.push(file.name || 'Imagen ' + images.length);
+                        onOneDone();
                         const img = new Image();
-                        img.onerror = () => { failed++; onOneDone(); };
-                        img.onload = () => {
-                            loadedImages.push(img);
-                            onOneDone();
-                        };
+                        img.onload = () => loadedImages.push(img);
+                        img.onerror = () => loadedImages.push(null);
                         img.src = dataUrl;
                     };
                     reader.readAsDataURL(file);
