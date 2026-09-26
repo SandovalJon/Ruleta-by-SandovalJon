@@ -898,6 +898,9 @@ canvas {
     <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
     <script>
+        window.addEventListener('error', (e) => console.error('ERR:', e.message, e.lineno));
+        window.addEventListener('unhandledrejection', (e) => console.error('REJECT:', e.reason));
+
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const previewImages = document.getElementById('previewImages');
