@@ -2442,73 +2442,50 @@ images = [];
 
         const MAX_IMAGE = 200;
 
-        function processImage(file, callback) {
-            const reader = new FileReader();
-            reader.onerror = () => callback(null);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onerror = () => callback(null);
-                img.onload = () => {
-                    const scale = Math.min(1, MAX_IMAGE / Math.max(img.width, img.height));
-                    if (scale >= 1) {
-                        callback(e.target.result);
-                        return;
-                    }
-                    const c = document.createElement('canvas');
-                    c.width = Math.round(img.width * scale);
-                    c.height = Math.round(img.height * scale);
-                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                    const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                    callback(c.toDataURL(mime, 0.8));
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
         function handleFiles(files) {
-            try {
-                const newImages = Array.from(files).filter(f => f.type.startsWith('image/'));
-                if (newImages.length === 0) return;
-                if (images.length + newImages.length > 500) {
-                    result.textContent = t('max');
-                    return;
-                }
-
-                isLoading = true;
-                let loaded = 0;
-                const total = newImages.length;
-                refreshMessages();
-                drawRoulette();
-
-                newImages.forEach(file => {
-                    processImage(file, (dataUrl) => {
-                        if (dataUrl) {
-                            images.push(dataUrl);
-                            fileNames.push(file.name || 'Imagen ' + images.length);
-                            const img = new Image();
-                            img.onload = () => {
-                                loadedImages.push(img);
-                                thumbImages.push(makeThumb(img, 32));
-                            };
-                            img.onerror = () => console.warn('Img load error:', file.name);
-                            img.src = dataUrl;
-                        }
-                        loaded++;
-                        if (loaded >= total) {
-                            isLoading = false;
-                            updatePreview();
-                            rebuildWheel();
-                            refreshMessages();
-                            if (typeof updateSaveBtn === 'function') updateSaveBtn();
-                        }
-                    });
-                });
-            } catch (e) {
-                console.error('handleFiles error:', e);
-                isLoading = false;
-                refreshMessages();
+            const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+            if (newFiles.length === 0) return;
+            if (images.length + newFiles.length > 500) {
+                result.textContent = t('max');
+                return;
             }
+
+            isLoading = true;
+            refreshMessages();
+            drawRoulette();
+
+            let processed = 0;
+            const total = newFiles.length;
+
+            function onOneDone() {
+                processed++;
+                if (processed >= total) {
+                    isLoading = false;
+                    updatePreview();
+                    rebuildWheel();
+                    refreshMessages();
+                    if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                }
+            }
+
+            newFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onerror = () => onOneDone();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    images.push(dataUrl);
+                    fileNames.push(file.name || 'Imagen ' + images.length);
+                    const img = new Image();
+                    img.onerror = () => onOneDone();
+                    img.onload = () => {
+                        loadedImages.push(img);
+                        thumbImages.push(makeThumb(img, 32));
+                        onOneDone();
+                    };
+                    img.src = dataUrl;
+                };
+                reader.readAsDataURL(file);
+            });
         }
         function updatePreview() {
             const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -4290,40 +4267,32 @@ eliminatedIndices = new Set(eliminatedArr);
                 return;
             }
             isLoading = true;
-            let loaded = 0;
+            let processed = 0;
             const total = dataUrls.length;
             refreshMessages();
             drawRoulette();
 
+            function onOneDone() {
+                processed++;
+                if (processed >= total) {
+                    isLoading = false;
+                    updatePreview();
+                    rebuildWheel();
+                    refreshMessages();
+                    if (currentUser && currentUser.uid) {
+                        saveSetBtn.disabled = images.length >= 2 ? false : true;
+                    }
+                }
+            }
+
             dataUrls.forEach((dataUrl, i) => {
                 const img = new Image();
+                img.onerror = () => onOneDone();
                 img.onload = () => {
                     images[i] = dataUrl;
                     loadedImages[i] = img;
                     thumbImages[i] = makeThumb(img, 32);
-                    loaded++;
-                    if (loaded >= total) {
-                        isLoading = false;
-                        updatePreview();
-                        rebuildWheel();
-                        refreshMessages();
-                        if (currentUser && currentUser.uid) {
-                            saveSetBtn.disabled = images.length >= 2 ? false : true;
-                        }
-                    } else {
-                        updatePreview();
-                        drawRoulette();
-                        refreshMessages();
-                    }
-                };
-                img.onerror = () => {
-                    loaded++;
-                    if (loaded >= total) {
-                        isLoading = false;
-                        updatePreview();
-                        rebuildWheel();
-                        refreshMessages();
-                    }
+                    onOneDone();
                 };
                 img.src = dataUrl;
             });
