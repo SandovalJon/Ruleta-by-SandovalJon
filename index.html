@@ -2491,19 +2491,23 @@ images = [];
                 const end = Math.min(batchStart + BATCH_SIZE, total);
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
-                    const reader = new FileReader();
-                    reader.onerror = () => { failed++; onOneDone(); };
-                    reader.onload = (e) => {
-                        const dataUrl = e.target.result;
+                    const objectUrl = URL.createObjectURL(file);
+                    const img = new Image();
+                    img.onerror = () => { URL.revokeObjectURL(objectUrl); failed++; onOneDone(); };
+                    img.onload = () => {
+                        const scale = Math.min(1, MAX_IMAGE / Math.max(img.width, img.height));
+                        const c = document.createElement('canvas');
+                        c.width = Math.max(1, Math.round(img.width * scale));
+                        c.height = Math.max(1, Math.round(img.height * scale));
+                        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                        const dataUrl = c.toDataURL('image/jpeg', 0.7);
+                        URL.revokeObjectURL(objectUrl);
                         images.push(dataUrl);
                         fileNames.push(file.name || 'Imagen ' + images.length);
+                        loadedImages.push(img);
                         onOneDone();
-                        const img = new Image();
-                        img.onload = () => loadedImages.push(img);
-                        img.onerror = () => loadedImages.push(null);
-                        img.src = dataUrl;
                     };
-                    reader.readAsDataURL(file);
+                    img.src = objectUrl;
                 }
                 batchStart = end;
                 if (batchStart < total) {
