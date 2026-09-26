@@ -4123,15 +4123,28 @@ googleBtn.addEventListener('click', () => {
                 elimMode: elimMode,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
-                console.log('SAVE SET eliminated:', [...eliminatedIndices]);
-                const batch = fbDB.batch();
+                console.log('SAVE SET eliminated:', [...eliminatedIndices], 'count:', images.length);
                 const compressPromises = images.map((dataUrl, i) => {
                     return compressImage(dataUrl).then((compressed) => {
-                        const imgRef = setRef.collection('images').doc(String(i));
-                        batch.set(imgRef, { uid: currentUser.uid, index: i, dataUrl: compressed });
+                        return { index: i, dataUrl: compressed };
                     });
                 });
-                return Promise.all(compressPromises).then(() => batch.commit()).then(() => setRef);
+                return Promise.all(compressPromises).then((compressedImages) => {
+                    const BATCH_SIZE = 400;
+                    let chain = Promise.resolve();
+                    for (let i = 0; i < compressedImages.length; i += BATCH_SIZE) {
+                        const chunk = compressedImages.slice(i, i + BATCH_SIZE);
+                        chain = chain.then(() => {
+                            const batch = fbDB.batch();
+                            chunk.forEach((item) => {
+                                const imgRef = setRef.collection('images').doc(String(item.index));
+                                batch.set(imgRef, { uid: currentUser.uid, index: item.index, dataUrl: item.dataUrl });
+                            });
+                            return batch.commit();
+                        });
+                    }
+                    return chain.then(() => setRef);
+                });
             }).then(() => {
                 setMsg.textContent = tt('savedOk');
                 setTimeout(() => { setMsg.textContent = ''; }, 2200);
@@ -4248,7 +4261,7 @@ eliminatedIndices = new Set(eliminatedArr);
                 refreshMessages();
                 return;
             }
-            if (images.length + dataUrls.length > 100) {
+            if (images.length + dataUrls.length > 500) {
                 result.textContent = t('max');
                 return;
             }
