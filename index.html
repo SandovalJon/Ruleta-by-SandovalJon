@@ -2553,7 +2553,22 @@ function removeImage(index) {
             const item = e.target.closest('.preview-item');
             if (!item) return;
             const index = parseInt(item.dataset.index, 10);
-            if (!isNaN(index)) removeImage(index);
+            if (isNaN(index)) return;
+
+            if (elimMode) {
+                if (eliminatedIndices.has(index)) {
+                    eliminatedIndices.delete(index);
+                } else {
+                    eliminatedIndices.add(index);
+                }
+                saveEliminationState();
+                updateSetProgress();
+                updatePreview();
+                rebuildWheel();
+                refreshMessages();
+            } else {
+                removeImage(index);
+            }
         });
 
         let draggedIndex = null;
