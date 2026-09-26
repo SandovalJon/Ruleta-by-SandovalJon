@@ -169,6 +169,8 @@
             background: var(--accent-soft);
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+            z-index: 10;
         }
 
         .drop-zone:hover, .drop-zone.dragover {
@@ -908,7 +910,9 @@ canvas {
         const result = document.getElementById('result');
         const searchInput = document.getElementById('searchInput');
 
-        searchInput.addEventListener('input', () => updatePreview());
+        if (searchInput) {
+            searchInput.addEventListener('input', () => updatePreview());
+        }
 
 let images = [];
         let fileNames = [];
