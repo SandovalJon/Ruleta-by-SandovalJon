@@ -2683,7 +2683,7 @@ const wheelCache = document.createElement('canvas');
                 c.beginPath();
                 c.arc(0, 0, imgSize / 2, 0, Math.PI * 2);
                 c.clip();
-                c.drawImage(thumb, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+                c.drawImage(img, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
                 c.restore();
             });
         }
