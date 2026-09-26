@@ -4316,17 +4316,6 @@ eliminatedIndices = new Set(eliminatedArr);
             pendingLoads = totalImages;
             processBatch();
         }
-                    pendingLoads--;
-                    if (pendingLoads <= 0) {
-                        pendingLoads = 0;
-                        isLoading = false;
-                        rebuildWheel();
-                        refreshMessages();
-                    }
-                };
-                img.src = dataUrl;
-            });
-        }
 
         saveSetBtn.addEventListener('click', saveCurrentSet);
         loadSetBtn.addEventListener('click', loadCurrentSet);
