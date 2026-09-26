@@ -2072,7 +2072,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 return;
             }
             if (isLoading) {
-                result.textContent = t('loading');
+                result.textContent = t('loading') + ' (' + images.length + ')';
                 return;
             }
             if (isSpinning) {
@@ -2439,7 +2439,7 @@ images = [];
             refreshMessages();
         });
 
-        const MAX_IMAGE = 100;
+        const MAX_IMAGE = 64;
 
         function handleFiles(files) {
             const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -2473,10 +2473,14 @@ images = [];
                     console.warn('Loading timeout forced');
                     finishLoading();
                 }
-            }, 30000);
+            }, 60000);
 
             function onOneDone() {
                 processed++;
+                if (processed % 25 === 0) {
+                    refreshMessages();
+                    drawRoulette();
+                }
                 if (processed >= total) {
                     clearTimeout(loadingTimeout);
                     finishLoading();
