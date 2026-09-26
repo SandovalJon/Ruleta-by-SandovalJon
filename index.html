@@ -2883,7 +2883,8 @@ const wheelCache = document.createElement('canvas');
         function updateSetProgress() {
             if (!fbDB || !currentUser || !currentSetId) return;
             fbDB.collection('sets').doc(currentSetId).update({
-                eliminated: [...eliminatedIndices]
+                eliminated: [...eliminatedIndices],
+                elimMode: elimMode
             }).catch((e) => console.log('Update progress error:', e.message));
         }
 
@@ -4119,6 +4120,7 @@ googleBtn.addEventListener('click', () => {
                 name: name,
                 count: images.length,
                 eliminated: [...eliminatedIndices],
+                elimMode: elimMode,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
                 console.log('SAVE SET eliminated:', [...eliminatedIndices]);
@@ -4172,8 +4174,15 @@ googleBtn.addEventListener('click', () => {
                             console.log('LOADED IMAGES:', dataUrls.length);
                             currentSetId = setId;
                             resetAndSetImages(dataUrls);
-                            eliminatedIndices = new Set(eliminatedArr);
-                            console.log('RESTORED ELIMINATED:', [...eliminatedIndices]);
+eliminatedIndices = new Set(eliminatedArr);
+                            const savedElimMode = setData.elimMode || false;
+                            if (elimMode !== savedElimMode) {
+                                elimMode = savedElimMode;
+                                elimBtn.classList.toggle('on', elimMode);
+                                elimBtn.textContent = elimMode ? t('eliminateActive') : t('eliminate');
+                                rouletteWrapper.classList.toggle('elim-mode', elimMode);
+                            }
+                            console.log('RESTORED ELIMINATED:', [...eliminatedIndices], 'elimMode:', elimMode);
                             saveEliminationState();
                             updatePreview();
                             rebuildWheel();
