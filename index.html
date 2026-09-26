@@ -2403,12 +2403,6 @@ let colors = themeColors[currentTheme];
             });
         }
 
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
-        }
-
 clearBtn.addEventListener('click', () => {
             if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
             if (recActive) {
