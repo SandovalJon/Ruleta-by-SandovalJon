@@ -2444,8 +2444,8 @@ images = [];
         function handleFiles(files) {
             const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
             if (newFiles.length === 0) return;
-            if (images.length + newFiles.length > 150) {
-                result.textContent = 'Máximo 150 imágenes para la ruleta';
+            if (images.length + newFiles.length > 500) {
+                result.textContent = t('max');
                 return;
             }
 
@@ -2656,8 +2656,6 @@ const wheelCache = document.createElement('canvas');
             const sliceAngle = (Math.PI * 2) / allActiveIndices.length;
 
             allActiveIndices.forEach((originalIndex, activeIndex) => {
-                const img = loadedImages[originalIndex];
-                if (!img) return;
                 const startAngle = activeIndex * sliceAngle;
                 const endAngle = startAngle + sliceAngle;
                 const midAngle = startAngle + sliceAngle / 2;
@@ -2669,8 +2667,13 @@ const wheelCache = document.createElement('canvas');
                 c.fillStyle = colors[activeIndex % colors.length];
                 c.fill();
                 c.strokeStyle = '#fff';
-                c.lineWidth = 3 * sf;
+                c.lineWidth = 2 * sf;
                 c.stroke();
+
+                if (allActiveIndices.length > 50) return;
+
+                const img = loadedImages[originalIndex];
+                if (!img) return;
 
                 const imageDistance = radius * 0.6;
                 const imgSize = Math.min(60 * sf, radius * 0.3);
@@ -4279,8 +4282,8 @@ eliminatedIndices = new Set(eliminatedArr);
                 refreshMessages();
                 return;
             }
-            if (images.length + dataUrls.length > 150) {
-                result.textContent = 'Máximo 150 imágenes para la ruleta';
+            if (images.length + dataUrls.length > 500) {
+                result.textContent = t('max');
                 return;
             }
             isLoading = true;
