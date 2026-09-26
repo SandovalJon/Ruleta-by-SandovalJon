@@ -2416,7 +2416,7 @@ eliminatedIndices.clear();
             refreshMessages();
         });
 
-        const MAX_IMAGE = 400;
+        const MAX_IMAGE = 150;
 
         function processImage(file, callback) {
             const reader = new FileReader();
@@ -4269,7 +4269,7 @@ eliminatedIndices = new Set(eliminatedArr);
             refreshMessages();
             drawRoulette();
             
-            const BATCH_SIZE = 50;
+            const BATCH_SIZE = 20;
             let batchIndex = 0;
             const totalImages = dataUrls.length;
             
@@ -4281,7 +4281,7 @@ eliminatedIndices = new Set(eliminatedArr);
                     img.onload = () => {
                         images[i] = dataUrl;
                         loadedImages[i] = img;
-                        thumbImages[i] = makeThumb(img, 48);
+                        thumbImages[i] = makeThumb(img, 32);
                         pendingLoads--;
                         if (pendingLoads <= 0) {
                             pendingLoads = 0;
