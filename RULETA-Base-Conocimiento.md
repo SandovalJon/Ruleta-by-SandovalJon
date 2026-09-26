@@ -33,7 +33,7 @@
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
 | Girar ruleta | ✅ | Animación con easeOut, sonido tick |
-| Subir imágenes | ✅ | Drag & drop, máximo 25 |
+| Subir imágenes | ✅ | Drag & drop, máximo 500 |
 | Reordenar imágenes | ✅ | Drag & drop en previews |
 | Eliminar imagen | ✅ | Click en X |
 | Limpiar todo | ✅ | Con confirmación |

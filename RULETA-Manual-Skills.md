@@ -25,7 +25,7 @@
 ## 3. Capacidades
 
 - Girar ruleta (animación 3-7s)
-- Subir hasta 100 imágenes
+- Subir hasta 500 imágenes
 - Reordenar con drag & drop
 - Modo eliminación persistente (marca ganadores con ✓, no los borra)
 - Restaurar eliminados (botón ♻️)
