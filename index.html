@@ -924,9 +924,8 @@ by <span>SandovalJon</span>
         }
 
 let images = [];
-        let fileNames = [];
         let loadedImages = [];
-        let thumbImages = [];
+        let fileNames = [];
         let eliminatedIndices = new Set();
         let isSpinning = false;
         let currentRotation = 0;
@@ -2415,9 +2414,8 @@ clearBtn.addEventListener('click', () => {
                 finishRecording();
             }
 images = [];
-            fileNames = [];
             loadedImages = [];
-            thumbImages = [];
+            fileNames = [];
             eliminatedIndices.clear();
             currentSetId = null;
             saveEliminationState();
@@ -2499,7 +2497,6 @@ images = [];
                         img.onerror = () => { failed++; onOneDone(); };
                         img.onload = () => {
                             loadedImages.push(img);
-                            thumbImages.push(makeThumb(img, 32));
                             onOneDone();
                         };
                         img.src = dataUrl;
@@ -2521,7 +2518,7 @@ images = [];
                 if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) return '';
                 const isEliminated = eliminatedIndices.has(index);
                 return `<div class="preview-item ${isEliminated ? 'eliminated' : ''}" data-index="${index}" draggable="${!isEliminated}">
-                    <img src="${src}" alt="preview" style="${isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : ''}">
+                    <img src="${src}" alt="preview" style="width:48px;height:48px;object-fit:cover;border-radius:6px;${isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : ''}">
                     ${isEliminated 
                         ? '<div class="eliminated-badge">✓</div>' 
                         : `<div class="remove-overlay">
@@ -2535,7 +2532,6 @@ images = [];
 function removeImage(index) {
             images.splice(index, 1);
             loadedImages.splice(index, 1);
-            thumbImages.splice(index, 1);
             winnerIndex = -1;
             winnerZoom = 0;
             isHovering = false;
@@ -2598,11 +2594,9 @@ function removeImage(index) {
 
             const movedImage = images.splice(draggedIndex, 1)[0];
             const movedLoaded = loadedImages.splice(draggedIndex, 1)[0];
-            const movedThumb = thumbImages.splice(draggedIndex, 1)[0];
 
             images.splice(dropIndex, 0, movedImage);
             loadedImages.splice(dropIndex, 0, movedLoaded);
-            thumbImages.splice(dropIndex, 0, movedThumb);
 
             if (winnerIndex === draggedIndex) {
                 winnerIndex = dropIndex;
@@ -2663,10 +2657,10 @@ const wheelCache = document.createElement('canvas');
 
             allActiveIndices.forEach((originalIndex, activeIndex) => {
                 const img = loadedImages[originalIndex];
+                if (!img) return;
                 const startAngle = activeIndex * sliceAngle;
                 const endAngle = startAngle + sliceAngle;
                 const midAngle = startAngle + sliceAngle / 2;
-                const thumb = thumbImages[originalIndex] || img;
 
                 c.beginPath();
                 c.moveTo(ox, oy);
@@ -2679,7 +2673,7 @@ const wheelCache = document.createElement('canvas');
                 c.stroke();
 
                 const imageDistance = radius * 0.6;
-                const imgSize = Math.min(80 * sf, radius * 0.35);
+                const imgSize = Math.min(60 * sf, radius * 0.3);
 
                 c.save();
                 c.translate(ox, oy);
@@ -3021,13 +3015,11 @@ const wheelCache = document.createElement('canvas');
                     results.sort((a, b) => a.index - b.index);
                     images = results.map(r => r.dataUrl);
                     loadedImages = [];
-                    thumbImages = [];
                     const loadPromises = images.map((dataUrl, i) => {
                         return new Promise((resolve) => {
                             const img = new Image();
                             img.onload = () => {
                                 loadedImages[i] = img;
-                                thumbImages[i] = makeThumb(img, 128);
                                 resolve();
                             };
                             img.onerror = () => resolve();
@@ -3036,7 +3028,6 @@ const wheelCache = document.createElement('canvas');
                     });
                     await Promise.all(loadPromises);
                     loadedImages = loadedImages.filter(Boolean);
-                    thumbImages = thumbImages.filter(Boolean);
                     updatePreview();
                     rebuildWheel();
                     refreshMessages();
@@ -4267,7 +4258,6 @@ eliminatedIndices = new Set(eliminatedArr);
             images = [];
             fileNames = [];
             loadedImages = [];
-            thumbImages = [];
             currentRotation = 0;
             winnerIndex = -1;
             winnerZoom = 0;
@@ -4323,7 +4313,6 @@ eliminatedIndices = new Set(eliminatedArr);
                     img.onload = () => {
                         images[i] = dataUrl;
                         loadedImages[i] = img;
-                        thumbImages[i] = makeThumb(img, 32);
                         onOneDone();
                     };
                     img.src = dataUrl;
