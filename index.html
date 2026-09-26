@@ -2439,13 +2439,13 @@ images = [];
             refreshMessages();
         });
 
-        const MAX_IMAGE = 200;
+        const MAX_IMAGE = 100;
 
         function handleFiles(files) {
             const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
             if (newFiles.length === 0) return;
-            if (images.length + newFiles.length > 500) {
-                result.textContent = t('max');
+            if (images.length + newFiles.length > 150) {
+                result.textContent = 'Máximo 150 imágenes para la ruleta';
                 return;
             }
 
@@ -4279,8 +4279,8 @@ eliminatedIndices = new Set(eliminatedArr);
                 refreshMessages();
                 return;
             }
-            if (images.length + dataUrls.length > 500) {
-                result.textContent = t('max');
+            if (images.length + dataUrls.length > 150) {
+                result.textContent = 'Máximo 150 imágenes para la ruleta';
                 return;
             }
             isLoading = true;
