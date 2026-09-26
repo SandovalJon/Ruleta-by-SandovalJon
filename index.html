@@ -4172,7 +4172,7 @@ googleBtn.addEventListener('click', () => {
                 console.log('SAVE SET eliminated:', [...eliminatedIndices], 'count:', images.length);
                 const compressPromises = images.map((dataUrl, i) => {
                     return compressImage(dataUrl).then((compressed) => {
-                        return { index: i, dataUrl: compressed };
+                        return { index: i, dataUrl: compressed, name: fileNames[i] || ('Imagen ' + (i + 1)) };
                     });
                 });
                 return Promise.all(compressPromises).then((compressedImages) => {
@@ -4184,7 +4184,7 @@ googleBtn.addEventListener('click', () => {
                             const batch = fbDB.batch();
                             chunk.forEach((item) => {
                                 const imgRef = setRef.collection('images').doc(String(item.index));
-                                batch.set(imgRef, { uid: currentUser.uid, index: item.index, dataUrl: item.dataUrl });
+                                batch.set(imgRef, { uid: currentUser.uid, index: item.index, dataUrl: item.dataUrl, name: item.name });
                             });
                             return batch.commit();
                         });
@@ -4227,12 +4227,17 @@ googleBtn.addEventListener('click', () => {
                         .orderBy('index').get()
                         .then((snap) => {
                             const dataUrls = [];
+                            const names = [];
                             snap.forEach((doc) => {
-                                if (doc.exists) dataUrls.push(doc.data().dataUrl);
+                                if (doc.exists) {
+                                    dataUrls.push(doc.data().dataUrl);
+                                    names.push(doc.data().name || ('Imagen ' + (dataUrls.length)));
+                                }
                             });
                             console.log('LOADED IMAGES:', dataUrls.length);
                             currentSetId = setId;
                             resetAndSetImages(dataUrls);
+                            fileNames = names;
 eliminatedIndices = new Set(eliminatedArr);
                             const savedElimMode = setData.elimMode || false;
                             if (elimMode !== savedElimMode) {
