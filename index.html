@@ -2056,11 +2056,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             const activeCount = getActiveCount();
             const eliminatedCount = getEliminatedCount();
             
-            if (loadedImages.length > 0) {
+            if (images.length > 0) {
                 counter.style.display = 'inline-flex';
                 countEl.textContent = activeCount;
                 if (eliminatedCount > 0) {
-                    countEl.textContent += `/${loadedImages.length}`;
+                    countEl.textContent += `/${images.length}`;
                 }
                 restoreBtn.style.display = eliminatedCount > 0 ? 'inline-flex' : 'none';
             } else {
@@ -2459,19 +2459,29 @@ images = [];
             const total = newFiles.length;
             const BATCH_SIZE = 50;
             let batchStart = 0;
+            let failed = 0;
+
+            function finishLoading() {
+                isLoading = false;
+                updatePreview();
+                rebuildWheel();
+                refreshMessages();
+                if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                if (failed > 0) console.warn(failed + ' images failed');
+            }
+
+            const loadingTimeout = setTimeout(() => {
+                if (isLoading) {
+                    console.warn('Loading timeout forced');
+                    finishLoading();
+                }
+            }, 30000);
 
             function onOneDone() {
                 processed++;
-                if (processed % 10 === 0) {
-                    refreshMessages();
-                    drawRoulette();
-                }
                 if (processed >= total) {
-                    isLoading = false;
-                    updatePreview();
-                    rebuildWheel();
-                    refreshMessages();
-                    if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                    clearTimeout(loadingTimeout);
+                    finishLoading();
                 }
             }
 
@@ -2480,13 +2490,13 @@ images = [];
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
                     const reader = new FileReader();
-                    reader.onerror = () => onOneDone();
+                    reader.onerror = () => { failed++; onOneDone(); };
                     reader.onload = (e) => {
                         const dataUrl = e.target.result;
                         images.push(dataUrl);
                         fileNames.push(file.name || 'Imagen ' + images.length);
                         const img = new Image();
-                        img.onerror = () => onOneDone();
+                        img.onerror = () => { failed++; onOneDone(); };
                         img.onload = () => {
                             loadedImages.push(img);
                             thumbImages.push(makeThumb(img, 32));
