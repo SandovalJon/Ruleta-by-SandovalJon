@@ -924,6 +924,7 @@ by <span>SandovalJon</span>
         }
 
 let images = [];
+        let fullImages = [];
         let loadedImages = [];
         let fileNames = [];
         let eliminatedIndices = new Set();
@@ -932,6 +933,7 @@ let images = [];
         let spinTimeout = null;
 let winnerIndex = -1;
         let winnerZoom = 0;
+        let winnerFullImg = null;
         let isHovering = false;
         let isLoading = false;
         let pendingLoads = 0;
@@ -2414,6 +2416,7 @@ clearBtn.addEventListener('click', () => {
                 finishRecording();
             }
 images = [];
+            fullImages = [];
             loadedImages = [];
             fileNames = [];
             eliminatedIndices.clear();
@@ -2495,14 +2498,21 @@ images = [];
                     const img = new Image();
                     img.onerror = () => { URL.revokeObjectURL(objectUrl); failed++; onOneDone(); };
                     img.onload = () => {
-                        const scale = Math.min(1, MAX_IMAGE / Math.max(img.width, img.height));
-                        const c = document.createElement('canvas');
-                        c.width = Math.max(1, Math.round(img.width * scale));
-                        c.height = Math.max(1, Math.round(img.height * scale));
-                        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                        const dataUrl = c.toDataURL('image/jpeg', 0.7);
+                        const drawScaled = (target) => {
+                            const s = Math.min(1, target / Math.max(img.width, img.height));
+                            const c = document.createElement('canvas');
+                            c.width = Math.max(1, Math.round(img.width * s));
+                            c.height = Math.max(1, Math.round(img.height * s));
+                            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                            return c;
+                        };
+                        const small = drawScaled(MAX_IMAGE);
+                        const smallDataUrl = small.toDataURL('image/jpeg', 0.7);
+                        const full = drawScaled(400);
+                        const fullDataUrl = full.toDataURL('image/jpeg', 0.85);
                         URL.revokeObjectURL(objectUrl);
-                        images.push(dataUrl);
+                        images.push(smallDataUrl);
+                        fullImages.push(fullDataUrl);
                         fileNames.push(file.name || 'Imagen ' + images.length);
                         loadedImages.push(img);
                         onOneDone();
@@ -2537,9 +2547,12 @@ images = [];
 
 function removeImage(index) {
             images.splice(index, 1);
+            fullImages.splice(index, 1);
             loadedImages.splice(index, 1);
+            fileNames.splice(index, 1);
             winnerIndex = -1;
             winnerZoom = 0;
+            winnerFullImg = null;
             isHovering = false;
             rouletteWrapper.classList.remove('winner-mode');
             updatePreview();
@@ -2599,10 +2612,14 @@ function removeImage(index) {
             if (isNaN(dropIndex) || draggedIndex === dropIndex) return;
 
             const movedImage = images.splice(draggedIndex, 1)[0];
+            const movedFull = fullImages.splice(draggedIndex, 1)[0];
             const movedLoaded = loadedImages.splice(draggedIndex, 1)[0];
+            const movedName = fileNames.splice(draggedIndex, 1)[0];
 
             images.splice(dropIndex, 0, movedImage);
+            fullImages.splice(dropIndex, 0, movedFull);
             loadedImages.splice(dropIndex, 0, movedLoaded);
+            fileNames.splice(dropIndex, 0, movedName);
 
             if (winnerIndex === draggedIndex) {
                 winnerIndex = dropIndex;
@@ -2755,7 +2772,7 @@ const wheelCache = document.createElement('canvas');
             }
 
             if (winnerIndex >= 0 && winnerZoom > 0) {
-                const winnerImg = loadedImages[winnerIndex];
+                const winnerImg = winnerFullImg || loadedImages[winnerIndex];
                 const displaySize = radius * 2 * winnerZoom;
 
                 c.save();
@@ -2880,6 +2897,12 @@ const wheelCache = document.createElement('canvas');
 
             winnerIndex = activeIndices[selectedIndex];
             winnerZoom = 0;
+            winnerFullImg = null;
+            if (fullImages[winnerIndex]) {
+                const fi = new Image();
+                fi.onload = () => { winnerFullImg = fi; };
+                fi.src = fullImages[winnerIndex];
+            }
             refreshMessages();
             const zoomStart = Date.now();
             const zoomDuration = 1500;
@@ -2918,6 +2941,7 @@ const wheelCache = document.createElement('canvas');
             eliminatedIndices.add(winnerIndex);
             winnerIndex = -1;
             winnerZoom = 0;
+            winnerFullImg = null;
             isHovering = false;
             rouletteWrapper.classList.remove('winner-mode');
             updatePreview();
@@ -4267,6 +4291,8 @@ eliminatedIndices = new Set(eliminatedArr);
             images = [];
             fileNames = [];
             loadedImages = [];
+            fullImages = [];
+            winnerFullImg = null;
             currentRotation = 0;
             winnerIndex = -1;
             winnerZoom = 0;
