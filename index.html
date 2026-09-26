@@ -871,6 +871,7 @@ canvas {
                 </div>
                 <div class="set-msg" id="setMsg"></div>
             </div>
+            <input type="text" id="searchInput" placeholder="🔍 Buscar imagen..." class="search-input" style="width:100%;padding:8px 12px;margin:10px 0;border-radius:12px;border:1px solid var(--accent);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box;" />
             <div class="preview-images" id="previewImages"></div>
         </div>
 
@@ -905,7 +906,9 @@ canvas {
         const recordBtn = document.getElementById('recordBtn');
         const elimBtn = document.getElementById('elimBtn');
         const result = document.getElementById('result');
-        const resultHint = document.getElementById('result-hint');
+        const searchInput = document.getElementById('searchInput');
+
+        searchInput.addEventListener('input', () => updatePreview());
 
 let images = [];
         let fileNames = [];
@@ -2521,7 +2524,10 @@ refreshMessages();
             });
         }
         function updatePreview() {
+            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
             previewImages.innerHTML = images.map((src, index) => {
+                const fileName = fileNames[index] || '';
+                if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) return '';
                 const isEliminated = eliminatedIndices.has(index);
                 return `<div class="preview-item ${isEliminated ? 'eliminated' : ''}" data-index="${index}" draggable="${!isEliminated}">
                     <img src="${src}" alt="preview" style="${isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : ''}">
