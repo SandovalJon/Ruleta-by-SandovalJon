@@ -2457,9 +2457,15 @@ images = [];
 
             let processed = 0;
             const total = newFiles.length;
+            const BATCH_SIZE = 50;
+            let batchStart = 0;
 
             function onOneDone() {
                 processed++;
+                if (processed % 10 === 0) {
+                    refreshMessages();
+                    drawRoulette();
+                }
                 if (processed >= total) {
                     isLoading = false;
                     updatePreview();
@@ -2469,24 +2475,34 @@ images = [];
                 }
             }
 
-            newFiles.forEach(file => {
-                const reader = new FileReader();
-                reader.onerror = () => onOneDone();
-                reader.onload = (e) => {
-                    const dataUrl = e.target.result;
-                    images.push(dataUrl);
-                    fileNames.push(file.name || 'Imagen ' + images.length);
-                    const img = new Image();
-                    img.onerror = () => onOneDone();
-                    img.onload = () => {
-                        loadedImages.push(img);
-                        thumbImages.push(makeThumb(img, 32));
-                        onOneDone();
+            function processBatch() {
+                const end = Math.min(batchStart + BATCH_SIZE, total);
+                for (let i = batchStart; i < end; i++) {
+                    const file = newFiles[i];
+                    const reader = new FileReader();
+                    reader.onerror = () => onOneDone();
+                    reader.onload = (e) => {
+                        const dataUrl = e.target.result;
+                        images.push(dataUrl);
+                        fileNames.push(file.name || 'Imagen ' + images.length);
+                        const img = new Image();
+                        img.onerror = () => onOneDone();
+                        img.onload = () => {
+                            loadedImages.push(img);
+                            thumbImages.push(makeThumb(img, 32));
+                            onOneDone();
+                        };
+                        img.src = dataUrl;
                     };
-                    img.src = dataUrl;
-                };
-                reader.readAsDataURL(file);
-            });
+                    reader.readAsDataURL(file);
+                }
+                batchStart = end;
+                if (batchStart < total) {
+                    setTimeout(processBatch, 50);
+                }
+            }
+
+            processBatch();
         }
         function updatePreview() {
             const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -4270,6 +4286,8 @@ eliminatedIndices = new Set(eliminatedArr);
             isLoading = true;
             let processed = 0;
             const total = dataUrls.length;
+            const BATCH_SIZE = 50;
+            let batchStart = 0;
             refreshMessages();
             drawRoulette();
 
@@ -4286,17 +4304,27 @@ eliminatedIndices = new Set(eliminatedArr);
                 }
             }
 
-            dataUrls.forEach((dataUrl, i) => {
-                const img = new Image();
-                img.onerror = () => onOneDone();
-                img.onload = () => {
-                    images[i] = dataUrl;
-                    loadedImages[i] = img;
-                    thumbImages[i] = makeThumb(img, 32);
-                    onOneDone();
-                };
-                img.src = dataUrl;
-            });
+            function processBatch() {
+                const end = Math.min(batchStart + BATCH_SIZE, total);
+                for (let i = batchStart; i < end; i++) {
+                    const dataUrl = dataUrls[i];
+                    const img = new Image();
+                    img.onerror = () => onOneDone();
+                    img.onload = () => {
+                        images[i] = dataUrl;
+                        loadedImages[i] = img;
+                        thumbImages[i] = makeThumb(img, 32);
+                        onOneDone();
+                    };
+                    img.src = dataUrl;
+                }
+                batchStart = end;
+                if (batchStart < total) {
+                    setTimeout(processBatch, 50);
+                }
+            }
+
+            processBatch();
         }
 
         saveSetBtn.addEventListener('click', saveCurrentSet);
