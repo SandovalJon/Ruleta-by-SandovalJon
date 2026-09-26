@@ -853,8 +853,8 @@ canvas {
                     <span id="dropText">Arrastra imágenes aquí</span><br>
                     <small id="dropHint">(mínimo 2, máximo 500)</small>
                 </div>
+                <input type="file" id="fileInput" multiple accept="image/*" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1;" />
             </div>
-            <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" />
             <button class="clear-btn" id="clearBtn" aria-label="Limpiar todas las imágenes">🗑️ Limpiar</button>
             <button class="record-btn" id="restoreBtn" style="display:none; margin: 10px auto 0;" aria-label="Restaurar eliminadas">♻️ Restaurar</button>
             <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)" aria-label="Grabar girada en video MP4">🎥 Grabar girada (MP4)</button>
@@ -892,11 +892,9 @@ canvas {
     </div>
 
 <div class="footer">
-        by <span>SandovalJon</span>
+by <span>SandovalJon</span>
         <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">v3.0.1</div>
     </div>
-
-    <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
     <script>
         window.addEventListener('error', (e) => console.error('ERR:', e.message, e.lineno));
@@ -2388,11 +2386,7 @@ let colors = themeColors[currentTheme];
             confettiActive = true;
         }
 
-        dropZone.addEventListener('click', () => {
-                console.log('DROPZONE CLICK');
-                document.getElementById('fileInput').click();
-            });
-            dropZone.addEventListener('dragover', (e) => {
+        dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('dragover');
             });
@@ -2402,13 +2396,11 @@ let colors = themeColors[currentTheme];
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
-                console.log('DROP', e.dataTransfer.files.length);
                 handleFiles(e.dataTransfer.files);
             });
         }
 
         fileInput.addEventListener('change', (e) => {
-            console.log('FILE INPUT CHANGE', e.target.files.length);
             if (e.target.files.length > 0) handleFiles(e.target.files);
         });
 
