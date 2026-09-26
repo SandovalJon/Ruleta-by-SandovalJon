@@ -853,8 +853,8 @@ canvas {
                     <span id="dropText">Arrastra imágenes aquí</span><br>
                     <small id="dropHint">(mínimo 2, máximo 500)</small>
                 </div>
+                <input type="file" id="fileInput" multiple accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" />
             </div>
-            <input type="file" id="fileInputVisible" multiple accept="image/*" style="display:block;width:100%;margin:10px 0;padding:8px;background:var(--accent-soft);border-radius:12px;color:var(--text);font-size:0.9rem;" />
             <button class="clear-btn" id="clearBtn" aria-label="Limpiar todas las imágenes">🗑️ Limpiar</button>
             <button class="record-btn" id="restoreBtn" style="display:none; margin: 10px auto 0;" aria-label="Restaurar eliminadas">♻️ Restaurar</button>
             <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)" aria-label="Grabar girada en video MP4">🎥 Grabar girada (MP4)</button>
@@ -904,11 +904,10 @@ canvas {
 
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
-        const fileInputVisible = document.getElementById('fileInputVisible');
         const previewImages = document.getElementById('previewImages');
 
-        if (fileInputVisible) {
-            fileInputVisible.addEventListener('change', (e) => {
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) handleFiles(e.target.files);
             });
         }
@@ -2389,11 +2388,7 @@ let colors = themeColors[currentTheme];
             confettiActive = true;
         }
 
-        if (fileInput) {
-            dropZone.addEventListener('click', () => {
-                console.log('Drop zone clicked');
-                fileInput.click();
-            });
+        if (dropZone) {
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('dragover');
