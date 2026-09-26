@@ -2393,9 +2393,9 @@ clearBtn.addEventListener('click', () => {
             images = [];
             loadedImages = [];
             thumbImages = [];
-            eliminatedIndices.clear();
+eliminatedIndices.clear();
+            currentSetId = null;
             saveEliminationState();
-            clearImagesDB();
             previewImages.innerHTML = '';
             rouletteWrapper.classList.remove('winner-mode');
             isHovering = false;
@@ -2880,6 +2880,13 @@ const wheelCache = document.createElement('canvas');
             animateWinner();
         }
 
+        function updateSetProgress() {
+            if (!fbDB || !currentUser || !currentSetId) return;
+            fbDB.collection('sets').doc(currentSetId).update({
+                eliminated: [...eliminatedIndices]
+            }).catch((e) => console.log('Update progress error:', e.message));
+        }
+
         function eliminateWinner() {
             if (winnerIndex < 0) return;
             eliminatedIndices.add(winnerIndex);
@@ -2890,7 +2897,7 @@ const wheelCache = document.createElement('canvas');
             updatePreview();
             rebuildWheel();
             saveEliminationState();
-            autoSaveImages();
+            updateSetProgress();
             clearTimeout(elimNoteTimer);
             const activeCount = getActiveIndices().length;
             elimNote = activeCount === 0 ? t('allEliminated') : t('eliminated').replace('{n}', activeCount);
@@ -3411,6 +3418,7 @@ const wheelCache = document.createElement('canvas');
         let fbAuth = null;
         let fbDB = null;
         let currentUser = null;
+        let currentSetId = null;
 
         const U = {
             es: {
@@ -4126,6 +4134,13 @@ googleBtn.addEventListener('click', () => {
                 setMsg.textContent = tt('savedOk');
                 setTimeout(() => { setMsg.textContent = ''; }, 2200);
                 loadMySets();
+                setTimeout(() => {
+                    if (currentUser) {
+                        fbDB.collection('sets').where('uid', '==', currentUser.uid).orderBy('createdAt', 'desc').limit(1).get().then((snap) => {
+                            if (!snap.empty) currentSetId = snap.docs[0].id;
+                        }).catch(() => {});
+                    }
+                }, 500);
             }).catch((e) => {
                 setMsg.textContent = tt('err') + ': ' + e.message;
                 saveSetBtn.disabled = false;
@@ -4155,6 +4170,7 @@ googleBtn.addEventListener('click', () => {
                                 if (doc.exists) dataUrls.push(doc.data().dataUrl);
                             });
                             console.log('LOADED IMAGES:', dataUrls.length);
+                            currentSetId = setId;
                             resetAndSetImages(dataUrls);
                             eliminatedIndices = new Set(eliminatedArr);
                             console.log('RESTORED ELIMINATED:', [...eliminatedIndices]);
