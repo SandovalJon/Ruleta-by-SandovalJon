@@ -939,6 +939,19 @@ let winnerIndex = -1;
         let isLoading = false;
         let pendingLoads = 0;
 
+        let isPremium = false;
+        const FREE_MAX_IMAGES = 25;
+        const PREMIUM_MAX_IMAGES = 150;
+        const FREE_MAX_SETS = 2;
+
+        function getMaxImages() {
+            return isPremium ? PREMIUM_MAX_IMAGES : FREE_MAX_IMAGES;
+        }
+
+        function getMaxSets() {
+            return isPremium ? 999 : FREE_MAX_SETS;
+        }
+
         let recActive = false;
         let recDiscard = false;
         let recMediaRecorder = null;
@@ -3469,18 +3482,6 @@ const wheelCache = document.createElement('canvas');
         let fbDB = null;
         let currentUser = null;
         let currentSetId = null;
-        let isPremium = false;
-        const FREE_MAX_IMAGES = 25;
-        const PREMIUM_MAX_IMAGES = 150;
-        const FREE_MAX_SETS = 2;
-
-        function getMaxImages() {
-            return isPremium ? PREMIUM_MAX_IMAGES : FREE_MAX_IMAGES;
-        }
-
-        function getMaxSets() {
-            return isPremium ? 999 : FREE_MAX_SETS;
-        }
 
         const U = {
             es: {
