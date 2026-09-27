@@ -2354,9 +2354,8 @@ let colors = themeColors[currentTheme];
             return particles;
         }
 
-        function drawConfetti() {
+        function updateConfetti() {
             if (!confettiActive) return;
-            
             let alive = 0;
             confettiParticles.forEach(p => {
                 if (p.opacity <= 0) return;
@@ -2366,21 +2365,29 @@ let colors = themeColors[currentTheme];
                 p.y += p.vy;
                 p.angle += p.spin;
                 if (p.y > canvas.height * 0.95) p.opacity -= 0.03;
-                
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate(p.angle);
-                ctx.globalAlpha = p.opacity;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-                ctx.restore();
             });
+            confettiActive = alive > 0;
+        }
 
-            if (alive > 0) {
-                confettiActive = true;
-            } else {
-                confettiActive = false;
-            }
+        function drawConfettiTo(cv, c) {
+            if (!confettiActive) return;
+            const sf = cv.width / canvas.width;
+            confettiParticles.forEach(p => {
+                if (p.opacity <= 0) return;
+                c.save();
+                c.translate(p.x * sf, p.y * sf);
+                c.rotate(p.angle);
+                c.globalAlpha = p.opacity;
+                c.fillStyle = p.color;
+                c.fillRect(-p.w * sf / 2, -p.h * sf / 2, p.w * sf, p.h * sf);
+                c.restore();
+            });
+        }
+
+        function drawConfetti() {
+            updateConfetti();
+            drawConfettiTo(canvas, ctx);
+            if (recActive && recCanvas) drawConfettiTo(recCanvas, recCtx);
         }
 
         function launchConfetti() {
