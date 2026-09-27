@@ -4104,12 +4104,23 @@ const wheelCache = document.createElement('canvas');
             if (el) el.textContent = text;
         }
 
-        function loadPremiumStatus(uid) {
+function loadPremiumStatus(uid) {
             if (!fbDB) return;
             console.log('Loading premium for uid:', uid);
             fbDB.collection('users').doc(uid).get().then((doc) => {
                 console.log('Doc exists:', doc.exists, 'data:', doc.exists ? JSON.stringify(doc.data()) : 'N/A');
-                isPremium = !!(doc.exists && doc.data().isPremium);
+                if (doc.exists) {
+                    isPremium = !!(doc.data().isPremium);
+                } else {
+                    console.log('Creating user doc for:', uid);
+                    fbDB.collection('users').doc(uid).set({
+                        isPremium: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        console.log('User doc created');
+                    }).catch((e) => console.error('Create doc error:', e.code, e.message));
+                    isPremium = false;
+                }
                 console.log('isPremium:', isPremium);
                 updatePremiumUI();
             }).catch((e) => { console.error('Premium error:', e.code, e.message); isPremium = false; updatePremiumUI(); });
