@@ -4178,7 +4178,8 @@ googleBtn.addEventListener('click', () => {
             }).then((setRef) => {
                 console.log('SAVE SET eliminated:', [...eliminatedIndices], 'count:', images.length);
                 const compressPromises = images.map((dataUrl, i) => {
-                    return compressImage(dataUrl).then((compressed) => {
+                    const source = fullImages[i] || dataUrl;
+                    return compressImage(source).then((compressed) => {
                         return { index: i, dataUrl: compressed, name: fileNames[i] || ('Imagen ' + (i + 1)) };
                     });
                 });
