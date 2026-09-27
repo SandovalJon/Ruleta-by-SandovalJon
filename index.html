@@ -4128,16 +4128,36 @@ function loadPremiumStatus(uid) {
 
         function activatePremium() {
             if (!fbDB || !currentUser) return;
-            fbDB.collection('users').doc(currentUser.uid).update({
-                isPremium: true
-            }).then(() => {
-                isPremium = true;
-                updatePremiumUI();
-                alert('¡Premium activado!');
-            }).catch((e) => {
-                console.error('Error:', e.code, e.message);
-                alert('Error: ' + e.message);
-            });
+            if (currentUser.email === 'jdss07@outlook.fr') {
+                fbDB.collection('users').doc(currentUser.uid).update({
+                    isPremium: true
+                }).then(() => {
+                    isPremium = true;
+                    updatePremiumUI();
+                    alert('¡Premium activado!');
+                }).catch((e) => {
+                    console.error('Error:', e.code, e.message);
+                    alert('Error: ' + e.message);
+                });
+            } else {
+                const url = 'https://sandovaljon-ruleta.lemonsqueezy.com/checkout';
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;';
+                modal.innerHTML = `
+                    <div style="background:var(--bg-2,#1a1a2e);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center;">
+                        <h3 style="margin:0 0 12px;color:#f0c040;">🔑 Activar Premium</h3>
+                        <p style="margin:0 0 16px;color:#ccc;font-size:0.9rem;">Haz tu compra y envía tu UID para activar.</p>
+                        <a href="${url}" target="_blank" rel="noopener" style="display:block;padding:10px;background:#58a6ff;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;margin-bottom:12px;">🛒 Comprar Premium</a>
+                        <p style="margin:0 0 8px;color:#aaa;font-size:0.85rem;">Tu UID:</p>
+                        <div style="background:rgba(255,255,255,0.1);padding:8px 12px;border-radius:8px;font-family:monospace;font-size:0.8rem;color:#ffd700;word-break:break-all;display:flex;justify-content:space-between;align-items:center;">
+                            <span>${currentUser.uid}</span>
+                            <button onclick="navigator.clipboard.writeText('${currentUser.uid}').then(()=>this.textContent='✅')" style="background:none;border:1px solid rgba(255,215,0,0.3);color:#ffd700;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:0.75rem;">Copiar</button>
+                        </div>
+                        <p style="margin:12px 0 0;color:#aaa;font-size:0.8rem;">Envía tu UID a <strong style="color:#fff;">jdss07@outlook.fr</strong></p>
+                        <button onclick="this.closest('div[style]').remove()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.9rem;">Cerrar</button>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
         }
 
         function updatePremiumUI() {
