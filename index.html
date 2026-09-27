@@ -4111,32 +4111,14 @@ const wheelCache = document.createElement('canvas');
             }).catch(() => { isPremium = false; updatePremiumUI(); });
         }
 
-        async function activatePremium() {
+        function activatePremium() {
             if (!fbDB || !currentUser) return;
-            const key = prompt('🔑 Ingresa tu clave de licencia:');
-            if (!key) return;
-            const valid = await validateLicenseKey(key);
-            if (valid) {
-                await fbDB.collection('users').doc(currentUser.uid).set({ isPremium: true, licenseKey: key }, { merge: true });
-                isPremium = true;
-                updatePremiumUI();
-                alert('✅ ¡Premium activado!');
-            } else {
-                alert('❌ Clave inválida. Escríbeme para obtenerla.');
-            }
-        }
-
-        async function validateLicenseKey(key) {
-            // TODO: reemplazar con la URL real de Lemon Squeezy / Cloud Function
-            const VALID_KEYS_URL = 'https://TU-CLOUD-FUNCTION/validate?key=';
-            try {
-                const res = await fetch(VALID_KEYS_URL + encodeURIComponent(key));
-                if (!res.ok) return false;
-                const data = await res.json();
-                return !!data.valid;
-            } catch (e) {
-                return false;
-            }
+            const uid = currentUser.uid;
+            const msg = '🔑 Para activar Premium:\n\n' +
+                '1. Compra aquí: https://sandovaljon.lemonsqueezy.com\n' +
+                '2. Envía tu UID a sandovaljon@gmail.com\n\n' +
+                'Tu UID: ' + uid;
+            alert(msg);
         }
 
         function updatePremiumUI() {
