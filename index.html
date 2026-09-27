@@ -4055,6 +4055,7 @@ const wheelCache = document.createElement('canvas');
             currentUser = user;
             const versionBadge = document.getElementById('versionBadge');
             if (user) {
+                isPremium = false;
                 googleBtn.style.display = 'none';
                 userChip.style.display = 'flex';
                 document.getElementById('premiumBadge').style.display = 'block';
