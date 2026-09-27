@@ -4105,10 +4105,12 @@ const wheelCache = document.createElement('canvas');
 
         function loadPremiumStatus(uid) {
             if (!fbDB) return;
+            console.log('Loading premium for uid:', uid);
             fbDB.collection('users').doc(uid).get().then((doc) => {
+                console.log('Doc exists:', doc.exists, 'isPremium:', doc.exists ? doc.data().isPremium : 'N/A');
                 isPremium = !!(doc.exists && doc.data().isPremium);
                 updatePremiumUI();
-            }).catch(() => { isPremium = false; updatePremiumUI(); });
+            }).catch((e) => { console.error('Premium error:', e); isPremium = false; updatePremiumUI(); });
         }
 
         function activatePremium() {
