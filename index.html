@@ -851,7 +851,7 @@ canvas {
                 <div class="drop-zone-icon">📸</div>
                 <div class="drop-zone-text">
                     <span id="dropText">Arrastra imágenes aquí</span><br>
-                    <small id="dropHint">(mínimo 2, máximo 500)</small>
+                    <small id="dropHint">(mínimo 2, máximo 150)</small>
                 </div>
             </label>
             <input type="file" id="fileInput" multiple accept="image/*" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" />
@@ -978,11 +978,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             es: {
                 title: '🎰 Ruleta de Imágenes',
                 drop: 'Arrastra imágenes aquí',
-                dropHint: '(mínimo 2, máximo 500)',
+                dropHint: '(mínimo 2, máximo 150)',
                 clear: '🗑️ Limpiar',
                 empty: 'Agrega imágenes para comenzar',
                 min: 'Agrega al menos 2 imágenes',
-                max: 'Máximo 500 imágenes permitidas',
+                max: 'Máximo 150 imágenes permitidas',
                 preview: '{n} imágenes · toca la ruleta para girar',
                 loading: 'Cargando imágenes... espere un momento',
                 spinning: '... Girando ...',
@@ -1020,11 +1020,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             en: {
                 title: '🎰 Image Roulette',
                 drop: 'Drag images here',
-                dropHint: '(minimum 2, maximum 500)',
+                dropHint: '(minimum 2, maximum 150)',
                 clear: '🗑️ Clear',
                 empty: 'Add images to start',
                 min: 'Add at least 2 images',
-                max: 'Maximum 500 images allowed',
+                max: 'Maximum 150 images allowed',
                 preview: '{n} images · tap the wheel to spin',
                 loading: 'Loading images... please wait',
                 spinning: '... Spinning ...',
@@ -1062,7 +1062,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             pt: {
                 title: '🎰 Roleta de Imagens',
                 drop: 'Arraste imagens aqui',
-                dropHint: '(mínimo 2, máximo 500)',
+                dropHint: '(mínimo 2, máximo 150)',
                 clear: '🗑️ Limpar',
                 empty: 'Adicione imagens para começar',
                 min: 'Adicione pelo menos 2 imagens',
@@ -1104,11 +1104,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             fr: {
                 title: '🎰 Roulette à Images',
                 drop: 'Glissez des images ici',
-                dropHint: '(minimum 2, maximum 500)',
+                dropHint: '(minimum 2, maximum 150)',
                 clear: '🗑️ Effacer',
                 empty: 'Ajoutez des images pour commencer',
                 min: 'Ajoutez au moins 2 images',
-                max: 'Maximum 500 images autorisées',
+                max: 'Maximum 150 images autorisées',
                 preview: '{n} images · touchez la roue pour tourner',
                 loading: 'Chargement des images... un instant',
                 spinning: '... Rotation ...',
@@ -2447,7 +2447,7 @@ images = [];
         function handleFiles(files) {
             const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
             if (newFiles.length === 0) return;
-            if (images.length + newFiles.length > 500) {
+            if (images.length + newFiles.length > 150) {
                 result.textContent = t('max');
                 return;
             }
@@ -2508,7 +2508,7 @@ images = [];
                         };
                         const small = drawScaled(MAX_IMAGE);
                         const smallDataUrl = small.toDataURL('image/jpeg', 0.7);
-                        const full = drawScaled(400);
+                        const full = drawScaled(512);
                         const fullDataUrl = full.toDataURL('image/jpeg', 0.85);
                         URL.revokeObjectURL(objectUrl);
                         images.push(smallDataUrl);
@@ -4133,7 +4133,7 @@ googleBtn.addEventListener('click', () => {
                 .catch((e) => { setMsg.textContent = tt('err') + ': ' + e.message; });
         }
 
-        async function compressImage(dataUrl, maxDim = 200, quality = 0.5) {
+        async function compressImage(dataUrl, maxDim = 512, quality = 0.85) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
@@ -4319,7 +4319,7 @@ eliminatedIndices = new Set(eliminatedArr);
                 refreshMessages();
                 return;
             }
-            if (images.length + dataUrls.length > 500) {
+            if (images.length + dataUrls.length > 150) {
                 result.textContent = t('max');
                 return;
             }
