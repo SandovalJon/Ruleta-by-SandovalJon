@@ -359,7 +359,7 @@
         }
 
 canvas {
-            width: 400px;
+            width: 512px;
             max-width: 100%;
             height: auto;
             border-radius: 50%;
@@ -881,7 +881,7 @@ canvas {
         <div class="roulette-container">
             <div class="arrow" id="arrow"></div>
             <div class="roulette-wrapper">
-                <canvas id="rouletteCanvas" width="400" height="400"></canvas>
+                <canvas id="rouletteCanvas" width="512" height="512"></canvas>
             </div>
 <div class="result" id="result">Agrega imágenes para comenzar</div>
             <div class="result hidden" id="result-hint"></div>
@@ -2646,7 +2646,7 @@ const wheelCache = document.createElement('canvas');
         wheelCache.height = canvas.height;
         const wheelCtx = wheelCache.getContext('2d');
 
-        const REC_SCALE = 2;
+        const REC_SCALE = 1;
         let recCanvas = null;
         let recCtx = null;
         let recWheelCache = null;
