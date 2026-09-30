@@ -2071,10 +2071,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             
             if (images.length > 0) {
                 counter.style.display = 'inline-flex';
-                countEl.textContent = activeCount;
-                if (eliminatedCount > 0) {
-                    countEl.textContent += `/${images.length}`;
-                }
+                countEl.textContent = eliminatedCount > 0
+                    ? activeCount + '/' + images.length
+                    : String(activeCount);
                 restoreBtn.style.display = eliminatedCount > 0 ? 'inline-flex' : 'none';
             } else {
                 counter.style.display = 'none';
@@ -2096,7 +2095,13 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             if (winnerIndex >= 0) {
                 result.classList.add('winner');
                 const winnerName = fileNames[winnerIndex] || '';
-                result.innerHTML = t('winner') + (winnerName ? '<div class="winner-name">' + winnerName + '</div>' : '');
+                result.textContent = t('winner');
+                if (winnerName) {
+                    const nameEl = document.createElement('div');
+                    nameEl.className = 'winner-name';
+                    nameEl.textContent = winnerName;
+                    result.appendChild(nameEl);
+                }
                 resultHint.innerHTML = t('hint');
                 resultHint.classList.remove('hidden');
                 return;
@@ -2484,6 +2489,7 @@ clearBtn.addEventListener('click', () => {
             const slots = new Array(total);
 
             function finishLoading() {
+                const isNewSet = images.length === 0;
                 for (let i = 0; i < slots.length; i++) {
                     const s = slots[i];
                     if (!s) continue;
@@ -2494,6 +2500,23 @@ clearBtn.addEventListener('click', () => {
                 }
                 slots.length = 0;
                 isLoading = false;
+                if (isNewSet) {
+                    // Las eliminaciones persistidas pertenecen a imagenes anteriores
+                    eliminatedIndices = new Set();
+                    winnerIndex = -1;
+                    winnerZoom = 0;
+                    winnerFullImg = null;
+                    saveEliminationState();
+                } else {
+                    const valid = new Set();
+                    for (const i of eliminatedIndices) if (i < images.length) valid.add(i);
+                    eliminatedIndices = valid;
+                    if (winnerIndex >= images.length) {
+                        winnerIndex = -1;
+                        winnerZoom = 0;
+                        winnerFullImg = null;
+                    }
+                }
                 invalidateActive();
                 updatePreview();
                 rebuildWheel();
