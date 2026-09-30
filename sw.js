@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruleta-v6';
+const CACHE_NAME = 'ruleta-v7';
 const urlsToCache = [
     '/Ruleta-by-SandovalJon/',
     '/Ruleta-by-SandovalJon/index.html',
