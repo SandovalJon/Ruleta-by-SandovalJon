@@ -1,0 +1,13 @@
+{
+  "name": "ruleta-de-imagenes",
+  "version": "3.1.0",
+  "description": "Ruleta de imagenes para sorteos y giros aleatorios",
+  "private": true,
+  "scripts": {
+    "test": "node test/smoke.js",
+    "test:live": "node test/smoke.js --live"
+  },
+  "devDependencies": {
+    "ws": "^8.22.0"
+  }
+}
