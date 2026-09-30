@@ -894,7 +894,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-        <div id="versionBadge" style="display:none;margin-top:8px;font-size:0.75rem;color:#ffd700;font-family:monospace;">v3.0.1</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.1.0</div>
     </div>
 
     <script>
@@ -4295,7 +4295,6 @@ const wheelCache = document.createElement('canvas');
                 saveSetBtn.disabled = images.length < 2;
                 loadMySets();
                 if (user.email === 'jdss07@outlook.fr') {
-                    versionBadge.style.display = 'block';
                     window.isDev = true;
                     const themeSelect = document.getElementById('themeSelect');
                     if (!document.querySelector('#themeSelect option[value="esmeralda"]')) {
@@ -4305,7 +4304,6 @@ const wheelCache = document.createElement('canvas');
                         themeSelect.appendChild(opt);
                     }
                 } else {
-                    versionBadge.style.display = 'none';
                     window.isDev = false;
                     const emeraldOpt = document.querySelector('#themeSelect option[value="esmeralda"]');
                     if (emeraldOpt) emeraldOpt.remove();
@@ -4317,7 +4315,6 @@ const wheelCache = document.createElement('canvas');
                 setsSelect.innerHTML = '<option value="">—</option>';
                 loadSetBtn.disabled = true;
                 setMsg.textContent = '';
-                versionBadge.style.display = 'none';
             }
         }
 
