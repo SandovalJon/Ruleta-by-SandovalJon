@@ -860,6 +860,7 @@ canvas {
             <button class="record-btn" id="recordBtn" title="Grabar girada (MP4)" aria-label="Grabar girada en video MP4">🎥 Grabar girada (MP4)</button>
             <button class="record-btn elim-btn" id="elimBtn" title="Eliminar ganador" aria-label="Activar modo eliminación">🎯 Eliminar ganador</button>
             <button class="record-btn elim-btn" id="soundBtn" title="Sonido" aria-label="Activar o desactivar sonido">🔊</button>
+            <button class="record-btn" id="undoBtn" style="display:none; margin: 10px auto 0;" title="Deshacer última acción" aria-label="Deshacer última acción">↩️ <span id="undoLabel">Deshacer</span></button>
 
             <div class="sets-panel" id="setsPanel">
                 <h3 id="setsTitle">💾 Mis sets de imágenes</h3>
@@ -881,9 +882,9 @@ canvas {
         <div class="roulette-container">
             <div class="arrow" id="arrow"></div>
             <div class="roulette-wrapper">
-                <canvas id="rouletteCanvas" width="512" height="512"></canvas>
+                <canvas id="rouletteCanvas" width="512" height="512" role="img" aria-label="Ruleta de imágenes" tabindex="0"></canvas>
             </div>
-<div class="result" id="result">Agrega imágenes para comenzar</div>
+            <div class="result" id="result" role="status" aria-live="polite" aria-atomic="true">Agrega imágenes para comenzar</div>
             <div class="result hidden" id="result-hint"></div>
             <div class="participant-counter" id="participantCounter" style="display:none;">
                 <span id="participantCount">0</span> <span data-i18n="participants">participantes</span>
@@ -945,9 +946,19 @@ by <span>SandovalJon</span>
         let elimVersion = 0;
 
         const MAX_IMAGES = 100;
+        const UNDO_LIMIT = 30;
+        const undoStack = [];
 
         function getMaxImages() {
             return MAX_IMAGES;
+        }
+
+        const reduceMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+        let prefersReducedMotion = !!(reduceMotionQuery && reduceMotionQuery.matches);
+        if (reduceMotionQuery) {
+            const onMotionChange = (e) => { prefersReducedMotion = e.matches; };
+            if (reduceMotionQuery.addEventListener) reduceMotionQuery.addEventListener('change', onMotionChange);
+            else if (reduceMotionQuery.addListener) reduceMotionQuery.addListener(onMotionChange);
         }
 
         let recActive = false;
@@ -1027,7 +1038,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Cerrar ganador',
                 keyS: 'Silenciar / Activar sonido',
                 keyE: 'Activar / Desactivar eliminación',
-                remove: 'Eliminar'
+                remove: 'Eliminar',
+                undo: 'Deshacer',
+                undoWinner: 'Deshacer giro'
             },
             en: {
                 title: '🎰 Image Roulette',
@@ -1069,7 +1082,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Close winner',
                 keyS: 'Mute / Unmute sound',
                 keyE: 'Toggle elimination',
-                remove: 'Remove'
+                remove: 'Remove',
+                undo: 'Undo',
+                undoWinner: 'Undo spin'
             },
             pt: {
                 title: '🎰 Roleta de Imagens',
@@ -1111,7 +1126,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Fechar vencedor',
                 keyS: 'Silenciar / Ativar som',
                 keyE: 'Ativar / Desativar eliminação',
-                remove: 'Remover'
+                remove: 'Remover',
+                undo: 'Desfazer',
+                undoWinner: 'Desfazer giro'
             },
             fr: {
                 title: '🎰 Roulette à Images',
@@ -1153,7 +1170,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Fermer gagnant',
                 keyS: 'Couper / Activer son',
                 keyE: 'Activer / Désactiver élimination',
-                remove: 'Retirer'
+                remove: 'Retirer',
+                undo: 'Annuler',
+                undoWinner: 'Annuler le tour'
             },
             de: {
                 title: '🎰 Bild-Roulette',
@@ -1195,7 +1214,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Gewinner schließen',
                 keyS: 'Ton an/aus',
                 keyE: 'Eliminierung ein/aus',
-                remove: 'Entfernen'
+                remove: 'Entfernen',
+                undo: 'Rückgängig',
+                undoWinner: 'Drehung rückgängig'
             },
             zh: {
                 title: '🎰 图片轮盘',
@@ -1237,7 +1258,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: '关闭获胜者',
                 keyS: '静音 / 取消静音',
                 keyE: '切换淘汰模式',
-                remove: '移除'
+                remove: '移除',
+                undo: '撤销',
+                undoWinner: '撤销旋转'
             },
             hi: {
                 title: '🎰 इमेज रूलेट',
@@ -1279,7 +1302,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'विजेता बंद करें',
                 keyS: 'ध्वनि बंद / चालू',
                 keyE: 'उन्मूलन चालू / बंद',
-                remove: 'हटाएं'
+                remove: 'हटाएं',
+                undo: 'पूर्ववत',
+                undoWinner: 'घुमाव पूर्ववत करें'
             },
             ar: {
                 title: '🎰 روليت الصور',
@@ -1321,7 +1346,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'إغلاق الفائز',
                 keyS: 'كتم / تشغيل الصوت',
                 keyE: 'تفعيل / تعطيل الإقصاء',
-                remove: 'إزالة'
+                remove: 'إزالة',
+                undo: 'تراجع',
+                undoWinner: 'تراجع الدوران'
             },
             bn: {
                 title: '🎰 ইমেজ রুলেট',
@@ -1363,7 +1390,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'বিজয়ী বন্ধ',
                 keyS: 'শব্দ বন্ধ / চালু',
                 keyE: 'নির্মূল চালু / বন্ধ',
-                remove: 'সরান'
+                remove: 'সরান',
+                undo: 'ফিরিয়ে আনুন',
+                undoWinner: 'ঘোরা ফিরিয়ে আনুন'
             },
             ru: {
                 title: '🎰 Рулетка изображений',
@@ -1405,7 +1434,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Закрыть победителя',
                 keyS: 'Звук вкл/выкл',
                 keyE: 'Исключение вкл/выкл',
-                remove: 'Убрать'
+                remove: 'Убрать',
+                undo: 'Отменить',
+                undoWinner: 'Отменить вращение'
             },
             ur: {
                 title: '🎰 امیج رولیٹ',
@@ -1447,7 +1478,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'فاتح بند کریں',
                 keyS: 'آواز بند / چالو',
                 keyE: 'اخراج چالو / بند',
-                remove: 'ہٹائیں'
+                remove: 'ہٹائیں',
+                undo: 'واپس لیں',
+                undoWinner: 'گھماؤ واپس لیں'
             },
             id: {
                 title: '🎰 Roulette Gambar',
@@ -1489,7 +1522,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Tutup pemenang',
                 keyS: 'Bisu / Aktifkan suara',
                 keyE: 'Aktifkan / Nonaktifkan eliminasi',
-                remove: 'Hapus'
+                remove: 'Hapus',
+                undo: 'Urungkan',
+                undoWinner: 'Urungkan putaran'
             },
             ja: {
                 title: '🎰 画像ルーレット',
@@ -1531,7 +1566,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: '勝者を閉じる',
                 keyS: 'サウンド切替',
                 keyE: '除外モード切替',
-                remove: '削除'
+                remove: '削除',
+                undo: '元に戻す',
+                undoWinner: '回転を元に戻す'
             },
             pa: {
                 title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
@@ -1573,7 +1610,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'ਜੇਤੂ ਬੰਦ',
                 keyS: 'ਆਵਾਜ਼ ਬੰਦ / ਚਾਲੂ',
                 keyE: 'ਖ਼ਾਤਮਾ ਚਾਲੂ / ਬੰਦ',
-                remove: 'ਹਟਾਓ'
+                remove: 'ਹਟਾਓ',
+                undo: 'ਵਾਪਸ',
+                undoWinner: 'ਘੁੰਮਾਅ ਵਾਪਸ'
             },
             jv: {
                 title: '🎰 Roulette Gambar',
@@ -1615,7 +1654,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Tutup pemenang',
                 keyS: 'Bisu / Aktifke swara',
                 keyE: 'Aktifke / Nonaktifke eliminasi',
-                remove: 'Busak'
+                remove: 'Busak',
+                undo: 'Batal',
+                undoWinner: 'Batal putar'
             },
             vi: {
                 title: '🎰 Vòng quay Hình ảnh',
@@ -1657,7 +1698,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Đóng người thắng',
                 keyS: 'Tắt / Bật âm thanh',
                 keyE: 'Bật / Tắt loại bỏ',
-                remove: 'Xóa'
+                remove: 'Xóa',
+                undo: 'Hoàn tác',
+                undoWinner: 'Hoàn tác vòng quay'
             },
             te: {
                 title: '🎰 ఇమేజ్ రూలెట్',
@@ -1699,7 +1742,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'విజేతను మూసివేయండి',
                 keyS: 'ధ్వని ఆఫ్ / ఆన్',
                 keyE: 'ఎలిమినేషన్ ఆన్ / ఆఫ్',
-                remove: 'తొలగించండి'
+                remove: 'తొలగించండి',
+                undo: 'రద్దు',
+                undoWinner: 'ఫిర్రులను రద్దు'
             },
             ko: {
                 title: '🎰 이미지 룰렛',
@@ -1741,7 +1786,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: '당첨자 닫기',
                 keyS: '소리 켜기/끄기',
                 keyE: '제외 모드 켜기/끄기',
-                remove: '제거'
+                remove: '제거',
+                undo: '실행 취소',
+                undoWinner: '회전 취소'
             },
             tr: {
                 title: '🎰 Görsel Ruleti',
@@ -1783,7 +1830,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Kazananı kapat',
                 keyS: 'Sessiz / Ses aç',
                 keyE: 'Elemeyi aç / kapat',
-                remove: 'Kaldır'
+                remove: 'Kaldır',
+                undo: 'Geri al',
+                undoWinner: 'Çevirmeyi geri al'
             },
             fa: {
                 title: '🎰 رولت تصویر',
@@ -1825,7 +1874,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'بستن برنده',
                 keyS: 'بی‌صدا / روشن کردن صدا',
                 keyE: 'فعال / غیرفعال کردن حذف',
-                remove: 'حذف'
+                remove: 'حذف',
+                undo: 'واگرد',
+                undoWinner: 'واگرد چرخش'
             },
             mr: {
                 title: '🎰 इमेज रूलेट',
@@ -1867,7 +1918,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'विजेता बंद',
                 keyS: 'आवाज बंद / चालू',
                 keyE: 'वगळणे चालू / बंद',
-                remove: 'काढा'
+                remove: 'काढा',
+                undo: 'पूर्ववत करा',
+                undoWinner: 'फिरवे पूर्ववत करा'
             },
             ta: {
                 title: '🎰 பட ரவுலட்',
@@ -1909,7 +1962,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'வெற்றியாளரை மூடு',
                 keyS: 'ஒலி அணை / இயக்கு',
                 keyE: 'நீக்குதல் இயக்கு / அணை',
-                remove: 'நீக்கு'
+                remove: 'நீக்கு',
+                undo: 'செயல்தவிர்',
+                undoWinner: 'சுழற்சியைச் செயல்தவிர்'
             },
             ha: {
                 title: '🎰 Roulette na Hotuna',
@@ -1951,7 +2006,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Rufe mara cin gya',
                 keyS: 'Kallo / kunna sauti',
                 keyE: 'Kunna / kashe share',
-                remove: 'Cire'
+                remove: 'Cire',
+                undo: 'Sau',
+                undoWinner: 'Maida sau'
             },
             sw: {
                 title: '🎰 Rulleti ya Picha',
@@ -1993,7 +2050,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Funga mshindi',
                 keyS: 'Nyamazisha / Washa sauti',
                 keyE: 'Washa / Zima uondoaji',
-                remove: 'Ondoa'
+                remove: 'Ondoa',
+                undo: 'Tendua',
+                undoWinner: 'Tendua mzunguko'
             },
             it: {
                 title: '🎰 Ruota delle Immagini',
@@ -2035,7 +2094,9 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 keyEscape: 'Chiudi vincitore',
                 keyS: 'Muto / Attiva audio',
                 keyE: 'Attiva / Disattiva eliminazione',
-                remove: 'Rimuovi'
+                remove: 'Rimuovi',
+                undo: 'Annulla',
+                undoWinner: 'Annulla giro'
             }
         };
 
@@ -2433,6 +2494,13 @@ let colors = themeColors[currentTheme];
             });
         }
 
+        const undoBtn = document.getElementById('undoBtn');
+        if (undoBtn) {
+            undoBtn.addEventListener('click', () => {
+                undo();
+            });
+        }
+
 clearBtn.addEventListener('click', () => {
             if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
             if (recActive) {
@@ -2445,6 +2513,7 @@ clearBtn.addEventListener('click', () => {
             fileNames = [];
             eliminatedIndices.clear();
             invalidateActive();
+            clearUndo();
             currentSetId = null;
             saveEliminationState();
             previewImages.innerHTML = '';
@@ -2626,7 +2695,17 @@ clearBtn.addEventListener('click', () => {
             previewImages.replaceChildren(frag);
         }
 
-function removeImage(index) {
+        function removeImage(index) {
+            pushUndo({
+                type: 'removeImage',
+                index: index,
+                image: images[index],
+                full: fullImages[index],
+                loaded: loadedImages[index],
+                name: fileNames[index],
+                eliminated: [...eliminatedIndices],
+                wasWinner: winnerIndex === index
+            });
             images.splice(index, 1);
             fullImages.splice(index, 1);
             loadedImages.splice(index, 1);
@@ -2636,6 +2715,8 @@ function removeImage(index) {
             winnerFullImg = null;
             isHovering = false;
             rouletteWrapper.classList.remove('winner-mode');
+            saveEliminationState();
+            invalidateActive();
             updatePreview();
             rebuildWheel();
             refreshMessages();
@@ -2907,8 +2988,8 @@ const wheelCache = document.createElement('canvas');
             isSpinning = true;
             refreshMessages();
 
-            const spinDuration = 3000 + cryptoRand() * 4000;
-            const totalRotation = Math.PI * 2 * (10 + cryptoRand() * 20);
+            const spinDuration = prefersReducedMotion ? 400 : 3000 + cryptoRand() * 4000;
+            const totalRotation = prefersReducedMotion ? Math.PI * 2 * 3 : Math.PI * 2 * (10 + cryptoRand() * 20);
             const startTime = Date.now();
             const startRotation = currentRotation;
             lastTickAngle = currentRotation;
@@ -2923,7 +3004,7 @@ const wheelCache = document.createElement('canvas');
                 const progress = Math.min(elapsed / spinDuration, 1);
                 const easeOut = 1 - Math.pow(1 - progress, 3);
 
-                if (progress < 0.5) {
+                if (progress < 0.5 && !prefersReducedMotion) {
                     const hue = Math.floor(elapsed / 16) % 360;
                     if (hue !== lastHue) {
                         lastHue = hue;
@@ -2967,6 +3048,7 @@ const wheelCache = document.createElement('canvas');
 
             rouletteWrapper.classList.add('winner-mode');
             isSpinning = false;
+            pushUndo({ type: 'spin' });
 
             winnerIndex = activeIndices[selectedIndex];
             winnerZoom = 0;
@@ -2978,7 +3060,7 @@ const wheelCache = document.createElement('canvas');
             }
             refreshMessages();
             const zoomStart = Date.now();
-            const zoomDuration = 1500;
+            const zoomDuration = prefersReducedMotion ? 1 : 1500;
 
             function animateWinner() {
                 const elapsed = Date.now() - zoomStart;
@@ -2987,7 +3069,7 @@ const wheelCache = document.createElement('canvas');
                 winnerZoom = easeOut;
                 if (progress === 0) {
                     playWinSound();
-                    launchConfetti();
+                    if (!prefersReducedMotion) launchConfetti();
                 }
                 drawRoulette();
 
@@ -3001,6 +3083,59 @@ const wheelCache = document.createElement('canvas');
             animateWinner();
         }
 
+        function pushUndo(entry) {
+            undoStack.push(entry);
+            if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+            updateUndoBtn();
+        }
+
+        function updateUndoBtn() {
+            const btn = document.getElementById('undoBtn');
+            const label = document.getElementById('undoLabel');
+            if (!btn || !label) return;
+            const last = undoStack[undoStack.length - 1];
+            if (!last) {
+                btn.style.display = 'none';
+                return;
+            }
+            btn.style.display = 'block';
+            label.textContent = t('undo');
+            btn.title = t(last.type === 'spin' ? 'undoWinner' : 'undo');
+        }
+
+        function clearUndo() {
+            undoStack.length = 0;
+            updateUndoBtn();
+        }
+
+        function undo() {
+            const entry = undoStack.pop();
+            if (!entry) return;
+            if (entry.type === 'spin') {
+                winnerIndex = -1;
+                winnerZoom = 0;
+                winnerFullImg = null;
+                isHovering = false;
+                rouletteWrapper.classList.remove('winner-mode');
+            } else if (entry.type === 'eliminate') {
+                eliminatedIndices = new Set(entry.eliminated);
+            } else if (entry.type === 'removeImage') {
+                images.splice(entry.index, 0, entry.image);
+                fullImages.splice(entry.index, 0, entry.full);
+                fileNames.splice(entry.index, 0, entry.name);
+                if (entry.loaded) loadedImages.splice(entry.index, 0, entry.loaded);
+                eliminatedIndices = new Set(entry.eliminated);
+                if (entry.wasWinner) winnerIndex = entry.index;
+            }
+            invalidateActive();
+            saveEliminationState();
+            updatePreview();
+            rebuildWheel();
+            refreshMessages();
+            updateUndoBtn();
+            if (typeof updateSaveBtn === 'function') updateSaveBtn();
+        }
+
         function updateSetProgress() {
             if (!fbDB || !currentUser || !currentSetId) return;
             fbDB.collection('sets').doc(currentSetId).update({
@@ -3011,6 +3146,7 @@ const wheelCache = document.createElement('canvas');
 
         function eliminateWinner() {
             if (winnerIndex < 0) return;
+            pushUndo({ type: 'eliminate', eliminated: [...eliminatedIndices] });
             eliminatedIndices.add(winnerIndex);
             winnerIndex = -1;
             winnerZoom = 0;
@@ -3146,6 +3282,7 @@ const wheelCache = document.createElement('canvas');
             }
             if (e.code === 'Escape') {
                 if (winnerIndex >= 0) {
+                    pushUndo({ type: 'spin' });
                     winnerIndex = -1;
                     winnerZoom = 0;
                     isHovering = false;
@@ -3153,6 +3290,10 @@ const wheelCache = document.createElement('canvas');
                     drawRoulette();
                     refreshMessages();
                 }
+            }
+            if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                undo();
             }
             if (e.code === 'KeyS' && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
@@ -3516,7 +3657,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Cerrar ganador',
                 keyS: 'Silenciar / Activar sonido',
                 keyE: 'Activar / Desactivar eliminación',
-                remove: 'Eliminar'
+                remove: 'Eliminar',
             },
             en: {
                 login: 'Sign in with Google', logout: 'Sign out',
@@ -3537,7 +3678,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Close winner',
                 keyS: 'Mute / Unmute sound',
                 keyE: 'Toggle elimination',
-                remove: 'Remove'
+                remove: 'Remove',
             },
             pt: {
                 login: 'Entrar com o Google', logout: 'Sair',
@@ -3558,7 +3699,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Fechar vencedor',
                 keyS: 'Silenciar / Ativar som',
                 keyE: 'Ativar / Desativar eliminação',
-                remove: 'Remover'
+                remove: 'Remover',
             },
             fr: {
                 login: 'Se connecter avec Google', logout: 'Se déconnecter',
@@ -3579,7 +3720,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Fermer gagnant',
                 keyS: 'Couper / Activer son',
                 keyE: 'Activer / Désactiver élimination',
-                remove: 'Retirer'
+                remove: 'Retirer',
             },
             de: {
                 login: 'Mit Google anmelden', logout: 'Abmelden',
@@ -3600,7 +3741,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Gewinner schließen',
                 keyS: 'Ton an/aus',
                 keyE: 'Eliminierung ein/aus',
-                remove: 'Entfernen'
+                remove: 'Entfernen',
             },
             zh: {
                 login: '使用 Google 登录', logout: '退出登录',
@@ -3621,7 +3762,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: '关闭获胜者',
                 keyS: '静音 / 取消静音',
                 keyE: '切换淘汰模式',
-                remove: '移除'
+                remove: '移除',
             },
             hi: {
                 login: 'Google से साइन इन करें', logout: 'साइन आउट',
@@ -3642,7 +3783,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'विजेता बंद करें',
                 keyS: 'ध्वनि बंद / चालू',
                 keyE: 'उन्मूलन चालू / बंद',
-                remove: 'हटाएं'
+                remove: 'हटाएं',
             },
             ar: {
                 login: 'تسجيل الدخول عبر Google', logout: 'تسجيل الخروج',
@@ -3663,7 +3804,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'إغلاق الفائز',
                 keyS: 'كتم / تشغيل الصوت',
                 keyE: 'تفعيل / تعطيل الإقصاء',
-                remove: 'إزالة'
+                remove: 'إزالة',
             },
             bn: {
                 login: 'Google দিয়ে সাইন ইন করুন', logout: 'সাইন আউট',
@@ -3726,7 +3867,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'فاتح بند کریں',
                 keyS: 'آواز بند / چالو',
                 keyE: 'اخراج چالو / بند',
-                remove: 'ہٹائیں'
+                remove: 'ہٹائیں',
             },
             id: {
                 login: 'Masuk dengan Google', logout: 'Keluar',
@@ -3747,7 +3888,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Tutup pemenang',
                 keyS: 'Bisu / Aktifkan suara',
                 keyE: 'Aktifkan / Nonaktifkan eliminasi',
-                remove: 'Hapus'
+                remove: 'Hapus',
             },
             ja: {
                 login: 'Googleでログイン', logout: 'ログアウト',
@@ -3768,7 +3909,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: '勝者を閉じる',
                 keyS: 'サウンド切替',
                 keyE: '除外モード切替',
-                remove: '削除'
+                remove: '削除',
             },
             pa: {
                 login: 'Google ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ', logout: 'ਸਾਈਨ ਆਊਟ',
@@ -3831,7 +3972,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Đóng người thắng',
                 keyS: 'Tắt / Bật âm thanh',
                 keyE: 'Bật / Tắt loại bỏ',
-                remove: 'Xóa'
+                remove: 'Xóa',
             },
             te: {
                 login: 'Googleతో సైన్ ఇన్ చేయండి', logout: 'సైన్ అవుట్',
@@ -3873,7 +4014,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: '당첨자 닫기',
                 keyS: '소리 켜기/끄기',
                 keyE: '제외 모드 켜기/끄기',
-                remove: '제거'
+                remove: '제거',
             },
             tr: {
                 login: 'Google ile giriş yap', logout: 'Çıkış yap',
@@ -3894,7 +4035,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Kazananı kapat',
                 keyS: 'Sessiz / Ses aç',
                 keyE: 'Elemeyi aç / kapat',
-                remove: 'Kaldır'
+                remove: 'Kaldır',
             },
             fa: {
                 login: 'ورود با Google', logout: 'خروج',
@@ -3915,7 +4056,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'بستن برنده',
                 keyS: 'بی‌صدا / روشن کردن صدا',
                 keyE: 'فعال / غیرفعال کردن حذف',
-                remove: 'حذف'
+                remove: 'حذف',
             },
             mr: {
                 login: 'Google सह साइन इन करा', logout: 'साइन आउट',
@@ -3936,7 +4077,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'विजेता बंद',
                 keyS: 'आवाज बंद / चालू',
                 keyE: 'वगळणे चालू / बंद',
-                remove: 'काढा'
+                remove: 'काढा',
             },
             ta: {
                 login: 'Google மூலம் உள்நுழைக', logout: 'வெளியேறு',
@@ -3957,7 +4098,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'வெற்றியாளரை மூடு',
                 keyS: 'ஒலி அணை / இயக்கு',
                 keyE: 'நீக்குதல் இயக்கு / அணை',
-                remove: 'நீக்கு'
+                remove: 'நீக்கு',
             },
             ha: {
                 login: 'Shiga da Google', logout: 'Fita',
@@ -3999,7 +4140,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Funga mshindi',
                 keyS: 'Nyamazisha / Washa sauti',
                 keyE: 'Washa / Zima uondoaji',
-                remove: 'Ondoa'
+                remove: 'Ondoa',
             },
             it: {
                 login: 'Accedi con Google', logout: 'Esci',
@@ -4020,7 +4161,7 @@ const wheelCache = document.createElement('canvas');
                 keyEscape: 'Chiudi vincitore',
                 keyS: 'Muto / Attiva audio',
                 keyE: 'Attiva / Disattiva eliminazione',
-                remove: 'Rimuovi'
+                remove: 'Rimuovi',
             }
         };
 
@@ -4262,6 +4403,7 @@ googleBtn.addEventListener('click', () => {
                             fileNames = names;
                             eliminatedIndices = new Set(eliminatedArr);
                             invalidateActive();
+                            clearUndo();
                             const savedElimMode = setData.elimMode || false;
                             if (elimMode !== savedElimMode) {
                                 elimMode = savedElimMode;
