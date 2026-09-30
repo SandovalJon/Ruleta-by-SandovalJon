@@ -2501,12 +2501,13 @@ let colors = themeColors[currentTheme];
             });
         }
 
-clearBtn.addEventListener('click', () => {
+        clearBtn.addEventListener('click', () => {
             if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
             if (recActive) {
                 recDiscard = true;
                 finishRecording();
             }
+            if (saveTimeout) { clearTimeout(saveTimeout); saveTimeout = null; }
             images = [];
             fullImages = [];
             loadedImages = [];
@@ -2516,7 +2517,8 @@ clearBtn.addEventListener('click', () => {
             clearUndo();
             currentSetId = null;
             saveEliminationState();
-            previewImages.innerHTML = '';
+            clearImagesDB();
+            previewImages.replaceChildren();
             rouletteWrapper.classList.remove('winner-mode');
             isHovering = false;
             currentRotation = 0;
@@ -2537,6 +2539,22 @@ clearBtn.addEventListener('click', () => {
         });
 
         const MAX_IMAGE = 64;
+
+        function toDataURLAsync(canvas, type, quality) {
+            return new Promise((resolve) => {
+                if (typeof canvas.toBlob === 'function') {
+                    canvas.toBlob((blob) => {
+                        if (!blob) { resolve(canvas.toDataURL(type, quality)); return; }
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => resolve(canvas.toDataURL(type, quality));
+                        reader.readAsDataURL(blob);
+                    }, type, quality);
+                    return;
+                }
+                resolve(canvas.toDataURL(type, quality));
+            });
+        }
 
         function handleFiles(files) {
             const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -2636,14 +2654,16 @@ clearBtn.addEventListener('click', () => {
                         };
                         const small = drawScaled(MAX_IMAGE);
                         const full = drawScaled(512);
-                        slots[i] = {
-                            small: small.toDataURL('image/jpeg', 0.7),
-                            full: full.toDataURL('image/jpeg', 0.85),
-                            canvas: small,
-                            name: file.name || ''
-                        };
                         URL.revokeObjectURL(objectUrl);
-                        onOneDone();
+                        toDataURLAsync(small, 'image/jpeg', 0.7).then((smallDataUrl) => {
+                            slots[i] = {
+                                small: smallDataUrl,
+                                full: full.toDataURL('image/jpeg', 0.85),
+                                canvas: small,
+                                name: file.name || ''
+                            };
+                            onOneDone();
+                        });
                     };
                     img.src = objectUrl;
                 }
@@ -3246,7 +3266,7 @@ const wheelCache = document.createElement('canvas');
                 const store = tx.objectStore(STORE_NAME);
                 store.clear();
                 images.forEach((dataUrl, index) => {
-                    store.put({ index, dataUrl });
+                    store.put({ index, dataUrl, name: fileNames[index] || '' });
                 });
                 await new Promise((resolve, reject) => {
                     tx.oncomplete = resolve;
@@ -3254,6 +3274,65 @@ const wheelCache = document.createElement('canvas');
                 });
                 db.close();
             } catch (e) {}
+        }
+
+        async function clearImagesDB() {
+            let db;
+            try {
+                db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).clear();
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+                db.close();
+            } catch (e) {
+                try { if (db) db.close(); } catch (e2) {}
+            }
+        }
+
+        async function loadImagesFromDB() {
+            let db;
+            try {
+                db = await openDB();
+            } catch (e) {
+                return false;
+            }
+            try {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.getAll();
+                const results = await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+                db.close();
+                if (!results || results.length === 0) return false;
+
+                results.sort((a, b) => a.index - b.index);
+                const dataUrls = results.map(r => r.dataUrl);
+                const names = results.map((r, i) => r.name || ('Imagen ' + (i + 1)));
+
+                isLoading = true;
+                refreshMessages();
+                resetAndSetImages(dataUrls);
+                fileNames = names;
+
+                const waitImages = setInterval(() => {
+                    if (isLoading) return;
+                    clearInterval(waitImages);
+                    invalidateActive();
+                    updatePreview();
+                    rebuildWheel();
+                    refreshMessages();
+                    if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                }, 100);
+                return true;
+            } catch (e) {
+                try { if (db) db.close(); } catch (e2) {}
+                return false;
+            }
         }
 
         let saveTimeout = null;
@@ -4540,6 +4619,8 @@ googleBtn.addEventListener('click', () => {
         saveSetBtn.addEventListener('click', saveCurrentSet);
         loadSetBtn.addEventListener('click', loadCurrentSet);
         deleteSetBtn.addEventListener('click', deleteCurrentSet);
+
+        loadImagesFromDB();
     </script>
 </body>
 </html>
