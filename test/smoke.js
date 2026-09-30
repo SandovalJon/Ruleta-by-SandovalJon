@@ -347,6 +347,95 @@ const tests = [
     },
   },
   {
+    name: 'las imagenes sin nombre se pueden renombrar',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        // simular 3 archivos sin nombre, como los de un drag en la nube
+        const mk = (color) => new Promise(res => {
+          const c = document.createElement('canvas');
+          c.width = 120; c.height = 120;
+          const x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,120,120);
+          c.toBlob(b => res(new File([b], '', { type: 'image/png' })), 'image/png');
+        });
+        const files = [await mk('#f00'), await mk('#0f0'), await mk('#00f')];
+        handleFiles(files, null);
+        await __t.waitFor(() => !isLoading && images.length === 3, 15000);
+
+        const genericosAntes = fileNames.filter(n => /^Imagen \\d+$/.test(n)).length;
+        const hayAviso = document.getElementById('setMsg').textContent.length > 0;
+        const hayInsignia = document.querySelectorAll('.preview-nameless').length;
+
+        // renombrar la primera
+        window.prompt = () => 'Maria Perez';
+        renameImage(0);
+        await new Promise(r => setTimeout(r, 300));
+
+        return {
+          genericosAntes,
+          hayAviso,
+          hayInsignia,
+          nombre0: fileNames[0],
+          insigniaTrasRenombrar: document.querySelectorAll('.preview-nameless').length
+        };
+      })()`, true);
+      if (r.genericosAntes !== 3) return 'no se generaron 3 nombres genericos (hubo ' + r.genericosAntes + ')';
+      if (!r.hayAviso) return 'no se mostro el aviso de nombres faltantes';
+      if (r.hayInsignia !== 3) return 'faltan insignias de renombrar (hay ' + r.hayInsignia + ')';
+      if (r.nombre0 !== 'Maria Perez') return 'el renombrado no se aplico: ' + r.nombre0;
+      if (r.insigniaTrasRenombrar !== 2) return 'la insignia no desaparecio tras renombrar';
+      return true;
+    },
+  },
+  {
+    name: 'deshacer un renombrado lo revierte',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const antes = fileNames[0];
+        window.prompt = () => 'Otro Nombre';
+        renameImage(0);
+        await new Promise(r => setTimeout(r, 200));
+        const trasRenombrar = fileNames[0];
+        undo();
+        await new Promise(r => setTimeout(r, 200));
+        return { antes, trasRenombrar, trasUndo: fileNames[0] };
+      })()`, true);
+      if (r.trasRenombrar !== 'Otro Nombre') return 'el renombrado no aplico: ' + r.trasRenombrar;
+      if (r.trasUndo !== r.antes) return 'deshacer no revirtio el nombre (quedo "' + r.trasUndo + '" en vez de "' + r.antes + '")';
+      return true;
+    },
+  },
+  {
+    name: 'los nombres no se desalinean con archivos no-imagen',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        const mkImg = (name, color) => new Promise(res => {
+          const c = document.createElement('canvas');
+          c.width = 120; c.height = 120;
+          const x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,120,120);
+          c.toBlob(b => res(new File([b], name, { type: 'image/png' })), 'image/png');
+        });
+        // un archivo que NO es imagen, seguido de imagenes con nombre
+        const notImg = new File(['x'], 'LEEME.txt', { type: 'text/plain' });
+        const a = await mkImg('Ana.jpg', '#f00');
+        const b = await mkImg('Beto.png', '#0f0');
+        // nombres alineados con el orden ORIGINAL (incluyendo el txt)
+        handleFiles([notImg, a, b], ['LEEME.txt', 'Ana.jpg', 'Beto.png']);
+        await __t.waitFor(() => !isLoading && images.length === 2, 15000);
+        return { total: images.length, nombres: fileNames.slice() };
+      })()`, true);
+      if (r.total !== 2) return 'se esperaban 2 imagenes, hay ' + r.total;
+      const esperado = ['Ana.jpg', 'Beto.png'];
+      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
+        return 'nombres desalineados: ' + JSON.stringify(r.nombres) + ' (esperado ' + JSON.stringify(esperado) + ')';
+      }
+      return true;
+    },
+  },
+  {
     name: 'los nombres originales sobreviven a la recarga',
     run: async (c) => {
       // cargar con nombres reconocibles y autoguardar
