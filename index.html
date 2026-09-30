@@ -1070,6 +1070,7 @@ by <span>SandovalJon</span>
         const HISTORY_KEY = 'roulette-history';
         const undoStack = [];
         let spinHistory = [];
+        let pendingRenames = 0;
 
         function getMaxImages() {
             return MAX_IMAGES;
@@ -1167,7 +1168,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Aún no hay sorteos',
                 historyCopied: 'Historial copiado ✓',
                 historyCopyFail: 'No se pudo copiar',
-                historyConfirm: '¿Borrar todo el historial de sorteos?',
+                historyConfirm: '¿Borrar todo el historial de sorteos?',
+                renamedImages: '{n} imágenes no guardaban su nombre, así que se muestran como «Imagen N». Vuelve a subirlas para recuperar los nombres originales.'
             },
             en: {
                 title: '🎰 Image Roulette',
@@ -1216,7 +1218,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'No spins yet',
                 historyCopied: 'History copied ✓',
                 historyCopyFail: 'Could not copy',
-                historyConfirm: 'Delete the entire spin history?',
+                historyConfirm: 'Delete the entire spin history?',
+                renamedImages: '{n} images had no name saved, so they show as "Image N". Upload them again to restore the original names.'
             },
             pt: {
                 title: '🎰 Roleta de Imagens',
@@ -1265,7 +1268,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Ainda sem sorteios',
                 historyCopied: 'Histórico copiado ✓',
                 historyCopyFail: 'Não foi possível copiar',
-                historyConfirm: 'Apagar todo o histórico de sorteios?',
+                historyConfirm: 'Apagar todo o histórico de sorteios?',
+                renamedImages: '{n} imagens não tinham nome salvo, então aparecem como "Imagem N". Envie-as novamente para recuperar os nomes originais.'
             },
             fr: {
                 title: '🎰 Roulette à Images',
@@ -1314,7 +1318,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Aucun tirage',
                 historyCopied: 'Historique copié ✓',
                 historyCopyFail: 'Copie impossible',
-                historyConfirm: 'Supprimer tout l\'historique des tirages ?',
+                historyConfirm: 'Supprimer tout l\'historique des tirages ?',
+                renamedImages: '{n} images n\'avaient pas de nom enregistré, elles s\'affichent donc « Image N ». Réimportez-les pour retrouver les noms d\'origine.'
             },
             de: {
                 title: '🎰 Bild-Roulette',
@@ -1363,7 +1368,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Noch keine Drehungen',
                 historyCopied: 'Verlauf kopiert ✓',
                 historyCopyFail: 'Kopieren fehlgeschlagen',
-                historyConfirm: 'Gesamten Drehverlauf löschen?',
+                historyConfirm: 'Gesamten Drehverlauf löschen?',
+                renamedImages: '{n} Bilder hatten keinen gespeicherten Namen und zeigen sich als „Bild N“. Lade sie erneut hoch, um die Originalnamen wiederherzustellen.'
             },
             zh: {
                 title: '🎰 图片轮盘',
@@ -1412,7 +1418,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: '还没有抽奖记录',
                 historyCopied: '历史已复制 ✓',
                 historyCopyFail: '无法复制',
-                historyConfirm: '要删除全部抽奖历史吗？',
+                historyConfirm: '要删除全部抽奖历史吗？',
+                renamedImages: '{n} 张图片没有保存文件名，因此显示为“图片 N”。重新上传即可恢复原始名称。'
             },
             hi: {
                 title: '🎰 इमेज रूलेट',
@@ -1461,7 +1468,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'अभी तक कोई स्पिन नहीं',
                 historyCopied: 'इतिहास कॉपी ✓',
                 historyCopyFail: 'कॉपी नहीं हो सका',
-                historyConfirm: 'पूरा स्पिन इतिहास हटाएँ?',
+                historyConfirm: 'पूरा स्पिन इतिहास हटाएँ?',
+                renamedImages: '{n} चित्रों का नाम सहेजा नहीं गया, इसलिए वे "चित्र N" के रूप में दिखते हैं। मूल नाम बहाल करने के लिए उन्हें फिर से अपलोड करें।'
             },
             ar: {
                 title: '🎰 روليت الصور',
@@ -1510,7 +1518,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'لا توجد سحوبات بعد',
                 historyCopied: 'تم نسخ السجل ✓',
                 historyCopyFail: 'تعذّر النسخ',
-                historyConfirm: 'حذف سجل السحوبات كاملاً؟',
+                historyConfirm: 'حذف سجل السحوبات كاملاً؟',
+                renamedImages: '{n} صور لم يكن اسمها محفوظًا، لذا تظهر كـ "صورة N". أعد رفعها لاستعادة الأسماء الأصلية.'
             },
             bn: {
                 title: '🎰 ইমেজ রুলেট',
@@ -1559,7 +1568,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'এখনো কোনো ঘোরা নেই',
                 historyCopied: 'ইতিহাস কপি হয়েছে ✓',
                 historyCopyFail: 'কপি করা যায়নি',
-                historyConfirm: 'সমস্ত ঘোরার ইতিহাস মুছবেন?',
+                historyConfirm: 'সমস্ত ঘোরার ইতিহাস মুছবেন?',
+                renamedImages: '{n}টি ছবির নাম সংরক্ষিত ছিল না, তাই সেগুলো "ছবি N" হিসেবে দেখাচ্ছে। মূল নাম ফিরিয়ে আনতে আবার আপলোড করুন।'
             },
             ru: {
                 title: '🎰 Рулетка изображений',
@@ -1608,7 +1618,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Розыгрышей пока нет',
                 historyCopied: 'История скопирована ✓',
                 historyCopyFail: 'Не удалось скопировать',
-                historyConfirm: 'Удалить всю историю розыгрышей?',
+                historyConfirm: 'Удалить всю историю розыгрышей?',
+                renamedImages: '{n} изображений не сохранили имя, поэтому они показаны как «Изображение N». Загрузите их снова, чтобы вернуть исходные имена.'
             },
             ur: {
                 title: '🎰 امیج رولیٹ',
@@ -1657,7 +1668,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ابھی کوئی گھماؤ نہیں',
                 historyCopied: 'تاریخ کاپی ہو گئی ✓',
                 historyCopyFail: 'کاپی نہیں ہو سکا',
-                historyConfirm: 'پوری گھماؤ کی تاریخ حذف کریں؟',
+                historyConfirm: 'پوری گھماؤ کی تاریخ حذف کریں؟',
+                renamedImages: '{n} تصاویر کے نام محفوظ نہیں تھے، اس لیے وہ "تصویر N" کے طور پر دکھائی دیتی ہیں۔ اصل نام بحال کرنے کے لیے انہیں دوبارہ اپ لوڈ کریں۔'
             },
             id: {
                 title: '🎰 Roulette Gambar',
@@ -1706,7 +1718,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Belum ada undian',
                 historyCopied: 'Riwayat disalin ✓',
                 historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus seluruh riwayat undian?',
+                historyConfirm: 'Hapus seluruh riwayat undian?',
+                renamedImages: '{n} gambar tidak menyimpan nama, jadi tampil sebagai "Gambar N". Unggah ulang untuk memulihkan nama asli.'
             },
             ja: {
                 title: '🎰 画像ルーレット',
@@ -1755,7 +1768,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'まだ抽選がありません',
                 historyCopied: '履歴をコピーしました ✓',
                 historyCopyFail: 'コピーできませんでした',
-                historyConfirm: '抽選履歴をすべて削除しますか？',
+                historyConfirm: '抽選履歴をすべて削除しますか？',
+                renamedImages: '{n}枚の画像に名前が保存されていなかったため「画像 N」と表示されています。再度アップロードすると元の名前が復元されます。'
             },
             pa: {
                 title: '🎰 ਚਿੱਤਰ ਰੂਲੇਟ',
@@ -1804,7 +1818,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ਹਾਲੇ ਕੋਈ ਘੁੰਮਾਅ ਨਹੀਂ',
                 historyCopied: 'ਇਤਿਹਾਸ ਕਾਪੀ ਹੋਇਆ ✓',
                 historyCopyFail: 'ਕਾਪੀ ਨਹੀਂ ਹੋ ਸਕਿਆ',
-                historyConfirm: 'ਪੂਰਾ ਘੁੰਮਾਅ ਇਤਿਹਾਸ ਮਿਟਾਓ?',
+                historyConfirm: 'ਪੂਰਾ ਘੁੰਮਾਅ ਇਤਿਹਾਸ ਮਿਟਾਓ?',
+                renamedImages: '{n} ਤਸਵੀਰਾਂ ਦੇ ਨਾਮ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ, ਇਸ ਲਈ ਉਹ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ। ਮੂਲ ਨਾਮ ਬਹਾਲ ਕਰਨ ਲਈ ਉਹਨਾਂ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰੋ।'
             },
             jv: {
                 title: '🎰 Roulette Gambar',
@@ -1853,7 +1868,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Belum ada undian',
                 historyCopied: 'Riwayat disalin ✓',
                 historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus semua riwayat undian?',
+                historyConfirm: 'Hapus semua riwayat undian?',
+                renamedImages: '{n} gambar tidak nyimpen jeneng, mula katon minangka "Gambar N". Unggah maneh deui kanggo mulihake jeneng asli.'
             },
             vi: {
                 title: '🎰 Vòng quay Hình ảnh',
@@ -1902,7 +1918,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Chưa có lượt quay nào',
                 historyCopied: 'Đã sao chép lịch sử ✓',
                 historyCopyFail: 'Không thể sao chép',
-                historyConfirm: 'Xóa toàn bộ lịch sử quay?',
+                historyConfirm: 'Xóa toàn bộ lịch sử quay?',
+                renamedImages: '{n} ảnh không lưu tên nên hiện là "Ảnh N". Tải lại để khôi phục tên gốc.'
             },
             te: {
                 title: '🎰 ఇమేజ్ రూలెట్',
@@ -1951,7 +1968,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ఇంకా ఫిర్రులు లేవు',
                 historyCopied: 'చరిత్ర కాపీ అయింది ✓',
                 historyCopyFail: 'కాపీ చేయలేకపోయాము',
-                historyConfirm: 'మొత్తం చరిత్ర తొలగించాలా?',
+                historyConfirm: 'మొత్తం చరిత్ర తొలగించాలా?',
+                renamedImages: '{n} చిత్రాల పేరు భద్రపరబడలేదు, అందువల్ల అవి "చిత్రం N"గా కనిపిస్తాయి. అసలు పేర్లు తిరిగి పొందడానికి మళ్లీ అప్‌లోడ్ చేయండి.'
             },
             ko: {
                 title: '🎰 이미지 룰렛',
@@ -2000,7 +2018,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: '아직 회전이 없습니다',
                 historyCopied: '기록 복사됨 ✓',
                 historyCopyFail: '복사할 수 없음',
-                historyConfirm: '회전 기록을 모두 삭제할까요?',
+                historyConfirm: '회전 기록을 모두 삭제할까요?',
+                renamedImages: '{n}개의 이미지 이름이 저장되지 않아 "이미지 N"으로 표시됩니다. 원래 이름을 복원하려면 다시 업로드하세요.'
             },
             tr: {
                 title: '🎰 Görsel Ruleti',
@@ -2049,7 +2068,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Henüz çekim yok',
                 historyCopied: 'Geçmiş kopyalandı ✓',
                 historyCopyFail: 'Kopyalanamadı',
-                historyConfirm: 'Tüm çekim geçmişi silinsin mi?',
+                historyConfirm: 'Tüm çekim geçmişi silinsin mi?',
+                renamedImages: '{n} görselin adı kaydedilmemiş, bu yüzden "Görsel N" olarak görünüyor. Özgün adları geri yüklemek için yeniden yükleyin.'
             },
             fa: {
                 title: '🎰 رولت تصویر',
@@ -2098,7 +2118,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'هنوز چرخشی نیست',
                 historyCopied: 'تاریخچه کپی شد ✓',
                 historyCopyFail: 'کپی نشد',
-                historyConfirm: 'کل تاریخچه حذف شود؟',
+                historyConfirm: 'کل تاریخچه حذف شود؟',
+                renamedImages: '{n} تصویر نامش ذخیره نشده بود، بنابراین به شکل «تصویر N» نمایش داده می‌شوند. برای بازیابی نام اصلی دوباره بارگذاری کنید.'
             },
             mr: {
                 title: '🎰 इमेज रूलेट',
@@ -2147,7 +2168,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'अजून फिरवे नाहीत',
                 historyCopied: 'इतिहास कॉपी झाला ✓',
                 historyCopyFail: 'कॉपी होऊ शकला नाही',
-                historyConfirm: 'संपूर्ण इतिहास हटवायचा?',
+                historyConfirm: 'संपूर्ण इतिहास हटवायचा?',
+                renamedImages: '{n} प्रतिमांचे नाव जतन करण्यात आले नाही, त्यामुळे त्या "प्रतिमा N" असे दिसतात. मूळ नावे पुनः प्राप्त करण्यासाठी त्यांना पुन्हा अपलोड करा.'
             },
             ta: {
                 title: '🎰 பட ரவுலட்',
@@ -2196,7 +2218,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'இன்னும் சுழற்சி இல்லை',
                 historyCopied: 'வரலாறு நகலெடுக்கப்பட்டது ✓',
                 historyCopyFail: 'நகலெடுக்க முடியவில்லை',
-                historyConfirm: 'முழு வரலாறையும் நீக்கவா?',
+                historyConfirm: 'முழு வரலாறையும் நீக்கவா?',
+                renamedImages: '{n} படங்களின் பெயர் சேமிக்கப்படவில்லை, எனவே அவை "படம் N" எனக் காட்டப்படுகின்றன. அசல் பெயர்களை மீட்டெடுக்க மீண்டும் பதிவேற்றவும்.'
             },
             ha: {
                 title: '🎰 Roulette na Hotuna',
@@ -2245,7 +2268,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Babban ciyawa ba a yi',
                 historyCopied: 'An ruwaita ✓',
                 historyCopyFail: 'Ba a iya kwayewa',
-                historyConfirm: 'Duka tarihi a gafafe?',
+                historyConfirm: 'Duka tarihi a gafafe?',
+                renamedImages: '{n} hotuna ba tucka sunan a bayan, suna ke nuna a cikin sanya “Hotuna N”. Sake upload don ya kuma dawo da asusun sunan.'
             },
             sw: {
                 title: '🎰 Rulleti ya Picha',
@@ -2294,7 +2318,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Hakuna mzunguko bado',
                 historyCopied: 'Imecopiwa ✓',
                 historyCopyFail: 'Imeshindwa kunakili',
-                historyConfirm: 'Ufutafute historia yote?',
+                historyConfirm: 'Ufutafute historia yote?',
+                renamedImages: '{n} picha hazina jina lililohifadhiwa, hivyo zinaonyeshwa kama "Picha N". Pakua tena ili kurejesha majina halisi.'
             },
             it: {
                 title: '🎰 Ruota delle Immagini',
@@ -2343,7 +2368,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Nessuna estrazione',
                 historyCopied: 'Cronologia copiata ✓',
                 historyCopyFail: 'Copia non riuscita',
-                historyConfirm: 'Eliminare tutta la cronologia?',
+                historyConfirm: 'Eliminare tutta la cronologia?',
+                renamedImages: '{n} immagini non hanno salvato il nome, quindi mostrano "Immagine N". Ricaricale per ripristinare i nomi originali.'
             }
         };
 
@@ -3699,9 +3725,11 @@ const wheelCache = document.createElement('canvas');
 
                 results.sort((a, b) => a.index - b.index);
                 const dataUrls = results.map(r => r.dataUrl);
+                const unnamed = results.filter(r => !r.name).length;
                 const names = results.map((r, i) => r.name || ('Imagen ' + (i + 1)));
 
                 resetAndSetImages(dataUrls, names);
+                if (unnamed > 0) pendingRenames = unnamed;
 
                 const waitImages = setInterval(() => {
                     if (isLoading) return;
@@ -3711,6 +3739,12 @@ const wheelCache = document.createElement('canvas');
                     rebuildWheel();
                     refreshMessages();
                     if (typeof updateSaveBtn === 'function') updateSaveBtn();
+                    if (pendingRenames > 0) {
+                        const n = pendingRenames;
+                        pendingRenames = 0;
+                        setMsg.textContent = t('renamedImages').replace('{n}', n);
+                        setTimeout(() => { setMsg.textContent = ''; }, 6000);
+                    }
                 }, 100);
                 return true;
             } catch (e) {
