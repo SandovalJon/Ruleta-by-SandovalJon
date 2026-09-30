@@ -4190,7 +4190,7 @@ googleBtn.addEventListener('click', () => {
                     });
                 });
                 return Promise.all(compressPromises).then((compressedImages) => {
-                    const BATCH_SIZE = 400;
+                    const BATCH_SIZE = 100;
                     let chain = Promise.resolve();
                     for (let i = 0; i < compressedImages.length; i += BATCH_SIZE) {
                         const chunk = compressedImages.slice(i, i + BATCH_SIZE);
