@@ -938,6 +938,17 @@ let winnerIndex = -1;
         let isLoading = false;
         let pendingLoads = 0;
 
+        const MAX_IMAGES = 150;
+        const MAX_SETS = 999;
+
+        function getMaxImages() {
+            return MAX_IMAGES;
+        }
+
+        function getMaxSets() {
+            return MAX_SETS;
+        }
+
         let recActive = false;
         let recDiscard = false;
         let recMediaRecorder = null;
@@ -4158,14 +4169,6 @@ googleBtn.addEventListener('click', () => {
             if (images.length < 2) {
                 setMsg.textContent = tt('saveNeed');
                 return;
-            }
-            if (!isPremium) {
-                const snap = await fbDB.collection('sets').where('uid', '==', currentUser.uid).get();
-                if (snap.size >= FREE_MAX_SETS) {
-                    setMsg.textContent = tt('setLimit') || 'Límite de sets alcanzado. Hazte premium para más.';
-                    activatePremium();
-                    return;
-                }
             }
             const name = setNameInput.value.trim() || 'Mi set';
             saveSetBtn.disabled = true;
