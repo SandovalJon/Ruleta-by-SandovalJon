@@ -131,7 +131,8 @@ class Client {
 
   /** Navega y reinyecta los helpers, porque la pagina se recrea al recargar. */
   async navigate(url) {
-    await this.send('Page.navigate', { url });
+    const target = url || this.currentUrl;
+    await this.send('Page.navigate', { url: target });
     await sleep(3000);
     await this.eval(HELPERS, true);
   }
@@ -346,6 +347,134 @@ const tests = [
     },
   },
   {
+    name: 'los nombres originales sobreviven a la recarga',
+    run: async (c) => {
+      // cargar con nombres reconocibles y autoguardar
+      await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        const files = await __t.makeFiles(4);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 4, 15000);
+        autoSaveImages();
+        await new Promise(r => setTimeout(r, 2000));
+      })()`, true);
+      await c.navigate(c.currentUrl);
+      const r = await c.eval(`(async () => {
+        await new Promise(r => setTimeout(r, 3000));
+        return { total: images.length, nombres: fileNames.slice() };
+      })()`, true);
+      if (r.total !== 4) return 'se esperaban 4 imagenes, hay ' + r.total;
+      const esperado = ['Foto 0', 'Foto 1', 'Foto 2', 'Foto 3'];
+      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
+        return 'nombres incorrectos tras recargar: ' + JSON.stringify(r.nombres);
+      }
+      return true;
+    },
+  },
+  {
+    name: 'los nombres originales sobreviven a girar',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        spin();
+        await __t.waitSpin();
+        await new Promise(r => setTimeout(r, 300));
+        return {
+          ganador: winnerIndex,
+          esperado: fileNames[winnerIndex],
+          enHistorial: spinHistory[0] ? spinHistory[0].nombre : null,
+          enDom: document.querySelector('.winner-name') ? document.querySelector('.winner-name').textContent : null
+        };
+      })()`, true);
+      if (!r.esperado) return 'el ganador no tiene nombre';
+      if (/^Imagen \\d+$/.test(r.esperado)) return 'el ganador uso un nombre generico: ' + r.esperado;
+      if (r.enHistorial !== r.esperado) {
+        return 'el historial guardo "' + r.enHistorial + '" en vez de "' + r.esperado + '"';
+      }
+      if (r.enDom !== r.esperado) {
+        return 'el DOM muestra "' + r.enDom + '" en vez de "' + r.esperado + '"';
+      }
+      return true;
+    },
+  },
+  {
+    name: 'resetAndSetImages respeta los nombres dados',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const misNombres = ['Ana', 'Beto', 'Caro'];
+        // tres imagenes dataURL minimas
+        const mk = (color) => {
+          const cv = document.createElement('canvas');
+          cv.width = 8; cv.height = 8;
+          const x = cv.getContext('2d');
+          x.fillStyle = color; x.fillRect(0,0,8,8);
+          return cv.toDataURL('image/png');
+        };
+        resetAndSetImages([mk('#f00'), mk('#0f0'), mk('#00f')], misNombres);
+        await __t.waitFor(() => !isLoading && images.length === 3, 10000);
+        return { nombres: fileNames.slice(), total: images.length };
+      })()`, true);
+      const esperado = ['Ana', 'Beto', 'Caro'];
+      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
+        return 'esperaba ' + JSON.stringify(esperado) + ', obtuve ' + JSON.stringify(r.nombres);
+      }
+      return true;
+    },
+  },
+  {
+    name: 'los nombres sobreviven si IndexedDB no tiene el campo name',
+    run: async (c, ctx) => {
+      // sembrar datos con el formato antiguo (sin 'name') y comprobar
+      // que la app no rompe y que el historial no hereda nombres genericos
+      const seed = await c.eval(`(async () => {
+        const mk = (color) => {
+          const cv = document.createElement('canvas');
+          cv.width = 200; cv.height = 200;
+          const x = cv.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,200,200);
+          return cv.toDataURL('image/png');
+        };
+        return await new Promise(res => {
+          const req = indexedDB.open('RuletaDB', 1);
+          req.onupgradeneeded = e => {
+            const d = e.target.result;
+            if (!d.objectStoreNames.contains('images')) d.createObjectStore('images', { keyPath: 'index' });
+          };
+          req.onsuccess = e => {
+            const d = e.target.result;
+            const tx = d.transaction('images', 'readwrite');
+            const st = tx.objectStore('images');
+            st.clear();
+            for (let i = 0; i < 5; i++) st.put({ index: i, dataUrl: mk('#' + i + 'f0a0') });
+            tx.oncomplete = () => { d.close(); res(true); };
+            tx.onerror = () => { d.close(); res(false); };
+          };
+          req.onerror = () => res(false);
+        });
+      })()`, true);
+      if (!seed) return 'no se pudieron sembrar los datos';
+
+      await c.navigate(ctx.url);
+      const r = await c.eval(`(async () => {
+        await new Promise(r => setTimeout(r, 3000));
+        const nombresOk = fileNames.every(n => typeof n === 'string' && n.length > 0);
+        spin();
+        const t0 = Date.now();
+        while (Date.now() - t0 < 20000 && isSpinning) await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 300));
+        return {
+          total: images.length,
+          nombresOk: nombresOk,
+          nombres: fileNames.slice(),
+          historial: spinHistory.map(h => h.nombre)
+        };
+      })()`, true);
+      if (r.total !== 5) return 'se esperaban 5 imagenes, hay ' + r.total;
+      if (!r.nombresOk) return 'hay nombres vacios tras recuperar datos antiguos';
+      if (r.historial.length === 0) return 'el historial quedo vacio';
+      return true;
+    },
+  },
+  {
     name: 'las eliminaciones de una sesion anterior no se heredan',
     run: async (c) => {
       const r = await c.eval(`(async () => {
@@ -519,6 +648,7 @@ const tests = [
     ws = new WebSocket(page.webSocketDebuggerUrl, { perMessageDeflate: false, maxPayload: 512 * 1024 * 1024 });
     await new Promise((res, rej) => { ws.on('open', res); ws.on('error', rej); });
     const c = new Client(ws);
+    c.currentUrl = url;
 
     await c.send('Runtime.enable');
     await c.send('Page.enable');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1013,7 +1013,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.1</div>
     </div>
 
     <script>
@@ -3701,10 +3701,7 @@ const wheelCache = document.createElement('canvas');
                 const dataUrls = results.map(r => r.dataUrl);
                 const names = results.map((r, i) => r.name || ('Imagen ' + (i + 1)));
 
-                isLoading = true;
-                refreshMessages();
-                resetAndSetImages(dataUrls);
-                fileNames = names;
+                resetAndSetImages(dataUrls, names);
 
                 const waitImages = setInterval(() => {
                     if (isLoading) return;
@@ -4858,12 +4855,11 @@ googleBtn.addEventListener('click', () => {
                             snap.forEach((doc) => {
                                 if (doc.exists) {
                                     dataUrls.push(doc.data().dataUrl);
-                                    names.push(doc.data().name || ('Imagen ' + (dataUrls.length)));
+                                    names.push(doc.data().name || ('Imagen ' + (names.length + 1)));
                                 }
                             });
                             currentSetId = setId;
-                            resetAndSetImages(dataUrls);
-                            fileNames = names;
+                            resetAndSetImages(dataUrls, names);
                             eliminatedIndices = new Set(eliminatedArr);
                             invalidateActive();
                             clearUndo();
@@ -4917,7 +4913,7 @@ googleBtn.addEventListener('click', () => {
                 });
         }
 
-        function resetAndSetImages(dataUrls) {
+        function resetAndSetImages(dataUrls, names) {
             cancelAnimationFrame(spinTimeout);
             if (isSpinning) isSpinning = false;
             images = [];
@@ -4931,13 +4927,11 @@ googleBtn.addEventListener('click', () => {
             winnerZoom = 0;
             isHovering = false;
             rouletteWrapper.classList.remove('winner-mode');
-            previewImages.innerHTML = '';
-            addDataUrls(dataUrls);
-            if (fileNames.length === 0 && images.length > 0) {
-                for (let i = 0; i < images.length; i++) {
-                    fileNames.push('Imagen ' + (i + 1));
-                }
+            previewImages.replaceChildren();
+            if (Array.isArray(names)) {
+                fileNames = names.slice();
             }
+            addDataUrls(dataUrls);
             saveSetBtn.disabled = images.length >= 2 ? false : true;
         }
 
