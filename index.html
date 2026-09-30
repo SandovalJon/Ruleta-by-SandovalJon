@@ -920,7 +920,11 @@ by <span>SandovalJon</span>
         const searchInput = document.getElementById('searchInput');
 
         if (searchInput) {
-            searchInput.addEventListener('input', () => updatePreview());
+            let searchTimer = null;
+            searchInput.addEventListener('input', () => {
+                if (searchTimer) clearTimeout(searchTimer);
+                searchTimer = setTimeout(updatePreview, 120);
+            });
         }
 
 let images = [];
@@ -2428,11 +2432,12 @@ clearBtn.addEventListener('click', () => {
                 recDiscard = true;
                 finishRecording();
             }
-images = [];
+            images = [];
             fullImages = [];
             loadedImages = [];
             fileNames = [];
             eliminatedIndices.clear();
+            invalidateActive();
             currentSetId = null;
             saveEliminationState();
             previewImages.innerHTML = '';
@@ -2474,14 +2479,52 @@ images = [];
             const BATCH_SIZE = 50;
             let batchStart = 0;
             let failed = 0;
+            const baseIndex = images.length;
+            images.length += total;
+            fullImages.length += total;
+            fileNames.length += total;
+            for (let i = 0; i < total; i++) {
+                fileNames[baseIndex + i] = newFiles[i].name || ('Imagen ' + (baseIndex + i + 1));
+            }
 
             function finishLoading() {
+                if (failed > 0) compactSlots();
                 isLoading = false;
                 updatePreview();
                 rebuildWheel();
                 refreshMessages();
                 if (typeof updateSaveBtn === 'function') updateSaveBtn();
                 if (failed > 0) console.warn(failed + ' images failed');
+            }
+
+            function compactSlots() {
+                const remap = new Map();
+                const keep = [];
+                for (let i = 0; i < images.length; i++) {
+                    if (images[i]) {
+                        remap.set(i, keep.length);
+                        keep.push(i);
+                    }
+                }
+                if (keep.length === images.length) return;
+                const newImages = keep.map(i => images[i]);
+                const newFull = keep.map(i => fullImages[i]);
+                const newLoaded = keep.map(i => loadedImages[i]);
+                const newNames = keep.map(i => fileNames[i]);
+                const newElim = new Set();
+                for (const i of eliminatedIndices) {
+                    if (remap.has(i)) newElim.add(remap.get(i));
+                }
+                images = newImages;
+                fullImages = newFull;
+                loadedImages = newLoaded;
+                fileNames = newNames;
+                eliminatedIndices = newElim;
+                if (winnerIndex >= 0) {
+                    winnerIndex = remap.has(winnerIndex) ? remap.get(winnerIndex) : -1;
+                }
+                invalidateActive();
+                saveEliminationState();
             }
 
             const loadingTimeout = setTimeout(() => {
@@ -2507,6 +2550,7 @@ images = [];
                 const end = Math.min(batchStart + BATCH_SIZE, total);
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
+                    const slot = baseIndex + i;
                     const objectUrl = URL.createObjectURL(file);
                     const img = new Image();
                     img.onerror = () => { URL.revokeObjectURL(objectUrl); failed++; onOneDone(); };
@@ -2524,10 +2568,9 @@ images = [];
                         const full = drawScaled(512);
                         const fullDataUrl = full.toDataURL('image/jpeg', 0.85);
                         URL.revokeObjectURL(objectUrl);
-                        images.push(smallDataUrl);
-                        fullImages.push(fullDataUrl);
-                        fileNames.push(file.name || 'Imagen ' + images.length);
-                        loadedImages.push(small);
+                        images[slot] = smallDataUrl;
+                        fullImages[slot] = fullDataUrl;
+                        loadedImages[slot] = small;
                         onOneDone();
                     };
                     img.src = objectUrl;
@@ -2542,20 +2585,42 @@ images = [];
         }
         function updatePreview() {
             const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
-            previewImages.innerHTML = images.map((src, index) => {
+            const frag = document.createDocumentFragment();
+            for (let index = 0; index < images.length; index++) {
                 const fileName = fileNames[index] || '';
-                if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) return '';
+                if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) continue;
                 const isEliminated = eliminatedIndices.has(index);
-                return `<div class="preview-item ${isEliminated ? 'eliminated' : ''}" data-index="${index}" draggable="${!isEliminated}">
-                    <img src="${src}" alt="preview" style="width:48px;height:48px;object-fit:cover;border-radius:6px;${isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : ''}">
-                    ${isEliminated 
-                        ? '<div class="eliminated-badge">✓</div>' 
-                        : `<div class="remove-overlay">
-                            <button class="remove-btn" data-index="${index}" title="${t('remove')}">✕</button>
-                          </div>`
-                    }
-                </div>`;
-            }).join('');
+                const item = document.createElement('div');
+                item.className = 'preview-item' + (isEliminated ? ' eliminated' : '');
+                item.dataset.index = index;
+                item.draggable = !isEliminated;
+                const img = document.createElement('img');
+                img.src = images[index];
+                img.alt = 'preview';
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:6px;'
+                    + (isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : '');
+                item.appendChild(img);
+                if (isEliminated) {
+                    const badge = document.createElement('div');
+                    badge.className = 'eliminated-badge';
+                    badge.textContent = '✓';
+                    item.appendChild(badge);
+                } else {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'remove-overlay';
+                    const btn = document.createElement('button');
+                    btn.className = 'remove-btn';
+                    btn.dataset.index = index;
+                    btn.title = t('remove');
+                    btn.textContent = '✕';
+                    overlay.appendChild(btn);
+                    item.appendChild(overlay);
+                }
+                frag.appendChild(item);
+            }
+            previewImages.replaceChildren(frag);
         }
 
 function removeImage(index) {
@@ -2717,6 +2782,7 @@ const wheelCache = document.createElement('canvas');
         }
 
         function rebuildWheel() {
+            invalidateActive();
             prerenderWheel(wheelCache, wheelCtx);
             if (recActive && recWheelCache) prerenderWheel(recWheelCache, recWheelCtx);
             drawRoulette();
@@ -2847,22 +2913,27 @@ const wheelCache = document.createElement('canvas');
             spinSlices = activeCount;
             playWhoosh(spinDuration / 1000);
 
+            let lastHue = -1;
+
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinDuration, 1);
                 const easeOut = 1 - Math.pow(1 - progress, 3);
-                
+
                 if (progress < 0.5) {
-                    const hue = (elapsed * 0.5) % 360;
-                    document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 15%) 0%, hsl(${(hue + 60) % 360}, 60%, 20%) 50%, hsl(${(hue + 120) % 360}, 50%, 25%) 100%)`;
-                } else if (progress >= 0.99) {
+                    const hue = Math.floor(elapsed / 16) % 360;
+                    if (hue !== lastHue) {
+                        lastHue = hue;
+                        document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 15%) 0%, hsl(${(hue + 60) % 360}, 60%, 20%) 50%, hsl(${(hue + 120) % 360}, 50%, 25%) 100%)`;
+                    }
+                } else if (lastHue !== -2) {
+                    lastHue = -2;
                     document.body.style.background = '';
                 }
-                
                 currentRotation = startRotation + totalRotation * easeOut;
                 const sliceStep = (Math.PI * 2) / spinSlices;
-                while (currentRotation > lastTickAngle) {
-                    lastTickAngle += sliceStep;
+                if (currentRotation > lastTickAngle + sliceStep) {
+                    lastTickAngle = currentRotation - sliceStep;
                     playTick(1 - progress);
                 }
                 drawRoulette();
@@ -2968,8 +3039,27 @@ const wheelCache = document.createElement('canvas');
             refreshMessages();
         });
 
+        let activeIndicesCache = null;
+        let activeCacheKey = '';
+
+        let elimVersion = 0;
+
         function getActiveIndices() {
-            return images.map((_, i) => i).filter(i => !eliminatedIndices.has(i));
+            const key = images.length + ':' + eliminatedIndices.size + ':' + elimVersion;
+            if (activeIndicesCache && activeCacheKey === key) return activeIndicesCache;
+            const out = [];
+            for (let i = 0; i < images.length; i++) {
+                if (!eliminatedIndices.has(i)) out.push(i);
+            }
+            activeIndicesCache = out;
+            activeCacheKey = key;
+            return out;
+        }
+
+        function invalidateActive() {
+            activeIndicesCache = null;
+            activeCacheKey = '';
+            elimVersion++;
         }
 
         function getActiveCount() {
@@ -4173,6 +4263,7 @@ googleBtn.addEventListener('click', () => {
                             resetAndSetImages(dataUrls);
                             fileNames = names;
                             eliminatedIndices = new Set(eliminatedArr);
+                            invalidateActive();
                             const savedElimMode = setData.elimMode || false;
                             if (elimMode !== savedElimMode) {
                                 elimMode = savedElimMode;
@@ -4230,6 +4321,7 @@ googleBtn.addEventListener('click', () => {
             fileNames = [];
             loadedImages = [];
             fullImages = [];
+            invalidateActive();
             winnerFullImg = null;
             currentRotation = 0;
             winnerIndex = -1;
