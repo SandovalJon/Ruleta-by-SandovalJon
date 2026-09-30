@@ -851,7 +851,7 @@ canvas {
                 <div class="drop-zone-icon">📸</div>
                 <div class="drop-zone-text">
                     <span id="dropText">Arrastra imágenes aquí</span><br>
-                    <small id="dropHint">(mínimo 2, máximo 150)</small>
+                    <small id="dropHint">(mínimo 2, máximo 100)</small>
                 </div>
             </label>
             <input type="file" id="fileInput" multiple accept="image/*" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" />
@@ -938,7 +938,7 @@ let winnerIndex = -1;
         let isLoading = false;
         let pendingLoads = 0;
 
-        const MAX_IMAGES = 150;
+        const MAX_IMAGES = 100;
         const MAX_SETS = 999;
 
         function getMaxImages() {
