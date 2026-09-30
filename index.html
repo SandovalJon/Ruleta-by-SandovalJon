@@ -931,22 +931,17 @@ let images = [];
         let isSpinning = false;
         let currentRotation = 0;
         let spinTimeout = null;
-let winnerIndex = -1;
+        let winnerIndex = -1;
         let winnerZoom = 0;
         let winnerFullImg = null;
         let isHovering = false;
         let isLoading = false;
-        let pendingLoads = 0;
 
         const MAX_IMAGES = 100;
         const MAX_SETS = 999;
 
         function getMaxImages() {
             return MAX_IMAGES;
-        }
-
-        function getMaxSets() {
-            return MAX_SETS;
         }
 
         let recActive = false;
@@ -2663,17 +2658,6 @@ const wheelCache = document.createElement('canvas');
         let recWheelCache = null;
         let recWheelCtx = null;
 
-        function makeThumb(img, size) {
-            const scale = size / Math.max(img.width, img.height);
-            const w = Math.max(1, Math.round(img.width * scale));
-            const h = Math.max(1, Math.round(img.height * scale));
-            const c = document.createElement('canvas');
-            c.width = w;
-            c.height = h;
-            c.getContext('2d').drawImage(img, 0, 0, w, h);
-            return c;
-        }
-
         function prerenderWheel(cache, c) {
             const sf = cache.width / canvas.width;
             const ox = cache.width / 2;
@@ -2863,9 +2847,6 @@ const wheelCache = document.createElement('canvas');
             spinSlices = activeCount;
             playWhoosh(spinDuration / 1000);
 
-            let crazyColors = ['#e94560', '#0f3460', '#533483', '#16c79a', '#ffd700', '#ff6b6b', '#4ecdc4'];
-            let crazyIndex = 0;
-
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinDuration, 1);
@@ -3043,59 +3024,6 @@ const wheelCache = document.createElement('canvas');
                 images.forEach((dataUrl, index) => {
                     store.put({ index, dataUrl });
                 });
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-                db.close();
-            } catch (e) {}
-        }
-
-        async function loadImagesFromDB() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const request = store.getAll();
-                const results = await new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-                db.close();
-                if (results && results.length > 0) {
-                    results.sort((a, b) => a.index - b.index);
-                    images = results.map(r => r.dataUrl);
-                    loadedImages = [];
-                    const loadPromises = images.map((dataUrl, i) => {
-                        return new Promise((resolve) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                loadedImages[i] = img;
-                                resolve();
-                            };
-                            img.onerror = () => resolve();
-                            img.src = dataUrl;
-                        });
-                    });
-                    await Promise.all(loadPromises);
-                    loadedImages = loadedImages.filter(Boolean);
-                    updatePreview();
-                    rebuildWheel();
-                    refreshMessages();
-                    return true;
-                }
-                return false;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        async function clearImagesDB() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                store.clear();
                 await new Promise((resolve, reject) => {
                     tx.oncomplete = resolve;
                     tx.onerror = () => reject(tx.error);
@@ -4091,12 +4019,7 @@ const wheelCache = document.createElement('canvas');
             }
         }
 
-        function updateSetMsg(elId, text) {
-            const el = document.getElementById(elId);
-            if (el) el.textContent = text;
-        }
-
-if (typeof firebase !== 'undefined') {
+        if (typeof firebase !== 'undefined') {
             try {
                 fbInit();
                 setAuthUI();
@@ -4182,7 +4105,6 @@ googleBtn.addEventListener('click', () => {
                 elimMode: elimMode,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then((setRef) => {
-                console.log('SAVE SET eliminated:', [...eliminatedIndices], 'count:', images.length);
                 const compressPromises = images.map((dataUrl, i) => {
                     const source = fullImages[i] || dataUrl;
                     return compressImage(source).then((compressed) => {
@@ -4234,8 +4156,7 @@ googleBtn.addEventListener('click', () => {
                     if (!setDoc.exists) throw new Error('Set not found');
                     const setData = setDoc.data();
                     const eliminatedArr = setData.eliminated || [];
-                    console.log('LOAD SET:', setId, 'eliminated:', eliminatedArr, 'count:', setData.count);
-                    
+
                     return fbDB.collection('sets').doc(setId).collection('images')
                         .where('uid', '==', currentUser.uid)
                         .orderBy('index').get()
@@ -4248,11 +4169,10 @@ googleBtn.addEventListener('click', () => {
                                     names.push(doc.data().name || ('Imagen ' + (dataUrls.length)));
                                 }
                             });
-                            console.log('LOADED IMAGES:', dataUrls.length);
                             currentSetId = setId;
                             resetAndSetImages(dataUrls);
                             fileNames = names;
-eliminatedIndices = new Set(eliminatedArr);
+                            eliminatedIndices = new Set(eliminatedArr);
                             const savedElimMode = setData.elimMode || false;
                             if (elimMode !== savedElimMode) {
                                 elimMode = savedElimMode;
@@ -4260,7 +4180,6 @@ eliminatedIndices = new Set(eliminatedArr);
                                 elimBtn.textContent = elimMode ? t('eliminateActive') : t('eliminate');
                                 rouletteWrapper.classList.toggle('elim-mode', elimMode);
                             }
-                            console.log('RESTORED ELIMINATED:', [...eliminatedIndices], 'elimMode:', elimMode);
                             saveEliminationState();
                             updatePreview();
                             rebuildWheel();
