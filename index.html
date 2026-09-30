@@ -942,7 +942,6 @@ let images = [];
         let isLoading = false;
 
         const MAX_IMAGES = 100;
-        const MAX_SETS = 999;
 
         function getMaxImages() {
             return MAX_IMAGES;
@@ -2479,52 +2478,25 @@ clearBtn.addEventListener('click', () => {
             const BATCH_SIZE = 50;
             let batchStart = 0;
             let failed = 0;
-            const baseIndex = images.length;
-            images.length += total;
-            fullImages.length += total;
-            fileNames.length += total;
-            for (let i = 0; i < total; i++) {
-                fileNames[baseIndex + i] = newFiles[i].name || ('Imagen ' + (baseIndex + i + 1));
-            }
+            const slots = new Array(total);
 
             function finishLoading() {
-                if (failed > 0) compactSlots();
+                for (let i = 0; i < slots.length; i++) {
+                    const s = slots[i];
+                    if (!s) continue;
+                    images.push(s.small);
+                    fullImages.push(s.full);
+                    loadedImages.push(s.canvas);
+                    fileNames.push(s.name || ('Imagen ' + images.length));
+                }
+                slots.length = 0;
                 isLoading = false;
+                invalidateActive();
                 updatePreview();
                 rebuildWheel();
                 refreshMessages();
                 if (typeof updateSaveBtn === 'function') updateSaveBtn();
                 if (failed > 0) console.warn(failed + ' images failed');
-            }
-
-            function compactSlots() {
-                const remap = new Map();
-                const keep = [];
-                for (let i = 0; i < images.length; i++) {
-                    if (images[i]) {
-                        remap.set(i, keep.length);
-                        keep.push(i);
-                    }
-                }
-                if (keep.length === images.length) return;
-                const newImages = keep.map(i => images[i]);
-                const newFull = keep.map(i => fullImages[i]);
-                const newLoaded = keep.map(i => loadedImages[i]);
-                const newNames = keep.map(i => fileNames[i]);
-                const newElim = new Set();
-                for (const i of eliminatedIndices) {
-                    if (remap.has(i)) newElim.add(remap.get(i));
-                }
-                images = newImages;
-                fullImages = newFull;
-                loadedImages = newLoaded;
-                fileNames = newNames;
-                eliminatedIndices = newElim;
-                if (winnerIndex >= 0) {
-                    winnerIndex = remap.has(winnerIndex) ? remap.get(winnerIndex) : -1;
-                }
-                invalidateActive();
-                saveEliminationState();
             }
 
             const loadingTimeout = setTimeout(() => {
@@ -2550,10 +2522,14 @@ clearBtn.addEventListener('click', () => {
                 const end = Math.min(batchStart + BATCH_SIZE, total);
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
-                    const slot = baseIndex + i;
                     const objectUrl = URL.createObjectURL(file);
                     const img = new Image();
-                    img.onerror = () => { URL.revokeObjectURL(objectUrl); failed++; onOneDone(); };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(objectUrl);
+                        slots[i] = null;
+                        failed++;
+                        onOneDone();
+                    };
                     img.onload = () => {
                         const drawScaled = (target) => {
                             const s = Math.min(1, target / Math.max(img.width, img.height));
@@ -2564,13 +2540,14 @@ clearBtn.addEventListener('click', () => {
                             return c;
                         };
                         const small = drawScaled(MAX_IMAGE);
-                        const smallDataUrl = small.toDataURL('image/jpeg', 0.7);
                         const full = drawScaled(512);
-                        const fullDataUrl = full.toDataURL('image/jpeg', 0.85);
+                        slots[i] = {
+                            small: small.toDataURL('image/jpeg', 0.7),
+                            full: full.toDataURL('image/jpeg', 0.85),
+                            canvas: small,
+                            name: file.name || ''
+                        };
                         URL.revokeObjectURL(objectUrl);
-                        images[slot] = smallDataUrl;
-                        fullImages[slot] = fullDataUrl;
-                        loadedImages[slot] = small;
                         onOneDone();
                     };
                     img.src = objectUrl;
