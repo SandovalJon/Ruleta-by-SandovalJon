@@ -927,7 +927,7 @@ by <span>SandovalJon</span>
             });
         }
 
-let images = [];
+        let images = [];
         let fullImages = [];
         let loadedImages = [];
         let fileNames = [];
@@ -940,6 +940,9 @@ let images = [];
         let winnerFullImg = null;
         let isHovering = false;
         let isLoading = false;
+        let activeIndicesCache = null;
+        let activeCacheKey = '';
+        let elimVersion = 0;
 
         const MAX_IMAGES = 100;
 
@@ -3015,11 +3018,6 @@ const wheelCache = document.createElement('canvas');
             rouletteWrapper.classList.toggle('elim-mode', elimMode);
             refreshMessages();
         });
-
-        let activeIndicesCache = null;
-        let activeCacheKey = '';
-
-        let elimVersion = 0;
 
         function getActiveIndices() {
             const key = images.length + ':' + eliminatedIndices.size + ':' + elimVersion;
