@@ -1034,7 +1034,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.3</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.4</div>
     </div>
 
     <script>
@@ -1092,6 +1092,7 @@ by <span>SandovalJon</span>
         const undoStack = [];
         let spinHistory = [];
         let pendingRenames = 0;
+        let imageEpoch = 0;
 
         function getMaxImages() {
             return MAX_IMAGES;
@@ -2920,6 +2921,7 @@ let colors = themeColors[currentTheme];
                 finishRecording();
             }
             if (saveTimeout) { clearTimeout(saveTimeout); saveTimeout = null; }
+            imageEpoch++;
             images = [];
             fullImages = [];
             loadedImages = [];
@@ -2977,6 +2979,7 @@ let colors = themeColors[currentTheme];
             }));
             const entries = paired.filter(p => p.file.type && p.file.type.startsWith('image/'));
             if (entries.length === 0) return;
+            imageEpoch++;
             const newFiles = entries.map(p => p.file);
             const resolvedNames = entries.map(p => p.name);
             if (images.length + newFiles.length > getMaxImages()) {
@@ -3170,6 +3173,7 @@ let colors = themeColors[currentTheme];
         }
 
         function removeImage(index) {
+            imageEpoch++;
             pushUndo({
                 type: 'removeImage',
                 index: index,
@@ -3882,6 +3886,7 @@ const wheelCache = document.createElement('canvas');
         }
 
         async function loadImagesFromDB() {
+            const myEpoch = imageEpoch;
             let db;
             try {
                 db = await openDB();
@@ -3897,6 +3902,7 @@ const wheelCache = document.createElement('canvas');
                     request.onerror = () => reject(request.error);
                 });
                 db.close();
+                if (myEpoch !== imageEpoch) return false;
                 if (!results || results.length === 0) return false;
 
                 results.sort((a, b) => a.index - b.index);
@@ -3908,6 +3914,7 @@ const wheelCache = document.createElement('canvas');
                 if (unnamed > 0) pendingRenames = unnamed;
 
                 const waitImages = setInterval(() => {
+                    if (myEpoch !== imageEpoch) { clearInterval(waitImages); return; }
                     if (isLoading) return;
                     clearInterval(waitImages);
                     invalidateActive();
@@ -5047,6 +5054,7 @@ googleBtn.addEventListener('click', () => {
             if (!fbDB || !currentUser) return;
             const setId = setsSelect.value;
             if (!setId) return;
+            imageEpoch++;
             loadSetBtn.disabled = true;
             setMsg.textContent = tt('loadingSet');
 

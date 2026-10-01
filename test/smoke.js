@@ -602,6 +602,75 @@ const tests = [
     },
   },
   {
+    name: 'la restauracion automatica no borra subidas en curso',
+    run: async (c, ctx) => {
+      // sembrar 40 documentos PESADOS para que la lectura tarde,
+      // recargar y subir inmediatamente: la restauracion no debe borrar lo subido
+      await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        function mkBig(i) {
+          const cv = document.createElement('canvas');
+          cv.width = 900; cv.height = 900;
+          const x = cv.getContext('2d');
+          x.fillStyle = '#' + ((i * 1234567) % 16777215).toString(16).padStart(6, '0');
+          x.fillRect(0, 0, 900, 900);
+          x.fillStyle = '#fff'; x.font = 'bold 60px sans-serif';
+          x.fillText('VIEJA_' + i, 40, 460);
+          return new Promise(res => cv.toBlob(b => {
+            const fr = new FileReader();
+            fr.onload = () => res(fr.result);
+            fr.readAsDataURL(b);
+          }, 'image/png'));
+        }
+        const datas = [];
+        for (let i = 0; i < 40; i++) datas.push(await mkBig(i));
+        await new Promise(res => {
+          const req = indexedDB.open('RuletaDB', 1);
+          req.onupgradeneeded = e => {
+            const d = e.target.result;
+            if (!d.objectStoreNames.contains('images')) d.createObjectStore('images', { keyPath: 'index' });
+          };
+          req.onsuccess = e => {
+            const d = e.target.result;
+            const tx = d.transaction('images', 'readwrite');
+            const st = tx.objectStore('images');
+            st.clear();
+            datas.forEach((dataUrl, i) => st.put({ index: i, dataUrl, name: 'VIEJA_' + i + '.png' }));
+            tx.oncomplete = () => { d.close(); res(true); };
+          };
+        });
+      })()`, true);
+      await c.navigate(ctx.url);
+      // subir INMEDIATAMENTE, sin esperar a que termine la restauracion
+      const r = await c.eval(`(async () => {
+        function mk(name, color) {
+          const cc = document.createElement('canvas'); cc.width = 200; cc.height = 200;
+          const x = cc.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,200,200);
+          x.fillStyle = '#fff'; x.font = 'bold 24px sans-serif'; x.fillText(name, 10, 110);
+          return new Promise(res => cc.toBlob(b => res(new File([b], name, { type: 'image/png' })), 'image/png'));
+        }
+        const files = [await mk('NUEVA_A.jpg', '#e94560'), await mk('NUEVA_B.jpg', '#0f3460')];
+        handleFiles(files);
+        const t0 = Date.now();
+        while (Date.now() - t0 < 45000 && (isLoading || images.length < 2)) {
+          await new Promise(rr => setTimeout(rr, 100));
+        }
+        // esperar a que cualquier restauracion pendiente termine
+        await new Promise(rr => setTimeout(rr, 8000));
+        return {
+          total: images.length,
+          nombres: fileNames.slice(0, 3).concat(['...']).concat(fileNames.slice(-3)),
+          tieneNuevas: fileNames.includes('NUEVA_A.jpg') && fileNames.includes('NUEVA_B.jpg')
+        };
+      })()`, true);
+      if (!r.tieneNuevas) {
+        return 'la restauracion borro las imagenes subidas (total ' + r.total + '): ' + JSON.stringify(r.nombres);
+      }
+      return true;
+    },
+  },
+  {
     name: 'limpiar vacia memoria e IndexedDB',
     run: async (c, ctx) => {
       const r = await c.eval(`(async () => {
