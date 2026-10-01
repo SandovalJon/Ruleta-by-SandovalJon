@@ -1034,7 +1034,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.4</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.5</div>
     </div>
 
     <script>
@@ -2980,6 +2980,7 @@ let colors = themeColors[currentTheme];
             const entries = paired.filter(p => p.file.type && p.file.type.startsWith('image/'));
             if (entries.length === 0) return;
             imageEpoch++;
+            const myEpoch = imageEpoch;
             const newFiles = entries.map(p => p.file);
             const resolvedNames = entries.map(p => p.name);
             if (images.length + newFiles.length > getMaxImages()) {
@@ -3004,6 +3005,7 @@ let colors = themeColors[currentTheme];
             const slots = new Array(total);
 
             function finishLoading() {
+                if (myEpoch !== imageEpoch) return;
                 const isNewSet = images.length === 0;
                 for (let i = 0; i < slots.length; i++) {
                     const s = slots[i];
