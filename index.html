@@ -347,6 +347,97 @@
             transform: scale(1.15);
         }
 
+        .bulk-rename-btn {
+            display: block;
+            width: 100%;
+            margin: 0 0 10px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #f85149;
+            background: transparent;
+            border: 1px solid #f85149;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .bulk-rename-btn:hover {
+            background: #f85149;
+            color: #fff;
+        }
+
+        .bulk-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+
+        .bulk-box {
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-2, #1a1a2e);
+            border: 1px solid var(--border, rgba(255,255,255,0.15));
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .bulk-box h3 {
+            margin: 0 0 12px;
+            font-size: 1rem;
+            text-align: center;
+            color: var(--text-muted, #ccc);
+        }
+
+        .bulk-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .bulk-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bulk-row img {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .bulk-row input {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 10px;
+            font-size: 0.9rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .bulk-row input:focus {
+            border-color: var(--accent-light, #ff6b6b);
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 8px;
+        }
+
         .preview-item.removed {
             animation: fadeOut 0.3s ease forwards;
         }
@@ -1016,7 +1107,18 @@ canvas {
                 <div class="set-msg" id="historyMsg"></div>
             </div>
             <input type="text" id="searchInput" placeholder="🔍 Buscar imagen..." class="search-input" style="width:100%;padding:8px 12px;margin:10px 0;border-radius:12px;border:1px solid var(--accent);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box;" />
+            <button id="bulkRenameBtn" class="bulk-rename-btn" type="button" style="display:none;">✎ <span id="bulkRenameLabel"></span></button>
             <div class="preview-images" id="previewImages"></div>
+            <div id="bulkModal" class="bulk-modal" style="display:none;">
+                <div class="bulk-box">
+                    <h3 id="bulkTitle"></h3>
+                    <div class="bulk-list" id="bulkList"></div>
+                    <div class="bulk-actions">
+                        <button id="bulkSaveBtn" class="history-btn" type="button"></button>
+                        <button id="bulkCancelBtn" class="history-btn" type="button"></button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="roulette-container">
@@ -1034,7 +1136,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.2.5</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.3.0</div>
     </div>
 
     <script>
@@ -1093,6 +1195,13 @@ by <span>SandovalJon</span>
         let spinHistory = [];
         let pendingRenames = 0;
         let imageEpoch = 0;
+
+        let isBraveBrowser = false;
+        if (typeof navigator !== 'undefined' && navigator.brave && typeof navigator.brave.isBrave === 'function') {
+            try {
+                navigator.brave.isBrave().then(function (b) { isBraveBrowser = !!b; }).catch(function () {});
+            } catch (e) {}
+        }
 
         function getMaxImages() {
             return MAX_IMAGES;
@@ -1190,8 +1299,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Aún no hay sorteos',
                 historyCopied: 'Historial copiado ✓',
                 historyCopyFail: 'No se pudo copiar',
-                historyConfirm: '¿Borrar todo el historial de sorteos?',
+                historyConfirm: '¿Borrar todo el historial de sorteos?',
                 renamedImages: '{n} imágenes no guardaban su nombre, así que se muestran como «Imagen N». Vuelve a subirlas para recuperar los nombres originales.',
+                bulkTitle: 'Renombrar imágenes sin nombre',
+                bulkSave: 'Guardar',
+                bulkCancel: 'Cancelar',
+                braveHint: 'Brave no entrega los nombres de archivo. Renómbralas aquí o sube desde Chrome o Edge.',
                 noFileNames: '{n} imágenes llegaron sin nombre de archivo y se mostrarán como «Imagen N». Si arrastras desde una página web o la nube, usa el botón para elegir los archivos.',
                 renameHint: 'Toca para poner el nombre',
                 renamePrompt: 'Ponle un nombre a esta imagen'
@@ -1243,8 +1356,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'No spins yet',
                 historyCopied: 'History copied ✓',
                 historyCopyFail: 'Could not copy',
-                historyConfirm: 'Delete the entire spin history?',
+                historyConfirm: 'Delete the entire spin history?',
                 renamedImages: '{n} images had no name saved, so they show as "Image N". Upload them again to restore the original names.',
+                bulkTitle: 'Rename unnamed images',
+                bulkSave: 'Save',
+                bulkCancel: 'Cancel',
+                braveHint: 'Brave does not provide file names. Rename them here or upload from Chrome or Edge.',
                 noFileNames: '{n} images arrived without a filename and will show as "Image N". If you drag from a web page or cloud, use the button to pick the files instead.',
                 renameHint: 'Tap to set the name',
                 renamePrompt: 'Name this image'
@@ -1296,8 +1413,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Ainda sem sorteios',
                 historyCopied: 'Histórico copiado ✓',
                 historyCopyFail: 'Não foi possível copiar',
-                historyConfirm: 'Apagar todo o histórico de sorteios?',
+                historyConfirm: 'Apagar todo o histórico de sorteios?',
                 renamedImages: '{n} imagens não tinham nome salvo, então aparecem como "Imagem N". Envie-as novamente para recuperar os nomes originais.',
+                bulkTitle: 'Renomear imagens sem nome',
+                bulkSave: 'Salvar',
+                bulkCancel: 'Cancelar',
+                braveHint: 'O Brave não fornece os nomes dos arquivos. Renomeie aqui ou envie pelo Chrome ou Edge.',
                 noFileNames: '{n} imagens chegaram sem nome de arquivo e aparecerão como "Imagem N". Se arrastar de uma página web ou da nuvem, use o botão para escolher os arquivos.',
                 renameHint: 'Toque para dar o nome',
                 renamePrompt: 'Dê um nome a esta imagem'
@@ -1349,8 +1470,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Aucun tirage',
                 historyCopied: 'Historique copié ✓',
                 historyCopyFail: 'Copie impossible',
-                historyConfirm: 'Supprimer tout l\'historique des tirages ?',
+                historyConfirm: 'Supprimer tout l\'historique des tirages ?',
                 renamedImages: '{n} images n\'avaient pas de nom enregistré, elles s\'affichent donc « Image N ». Réimportez-les pour retrouver les noms d\'origine.',
+                bulkTitle: 'Renommer les images sans nom',
+                bulkSave: 'Enregistrer',
+                bulkCancel: 'Annuler',
+                braveHint: 'Brave ne fournit pas les noms de fichiers. Renommez-les ici ou importez depuis Chrome ou Edge.',
                 noFileNames: '{n} images sont arrivées sans nom de fichier et s\'afficheront comme « Image N ». Si vous glissez depuis une page web ou un cloud, utilisez le bouton pour choisir les fichiers.',
                 renameHint: 'Touchez pour donner un nom',
                 renamePrompt: 'Nommez cette image'
@@ -1402,8 +1527,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Noch keine Drehungen',
                 historyCopied: 'Verlauf kopiert ✓',
                 historyCopyFail: 'Kopieren fehlgeschlagen',
-                historyConfirm: 'Gesamten Drehverlauf löschen?',
+                historyConfirm: 'Gesamten Drehverlauf löschen?',
                 renamedImages: '{n} Bilder hatten keinen gespeicherten Namen und zeigen sich als „Bild N“. Lade sie erneut hoch, um die Originalnamen wiederherzustellen.',
+                bulkTitle: 'Bilder ohne Namen umbenennen',
+                bulkSave: 'Speichern',
+                bulkCancel: 'Abbrechen',
+                braveHint: 'Brave liefert keine Dateinamen. Benenne sie hier um oder lade sie über Chrome oder Edge hoch.',
                 noFileNames: '{n} Bilder kamen ohne Dateinamen an und zeigen sich als „Bild N“. Wenn du von einer Webseite oder Cloud ziehst, nutze die Schaltfläche zum Auswählen.',
                 renameHint: 'Tippen zum Benennen',
                 renamePrompt: 'Gib diesem Bild einen Namen'
@@ -1455,8 +1584,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: '还没有抽奖记录',
                 historyCopied: '历史已复制 ✓',
                 historyCopyFail: '无法复制',
-                historyConfirm: '要删除全部抽奖历史吗？',
+                historyConfirm: '要删除全部抽奖历史吗？',
                 renamedImages: '{n} 张图片没有保存文件名，因此显示为“图片 N”。重新上传即可恢复原始名称。',
+                bulkTitle: '重命名未命名的图片',
+                bulkSave: '保存',
+                bulkCancel: '取消',
+                braveHint: 'Brave 不提供文件名。请在此重命名，或改用 Chrome 或 Edge 上传。',
                 noFileNames: '{n} 张图片没有文件名，将显示为“图片 N”。如果从网页或云盘拖拽，请使用按钮选择文件。',
                 renameHint: '点击以设置名称',
                 renamePrompt: '为这张图片命名'
@@ -1508,8 +1641,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'अभी तक कोई स्पिन नहीं',
                 historyCopied: 'इतिहास कॉपी ✓',
                 historyCopyFail: 'कॉपी नहीं हो सका',
-                historyConfirm: 'पूरा स्पिन इतिहास हटाएँ?',
+                historyConfirm: 'पूरा स्पिन इतिहास हटाएँ?',
                 renamedImages: '{n} चित्रों का नाम सहेजा नहीं गया, इसलिए वे "चित्र N" के रूप में दिखते हैं। मूल नाम बहाल करने के लिए उन्हें फिर से अपलोड करें।',
+                bulkTitle: 'बिना नाम वाली छवियों का नाम बदलें',
+                bulkSave: 'सहेजें',
+                bulkCancel: 'रद्द करें',
+                braveHint: 'Brave फ़ाइल नाम नहीं देता। इन्हें यहीं नाम दें या Chrome या Edge से अपलोड करें।',
                 noFileNames: '{n} चित्र फ़ाइल नाम के बिना आए हैं और "चित्र N" के रूप में दिखेंगे। वेब पेज या क्लाउड से खींच रहे हैं, तो फ़ाइलें चुनने के लिए बटन का उपयोग करें।',
                 renameHint: 'नाम सेट करने के लिए टैप करें',
                 renamePrompt: 'इस चित्र को नाम दें'
@@ -1561,8 +1698,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'لا توجد سحوبات بعد',
                 historyCopied: 'تم نسخ السجل ✓',
                 historyCopyFail: 'تعذّر النسخ',
-                historyConfirm: 'حذف سجل السحوبات كاملاً؟',
+                historyConfirm: 'حذف سجل السحوبات كاملاً؟',
                 renamedImages: '{n} صور لم يكن اسمها محفوظًا، لذا تظهر كـ "صورة N". أعد رفعها لاستعادة الأسماء الأصلية.',
+                bulkTitle: 'إعادة تسمية الصور بلا اسم',
+                bulkSave: 'حفظ',
+                bulkCancel: 'إلغاء',
+                braveHint: 'متصفح Brave لا يقدّم أسماء الملفات. أعد تسميتها هنا أو ارفعها من Chrome أو Edge.',
                 noFileNames: '{n} صورة وصلت بدون اسم ملف وستظهر كـ "صورة N". إذا كنت تسحب من صفحة ويب أو سحابة، استخدم الزر لاختيار الملفات.',
                 renameHint: 'انقر لتعيين الاسم',
                 renamePrompt: 'سمِّ هذه الصورة'
@@ -1614,8 +1755,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'এখনো কোনো ঘোরা নেই',
                 historyCopied: 'ইতিহাস কপি হয়েছে ✓',
                 historyCopyFail: 'কপি করা যায়নি',
-                historyConfirm: 'সমস্ত ঘোরার ইতিহাস মুছবেন?',
+                historyConfirm: 'সমস্ত ঘোরার ইতিহাস মুছবেন?',
                 renamedImages: '{n}টি ছবির নাম সংরক্ষিত ছিল না, তাই সেগুলো "ছবি N" হিসেবে দেখাচ্ছে। মূল নাম ফিরিয়ে আনতে আবার আপলোড করুন।',
+                bulkTitle: 'নামহীন ছবিগুলোর নাম দিন',
+                bulkSave: 'সংরক্ষণ',
+                bulkCancel: 'বাতিল',
+                braveHint: 'Brave ফাইলের নাম দেয় না। এখানেই নাম দিন অথবা Chrome বা Edge থেকে আপলোড করুন।',
                 noFileNames: '{n}টি ছবি ফাইলের নাম ছাড়া এসেছে এবং "ছবি N" হিসেবে দেখাবে। ওয়েব পেজ বা ক্লাউড থেকে টেনে আনলে ফাইল বাছাই করার বোতাম ব্যবহার করুন।',
                 renameHint: 'নাম দিতে ট্যাপ করুন',
                 renamePrompt: 'এই ছবির নাম দিন'
@@ -1667,8 +1812,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Розыгрышей пока нет',
                 historyCopied: 'История скопирована ✓',
                 historyCopyFail: 'Не удалось скопировать',
-                historyConfirm: 'Удалить всю историю розыгрышей?',
+                historyConfirm: 'Удалить всю историю розыгрышей?',
                 renamedImages: '{n} изображений не сохранили имя, поэтому они показаны как «Изображение N». Загрузите их снова, чтобы вернуть исходные имена.',
+                bulkTitle: 'Переименовать изображения без имени',
+                bulkSave: 'Сохранить',
+                bulkCancel: 'Отмена',
+                braveHint: 'Brave не передаёт имена файлов. Переименуйте их здесь или загрузите через Chrome или Edge.',
                 noFileNames: '{n} изображений пришли без имени файла и будут показаны как «Изображение N». Если перетаскиваете с веб-страницы или облака, используйте кнопку выбора файлов.',
                 renameHint: 'Нажмите, чтобы задать имя',
                 renamePrompt: 'Дайте имя этому изображению'
@@ -1720,8 +1869,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ابھی کوئی گھماؤ نہیں',
                 historyCopied: 'تاریخ کاپی ہو گئی ✓',
                 historyCopyFail: 'کاپی نہیں ہو سکا',
-                historyConfirm: 'پوری گھماؤ کی تاریخ حذف کریں؟',
+                historyConfirm: 'پوری گھماؤ کی تاریخ حذف کریں؟',
                 renamedImages: '{n} تصاویر کے نام محفوظ نہیں تھے، اس لیے وہ "تصویر N" کے طور پر دکھائی دیتی ہیں۔ اصل نام بحال کرنے کے لیے انہیں دوبارہ اپ لوڈ کریں۔',
+                bulkTitle: 'بغیر نام تصاویر کا نام بدلیں',
+                bulkSave: 'محفوظ کریں',
+                bulkCancel: 'منسوخ کریں',
+                braveHint: 'Brave فائل کے نام فراہم نہیں کرتا۔ انہیں یہیں نام دیں یا Chrome یا Edge سے اپ لوڈ کریں۔',
                 noFileNames: '{n} تصاویر بدون نام فایل آمدند و به شکل «تصویر N» نمایش داده می‌شوند. اگر از یک صفحه وب یا فضای ابری می‌کشید، از دکمه انتخاب فایل استفاده کنید.',
                 renameHint: 'نام Setsat کے لیے ٹیپ کریں',
                 renamePrompt: 'اس تصویر کو نام دیں'
@@ -1773,8 +1926,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Belum ada undian',
                 historyCopied: 'Riwayat disalin ✓',
                 historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus seluruh riwayat undian?',
+                historyConfirm: 'Hapus seluruh riwayat undian?',
                 renamedImages: '{n} gambar tidak menyimpan nama, jadi tampil sebagai "Gambar N". Unggah ulang untuk memulihkan nama asli.',
+                bulkTitle: 'Ganti nama gambar tanpa nama',
+                bulkSave: 'Simpan',
+                bulkCancel: 'Batal',
+                braveHint: 'Brave tidak memberikan nama file. Ganti nama di sini atau unggah dari Chrome atau Edge.',
                 noFileNames: '{n} gambar tiba tanpa nama file dan akan tampil sebagai "Gambar N". Jika menarik dari halaman web atau cloud, gunakan tombol untuk memilih file.',
                 renameHint: 'Ketuk untuk menetapkan nama',
                 renamePrompt: 'Beri nama gambar ini'
@@ -1826,8 +1983,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'まだ抽選がありません',
                 historyCopied: '履歴をコピーしました ✓',
                 historyCopyFail: 'コピーできませんでした',
-                historyConfirm: '抽選履歴をすべて削除しますか？',
+                historyConfirm: '抽選履歴をすべて削除しますか？',
                 renamedImages: '{n}枚の画像に名前が保存されていなかったため「画像 N」と表示されています。再度アップロードすると元の名前が復元されます。',
+                bulkTitle: '名前のない画像の名前を変更',
+                bulkSave: '保存',
+                bulkCancel: 'キャンセル',
+                braveHint: 'Brave はファイル名を提供しません。ここで名前を付けるか、Chrome または Edge からアップロードしてください。',
                 noFileNames: '{n}枚の画像にファイル名がありません。「画像 N」と表示されます。ウェブページやクラウドからドラッグしている場合は、ボタンからファイルを選択してください。',
                 renameHint: 'タップして名前を設定',
                 renamePrompt: 'この画像に名前を付けます'
@@ -1879,8 +2040,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ਹਾਲੇ ਕੋਈ ਘੁੰਮਾਅ ਨਹੀਂ',
                 historyCopied: 'ਇਤਿਹਾਸ ਕਾਪੀ ਹੋਇਆ ✓',
                 historyCopyFail: 'ਕਾਪੀ ਨਹੀਂ ਹੋ ਸਕਿਆ',
-                historyConfirm: 'ਪੂਰਾ ਘੁੰਮਾਅ ਇਤਿਹਾਸ ਮਿਟਾਓ?',
+                historyConfirm: 'ਪੂਰਾ ਘੁੰਮਾਅ ਇਤਿਹਾਸ ਮਿਟਾਓ?',
                 renamedImages: '{n} ਤਸਵੀਰਾਂ ਦੇ ਨਾਮ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ, ਇਸ ਲਈ ਉਹ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ। ਮੂਲ ਨਾਮ ਬਹਾਲ ਕਰਨ ਲਈ ਉਹਨਾਂ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰੋ।',
+                bulkTitle: 'ਬਿਨਾਂ ਨਾਮ ਤਸਵੀਰਾਂ ਦਾ ਨਾਮ ਬਦਲੋ',
+                bulkSave: 'ਸੰਭਾਲੋ',
+                bulkCancel: 'ਰੱਦ ਕਰੋ',
+                braveHint: 'Brave ਫ਼ਾਈਲਾਂ ਦੇ ਨਾਮ ਨਹੀਂ ਦਿੰਦਾ। ਇੱਥੇ ਹੀ ਨਾਮ ਬਦਲੋ ਜਾਂ Chrome ਜਾਂ Edge ਤੋਂ ਅਪਲੋਡ ਕਰੋ।',
                 noFileNames: '{n} ਤਸਵੀਰਾਂ ਫ਼ਾਈਲ ਨਾਮ ਤੋਂ ਬਿਨਾਂ ਆਈਆਂ ਹਨ ਅਤੇ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਣਗੀਆਂ ਹਨ। ਜੇ ਤੁਸੀਂ ਵੈੱਬ ਪੇਜ ਜਾਂ ਕਲਾਉਡ ਤੋਂ ਖਿੱਚ ਰਹੇ ਹੋ, ਤਾਂ ਫ਼ਾਈਲਾਂ ਚੁਣਨ ਲਈ ਬਟਨ ਵਰਤੋ।',
                 renameHint: 'ਨਾਮ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ',
                 renamePrompt: 'ਇਸ ਤਸਵੀਰ ਨੂੰ ਨਾਮ ਦਿਓ'
@@ -1932,8 +2097,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Belum ada undian',
                 historyCopied: 'Riwayat disalin ✓',
                 historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus semua riwayat undian?',
+                historyConfirm: 'Hapus semua riwayat undian?',
                 renamedImages: '{n} gambar tidak nyimpen jeneng, mula katon minangka "Gambar N". Unggah maneh deui kanggo mulihake jeneng asli.',
+                bulkTitle: 'Ganti jeneng gambar tanpa jeneng',
+                bulkSave: 'Simpen',
+                bulkCancel: 'Batal',
+                braveHint: 'Brave ora menehi jeneng file. Ganti jeneng ing kene utawa unggah saka Chrome utawa Edge.',
                 noFileNames: '{n} gambar teka tanpa jeneng file lan bakal nunjuk minangka "Gambar N". Yen nyeret saka halaman web utawa awan, gunakake tombol kanggo milih file.',
                 renameHint: 'Ketuk kanggo set jeneng',
                 renamePrompt: 'Wene jeneng kanggo gambar iki'
@@ -1985,8 +2154,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Chưa có lượt quay nào',
                 historyCopied: 'Đã sao chép lịch sử ✓',
                 historyCopyFail: 'Không thể sao chép',
-                historyConfirm: 'Xóa toàn bộ lịch sử quay?',
+                historyConfirm: 'Xóa toàn bộ lịch sử quay?',
                 renamedImages: '{n} ảnh không lưu tên nên hiện là "Ảnh N". Tải lại để khôi phục tên gốc.',
+                bulkTitle: 'Đổi tên ảnh chưa có tên',
+                bulkSave: 'Lưu',
+                bulkCancel: 'Hủy',
+                braveHint: 'Brave không cung cấp tên tệp. Hãy đổi tên tại đây hoặc tải lên từ Chrome hoặc Edge.',
                 noFileNames: '{n} ảnh đến mà không có tên tệp và sẽ hiện là "Ảnh N". Nếu kéo từ trang web hoặc đám mây, hãy dùng nút để chọn tệp.',
                 renameHint: 'Chạm để đặt tên',
                 renamePrompt: 'Đặt tên cho ảnh này'
@@ -2038,8 +2211,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'ఇంకా ఫిర్రులు లేవు',
                 historyCopied: 'చరిత్ర కాపీ అయింది ✓',
                 historyCopyFail: 'కాపీ చేయలేకపోయాము',
-                historyConfirm: 'మొత్తం చరిత్ర తొలగించాలా?',
+                historyConfirm: 'మొత్తం చరిత్ర తొలగించాలా?',
                 renamedImages: '{n} చిత్రాల పేరు భద్రపరబడలేదు, అందువల్ల అవి "చిత్రం N"గా కనిపిస్తాయి. అసలు పేర్లు తిరిగి పొందడానికి మళ్లీ అప్‌లోడ్ చేయండి.',
+                bulkTitle: 'పేరు లేని చిత్రాలకు పేరు పెట్టండి',
+                bulkSave: 'సేవ్',
+                bulkCancel: 'రద్దు',
+                braveHint: 'Brave ఫైల్ పేర్లను ఇవ్వదు. వాటికి ఇక్కడే పేరు పెట్టండి లేదా Chrome లేదా Edge నుండి అప్‌లోడ్ చేయండి.',
                 noFileNames: '{n} చిత్రాలు ఫైల్ పేరు లేకుండా వచ్చాయి, "చిత్రం N"గా కనిపిస్తాయి. వెబ్ పేజ్ లేదా క్లౌడ్ నుండి గీసుస్తే, ఫైళ్లు ఎంచుకోవడానికి బటన్ ఉపయోగించండి.',
                 renameHint: 'పేరు పెట్టడానికి టాప్ చేయండి',
                 renamePrompt: 'ఈ చిత్రానికి పేరు పెట్టండి'
@@ -2091,8 +2268,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: '아직 회전이 없습니다',
                 historyCopied: '기록 복사됨 ✓',
                 historyCopyFail: '복사할 수 없음',
-                historyConfirm: '회전 기록을 모두 삭제할까요?',
+                historyConfirm: '회전 기록을 모두 삭제할까요?',
                 renamedImages: '{n}개의 이미지 이름이 저장되지 않아 "이미지 N"으로 표시됩니다. 원래 이름을 복원하려면 다시 업로드하세요.',
+                bulkTitle: '이름 없는 이미지 이름 바꾸기',
+                bulkSave: '저장',
+                bulkCancel: '취소',
+                braveHint: 'Brave는 파일 이름을 제공하지 않습니다. 여기서 이름을 바꾸거나 Chrome 또는 Edge에서 업로드하세요.',
                 noFileNames: '{n}개의 이미지에 파일 이름이 없어 "이미지 N"으로 표시됩니다. 웹페이지나 클라우드에서 끌어온 경우 파일 선택 버튼을 사용하세요.',
                 renameHint: '이름을 지정하려면 탭하세요',
                 renamePrompt: '이 이미지에 이름을 지정하세요'
@@ -2144,8 +2325,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Henüz çekim yok',
                 historyCopied: 'Geçmiş kopyalandı ✓',
                 historyCopyFail: 'Kopyalanamadı',
-                historyConfirm: 'Tüm çekim geçmişi silinsin mi?',
+                historyConfirm: 'Tüm çekim geçmişi silinsin mi?',
                 renamedImages: '{n} görselin adı kaydedilmemiş, bu yüzden "Görsel N" olarak görünüyor. Özgün adları geri yüklemek için yeniden yükleyin.',
+                bulkTitle: 'Adsız görselleri yeniden adlandır',
+                bulkSave: 'Kaydet',
+                bulkCancel: 'Vazgeç',
+                braveHint: 'Brave dosya adı vermiyor. Burada yeniden adlandırın veya Chrome ya da Edge üzerinden yükleyin.',
                 noFileNames: '{n} görsel dosya adı olmadan geldi ve "Görsel N" olarak görünecek. Bir web sayfasından veya buluttan sürüklüyorsanız, dosyaları seçmek için düğmeyi kullanın.',
                 renameHint: 'Ad vermek için dokunun',
                 renamePrompt: 'Bu görsele bir ad verin'
@@ -2197,8 +2382,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'هنوز چرخشی نیست',
                 historyCopied: 'تاریخچه کپی شد ✓',
                 historyCopyFail: 'کپی نشد',
-                historyConfirm: 'کل تاریخچه حذف شود؟',
+                historyConfirm: 'کل تاریخچه حذف شود؟',
                 renamedImages: '{n} تصویر نامش ذخیره نشده بود، بنابراین به شکل «تصویر N» نمایش داده می‌شوند. برای بازیابی نام اصلی دوباره بارگذاری کنید.',
+                bulkTitle: 'تغییر نام تصاویر بی‌نام',
+                bulkSave: 'ذخیره',
+                bulkCancel: 'لغو',
+                braveHint: 'مرورگر Brave نام فایل‌ها را ارائه نمی‌دهد. همین‌جا نام بگذارید یا از Chrome یا Edge بارگذاری کنید.',
                 noFileNames: '{n} تصویر بدون نام فایل رسید و به شکل «تصویر N» نمایش داده می‌شود. اگر از یک صفحه وب یا فضای ابری می‌کشید، از دکمه انتخاب فایل استفاده کنید.',
                 renameHint: 'انقر لتعيين الاسم',
                 renamePrompt: 'سمِّ هذه الصورة'
@@ -2250,8 +2439,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'अजून फिरवे नाहीत',
                 historyCopied: 'इतिहास कॉपी झाला ✓',
                 historyCopyFail: 'कॉपी होऊ शकला नाही',
-                historyConfirm: 'संपूर्ण इतिहास हटवायचा?',
+                historyConfirm: 'संपूर्ण इतिहास हटवायचा?',
                 renamedImages: '{n} प्रतिमांचे नाव जतन करण्यात आले नाही, त्यामुळे त्या "प्रतिमा N" असे दिसतात. मूळ नावे पुनः प्राप्त करण्यासाठी त्यांना पुन्हा अपलोड करा.',
+                bulkTitle: 'नाव नसलेल्या प्रतिमांचे नाव बदला',
+                bulkSave: 'जतन करा',
+                bulkCancel: 'रद्द करा',
+                braveHint: 'Brave फाइलची नावे देत नाही. इथेच नावे द्या किंवा Chrome किंवा Edge वरून अपलोड करा.',
                 noFileNames: '{n} प्रतिमा फाइलच्या नावाशिवाय आल्या आहेत आणि "प्रतिमा N" असे दिसतील. वेब पेज किंवा क्लाउडमधून ओढत असाल तर फाइल निवडण्यासाठी बटण वापरा.',
                 renameHint: 'नाव ठेवण्यासाठी टॅप करा',
                 renamePrompt: 'या प्रतिमेला नाव द्या'
@@ -2303,8 +2496,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'இன்னும் சுழற்சி இல்லை',
                 historyCopied: 'வரலாறு நகலெடுக்கப்பட்டது ✓',
                 historyCopyFail: 'நகலெடுக்க முடியவில்லை',
-                historyConfirm: 'முழு வரலாறையும் நீக்கவா?',
+                historyConfirm: 'முழு வரலாறையும் நீக்கவா?',
                 renamedImages: '{n} படங்களின் பெயர் சேமிக்கப்படவில்லை, எனவே அவை "படம் N" எனக் காட்டப்படுகின்றன. அசல் பெயர்களை மீட்டெடுக்க மீண்டும் பதிவேற்றவும்.',
+                bulkTitle: 'பெயரில்லாத படங்களுக்கு பெயரிடுக',
+                bulkSave: 'சேமி',
+                bulkCancel: 'ரத்து',
+                braveHint: 'Brave கோப்பு பெயர்களை வழங்காது. இங்கேயே பெயரிடுங்கள் அல்லது Chrome அல்லது Edge இலிருந்து பதிவேற்றுங்கள்.',
                 noFileNames: '{n} படங்கள் கோப்பு பெயர் இல்லாமல் வந்துள்ளன, "படம் N" எனக் காட்டப்படும். இணையப் பக்கம் அல்லது மேகத்திலிருந்து இழுக்கிறீர்கள் என்றால், கோப்புகளைத் தேர்ந்தெடுக்கப் பொத்தானைப் பயன்படுத்தவும்.',
                 renameHint: 'பெயரை அமைக்க தட்டவும்',
                 renamePrompt: 'இந்தப் படத்திற்கு பெயர் வையுங்கள்'
@@ -2356,8 +2553,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Babban ciyawa ba a yi',
                 historyCopied: 'An ruwaita ✓',
                 historyCopyFail: 'Ba a iya kwayewa',
-                historyConfirm: 'Duka tarihi a gafafe?',
+                historyConfirm: 'Duka tarihi a gafafe?',
                 renamedImages: '{n} hotuna ba tucka sunan a bayan, suna ke nuna a cikin sanya “Hotuna N”. Sake upload don ya kuma dawo da asusun sunan.',
+                bulkTitle: 'Sanya wa hotuna marasa suna',
+                bulkSave: 'Ajiye',
+                bulkCancel: 'Soke',
+                braveHint: 'Brave ba ya bayar da sunayen fayiloli. Sanya su a nan ko ka loda daga Chrome ko Edge.',
                 noFileNames: '{n} hotuna ba suna ba fili sunan zuwa tare kuma za a nuna sanya “Hotuna N”. Idan ka jawo daga shafi na yan\'a ko rumbewa, amfani mada button don zaɗi fayiloli.',
                 renameHint: 'Sanya don sanya',
                 renamePrompt: 'Sanya wannan hotuna'
@@ -2409,8 +2610,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Hakuna mzunguko bado',
                 historyCopied: 'Imecopiwa ✓',
                 historyCopyFail: 'Imeshindwa kunakili',
-                historyConfirm: 'Ufutafute historia yote?',
+                historyConfirm: 'Ufutafute historia yote?',
                 renamedImages: '{n} picha hazina jina lililohifadhiwa, hivyo zinaonyeshwa kama "Picha N". Pakua tena ili kurejesha majina halisi.',
+                bulkTitle: 'Weka majina picha zisizo na majina',
+                bulkSave: 'Hifadhi',
+                bulkCancel: 'Ghairi',
+                braveHint: 'Brave haitoi majina ya faili. Yape majina hapa au pakia kutoka Chrome au Edge.',
                 noFileNames: '{n} picha zinaingia bila jina la faili na zitaonyeshwa kama "Picha N". Ukichovuta kutoka tovuti au wingu, tumia kitufe kuchagua faili.',
                 renameHint: 'Gong clicking iliweka jina',
                 renamePrompt: 'Picha hii paka jina'
@@ -2462,8 +2667,12 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 historyEmpty: 'Nessuna estrazione',
                 historyCopied: 'Cronologia copiata ✓',
                 historyCopyFail: 'Copia non riuscita',
-                historyConfirm: 'Eliminare tutta la cronologia?',
+                historyConfirm: 'Eliminare tutta la cronologia?',
                 renamedImages: '{n} immagini non hanno salvato il nome, quindi mostrano "Immagine N". Ricaricale per ripristinare i nomi originali.',
+                bulkTitle: 'Rinomina immagini senza nome',
+                bulkSave: 'Salva',
+                bulkCancel: 'Annulla',
+                braveHint: 'Brave non fornisce i nomi dei file. Rinominali qui o carica da Chrome o Edge.',
                 noFileNames: '{n} immagini arrivano senza nome file e mostreranno "Immagine N". Se trascini da una pagina web o dal cloud, usa il pulsante per scegliere i file.',
                 renameHint: 'Tocca per assegnare un nome',
                 renamePrompt: 'Assegna un nome a questa immagine'
@@ -2490,6 +2699,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             soundBtn.classList.toggle('on', soundEnabled);
             document.getElementById('themeSelect').value = currentTheme;
             langSelect.value = lang;
+            updateBulkBtn();
             refreshMessages();
         }
 
@@ -2898,6 +3108,19 @@ let colors = themeColors[currentTheme];
             });
         }
 
+        const bulkRenameBtn = document.getElementById('bulkRenameBtn');
+        if (bulkRenameBtn) bulkRenameBtn.addEventListener('click', openBulkRename);
+        const bulkSaveBtn = document.getElementById('bulkSaveBtn');
+        if (bulkSaveBtn) bulkSaveBtn.addEventListener('click', saveBulkRename);
+        const bulkCancelBtn = document.getElementById('bulkCancelBtn');
+        if (bulkCancelBtn) bulkCancelBtn.addEventListener('click', closeBulkRename);
+        const bulkModal = document.getElementById('bulkModal');
+        if (bulkModal) {
+            bulkModal.addEventListener('click', (e) => {
+                if (e.target === bulkModal) closeBulkRename();
+            });
+        }
+
         const historyCopyBtn = document.getElementById('historyCopyBtn');
         if (historyCopyBtn) historyCopyBtn.addEventListener('click', copyHistory);
         const historyExportBtn = document.getElementById('historyExportBtn');
@@ -2996,8 +3219,12 @@ let colors = themeColors[currentTheme];
             const total = newFiles.length;
             const missingNames = resolvedNames.filter(n => !n).length;
             if (missingNames > 0) {
-                setMsg.textContent = t('noFileNames').replace('{n}', missingNames);
-                setTimeout(() => { setMsg.textContent = ''; }, 6000);
+                let warnMsg = t('noFileNames').replace('{n}', missingNames);
+                if (isBraveBrowser && typeof t('braveHint') === 'string' && t('braveHint') !== 'braveHint') {
+                    warnMsg += ' ' + t('braveHint');
+                }
+                setMsg.textContent = warnMsg;
+                setTimeout(() => { setMsg.textContent = ''; }, 9000);
             }
             const BATCH_SIZE = 50;
             let batchStart = 0;
@@ -3126,6 +3353,90 @@ let colors = themeColors[currentTheme];
             if (currentSetId) updateSetProgress();
         }
 
+        function isUnnamed(index) {
+            const nm = fileNames[index] || '';
+            return !nm || /^Imagen \d+$/.test(nm);
+        }
+
+        function unnamedIndices() {
+            const out = [];
+            for (let i = 0; i < fileNames.length; i++) {
+                if (isUnnamed(i)) out.push(i);
+            }
+            return out;
+        }
+
+        function updateBulkBtn() {
+            const btn = document.getElementById('bulkRenameBtn');
+            const label = document.getElementById('bulkRenameLabel');
+            if (!btn || !label) return;
+            const idxs = unnamedIndices();
+            if (idxs.length === 0) {
+                btn.style.display = 'none';
+                return;
+            }
+            btn.style.display = 'block';
+            label.textContent = t('bulkTitle') + ' (' + idxs.length + ')';
+        }
+
+        function openBulkRename() {
+            const modal = document.getElementById('bulkModal');
+            const list = document.getElementById('bulkList');
+            if (!modal || !list) return;
+            document.getElementById('bulkTitle').textContent = t('bulkTitle');
+            document.getElementById('bulkSaveBtn').textContent = t('bulkSave');
+            document.getElementById('bulkCancelBtn').textContent = t('bulkCancel');
+            list.replaceChildren();
+            unnamedIndices().forEach((idx) => {
+                const row = document.createElement('div');
+                row.className = 'bulk-row';
+                const thumb = document.createElement('img');
+                thumb.src = images[idx];
+                thumb.alt = 'preview';
+                const inp = document.createElement('input');
+                inp.type = 'text';
+                inp.maxLength = 60;
+                inp.dataset.index = idx;
+                inp.placeholder = fileNames[idx] || '';
+                inp.setAttribute('aria-label', t('renamePrompt'));
+                row.appendChild(thumb);
+                row.appendChild(inp);
+                list.appendChild(row);
+            });
+            modal.style.display = 'flex';
+            const first = list.querySelector('input');
+            if (first) first.focus();
+        }
+
+        function closeBulkRename() {
+            const modal = document.getElementById('bulkModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function saveBulkRename() {
+            const list = document.getElementById('bulkList');
+            if (!list) return;
+            const changes = [];
+            list.querySelectorAll('input[data-index]').forEach((inp) => {
+                const idx = parseInt(inp.dataset.index, 10);
+                if (isNaN(idx) || idx < 0 || idx >= fileNames.length) return;
+                const v = inp.value.trim();
+                if (v && v !== fileNames[idx]) {
+                    changes.push({ index: idx, previousName: fileNames[idx] || '', newName: v });
+                }
+            });
+            if (changes.length > 0) {
+                pushUndo({ type: 'renameBulk', changes: changes });
+                changes.forEach((c) => { fileNames[c.index] = c.newName; });
+                saveEliminationState();
+                autoSaveImages();
+                if (currentSetId) updateSetProgress();
+            }
+            closeBulkRename();
+            updatePreview();
+            refreshMessages();
+        }
+
         function updatePreview() {
             const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
             const frag = document.createDocumentFragment();
@@ -3172,6 +3483,7 @@ let colors = themeColors[currentTheme];
                 frag.appendChild(item);
             }
             previewImages.replaceChildren(frag);
+            updateBulkBtn();
         }
 
         function removeImage(index) {
@@ -3734,6 +4046,8 @@ const wheelCache = document.createElement('canvas');
                 eliminatedIndices = new Set(entry.eliminated);
             } else if (entry.type === 'renameImage') {
                 fileNames[entry.index] = entry.previousName;
+            } else if (entry.type === 'renameBulk') {
+                entry.changes.forEach((c) => { fileNames[c.index] = c.previousName; });
             } else if (entry.type === 'removeImage') {
                 images.splice(entry.index, 0, entry.image);
                 fullImages.splice(entry.index, 0, entry.full);

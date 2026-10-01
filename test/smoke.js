@@ -407,6 +407,110 @@ const tests = [
     },
   },
   {
+    name: 'el renombrado masivo aplica varios nombres a la vez',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        const mk = (color) => new Promise(res => {
+          const cc = document.createElement('canvas');
+          cc.width = 120; cc.height = 120;
+          const x = cc.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,120,120);
+          cc.toBlob(b => res(new File([b], '', { type: 'image/png' })), 'image/png');
+        });
+        const files = [await mk('#f00'), await mk('#0f0'), await mk('#00f'), await mk('#ff0')];
+        handleFiles(files, null);
+        await __t.waitFor(() => !isLoading && images.length === 4, 15000);
+
+        const botonVisible = document.getElementById('bulkRenameBtn').style.display !== 'none';
+        openBulkRename();
+        const filas = document.querySelectorAll('#bulkList .bulk-row').length;
+        const inputs = document.querySelectorAll('#bulkList input[data-index]');
+        const nombres = ['Ana', 'Beto', 'Caro', 'Dora'];
+        inputs.forEach((inp, k) => { inp.value = nombres[k]; });
+        saveBulkRename();
+        await new Promise(r => setTimeout(r, 300));
+        return {
+          botonVisible, filas,
+          aplicados: fileNames.slice(),
+          modalCerrado: document.getElementById('bulkModal').style.display === 'none',
+          botonOculto: document.getElementById('bulkRenameBtn').style.display === 'none'
+        };
+      })()`, true);
+      if (!r.botonVisible) return 'el boton masivo no aparecio con 4 sin nombre';
+      if (r.filas !== 4) return 'el modal mostro ' + r.filas + ' filas en vez de 4';
+      const esperado = ['Ana', 'Beto', 'Caro', 'Dora'];
+      if (JSON.stringify(r.aplicados) !== JSON.stringify(esperado)) {
+        return 'nombres aplicados incorrectos: ' + JSON.stringify(r.aplicados);
+      }
+      if (!r.modalCerrado) return 'el modal no se cerro al guardar';
+      if (!r.botonOculto) return 'el boton masivo sigue visible tras renombrar todo';
+      return true;
+    },
+  },
+  {
+    name: 'deshacer un renombrado masivo lo revierte todo',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(r => setTimeout(r, 400));
+        const mk = (color) => new Promise(res => {
+          const cc = document.createElement('canvas');
+          cc.width = 120; cc.height = 120;
+          const x = cc.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,120,120);
+          cc.toBlob(b => res(new File([b], '', { type: 'image/png' })), 'image/png');
+        });
+        const files = [await mk('#f00'), await mk('#0f0'), await mk('#00f'), await mk('#ff0')];
+        handleFiles(files, null);
+        await __t.waitFor(() => !isLoading && images.length === 4, 15000);
+        openBulkRename();
+        const inputs = document.querySelectorAll('#bulkList input[data-index]');
+        inputs.forEach((inp, k) => { inp.value = 'X' + k; });
+        saveBulkRename();
+        await new Promise(r => setTimeout(r, 200));
+        const tras = fileNames.slice();
+        undo();
+        await new Promise(r => setTimeout(r, 200));
+        return { tras, trasUndo: fileNames.slice() };
+      })()`, true);
+      const esperadoX = ['X0', 'X1', 'X2', 'X3'];
+      if (JSON.stringify(r.tras) !== JSON.stringify(esperadoX)) {
+        return 'el masivo no aplico: ' + JSON.stringify(r.tras);
+      }
+      const esperadoGen = ['Imagen 1', 'Imagen 2', 'Imagen 3', 'Imagen 4'];
+      if (JSON.stringify(r.trasUndo) !== JSON.stringify(esperadoGen)) {
+        return 'deshacer no revirtio: ' + JSON.stringify(r.trasUndo);
+      }
+      return true;
+    },
+  },
+  {
+    name: 'el renombrado masivo sobrevive a la recarga',
+    run: async (c, ctx) => {
+      await c.eval(`(async () => {
+        openBulkRename();
+        const inputs = document.querySelectorAll('#bulkList input[data-index]');
+        const nombres = ['Ana', 'Beto', 'Caro', 'Dora'];
+        inputs.forEach((inp, k) => { inp.value = nombres[k]; });
+        saveBulkRename();
+        await new Promise(r => setTimeout(r, 200));
+        autoSaveImages();
+        await new Promise(r => setTimeout(r, 2000));
+      })()`, true);
+      await c.navigate(ctx.url);
+      const r = await c.eval(`(async () => {
+        await new Promise(r => setTimeout(r, 3000));
+        return { total: images.length, nombres: fileNames.slice(0, 4) };
+      })()`, true);
+      if (r.total !== 4) return 'se esperaban 4 imagenes, hay ' + r.total;
+      const esperado = ['Ana', 'Beto', 'Caro', 'Dora'];
+      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
+        return 'nombres masivos no persistieron: ' + JSON.stringify(r.nombres);
+      }
+      return true;
+    },
+  },
+  {
     name: 'los nombres no se desalinean con archivos no-imagen',
     run: async (c) => {
       const r = await c.eval(`(async () => {
