@@ -5,7 +5,7 @@
 | Campo | Valor |
 |-------|-------|
 | Nombre | Ruleta de Imágenes |
-| Versión | v3.0.1 |
+| Versión | v3.12.0 |
 | URL | https://sandovaljon.github.io/Ruleta-by-SandovalJon/ |
 | Repo | https://github.com/SandovalJon/Ruleta-by-SandovalJon |
 | Stack | HTML5, CSS3, JS vanilla, Canvas 2D, Web Audio, Firebase |
@@ -13,70 +13,84 @@
 
 ## 2. Arquitectura y flujo
 
-1. Usuario sube imágenes (drag & drop o clic)
-2. Imágenes se procesan y redimensionan (max 800px)
-3. Se dibuja la ruleta en Canvas 2D
-4. Click en ruleta → girar con animación easeOut
-5. Sonido tick sincronizado con sectores
-6. Al parar → confeti + sonido victoria
+1. Usuario sube imágenes (drag & drop o clic, hasta 500)
+2. Imágenes se procesan y redimensionan (mini 64px, completa 512px)
+3. Se dibuja la ruleta en Canvas 2D (512x512)
+4. Click en ruleta o Espacio → girar con animación easeOut
+5. Sonido tick sincronizado con sectores (1 por frame)
+6. Al parar → confeti + sonido victoria (salvo movimiento reducido)
 7. Modo eliminación → ganador se elimina al siguiente giro
-8. Grabar → MediaRecorder captura canvas + audio → MP4
+8. Grabar → MediaRecorder captura canvas + audio → MP4/WebM 512x512
+9. Compartir → tarjeta PNG 512x512 con marco dorado, o texto
 
 ## 3. Capacidades
 
-- Girar ruleta (animación 3-7s)
-- Subir hasta 500 imágenes
-- Reordenar con drag & drop
+- Girar ruleta (animación 3-7s, 400 ms con movimiento reducido)
+- Subir hasta 500 imágenes (compresión por lotes de 25 al guardar)
+- Preview limitado a 10 miniaturas + aviso "+N más" + buscador por texto
+- Nombres de archivo; aviso si llegan vacíos; renombrado masivo con deshacer
+- Miniaturas numeradas según posición
+- Reordenar con drag ratón + táctil (función moveImage compartida)
+- Deshacer giro, eliminación, borrado y renombrados (botón ↩️ + Ctrl+Z)
 - Modo eliminación persistente (marca ganadores con ✓, no los borra)
 - Restaurar eliminados (botón ♻️)
-- Máximo 12 imágenes visibles por giro (selección justa de todas las activas)
-- 2 temas (Noche, Claro) + Esmeralda (solo dev)
+- Más de 50 imágenes: la ruleta dibuja colores, todas participan (aviso visible)
+- 2 temas (Noche, Claro) + Esmeralda (solo dev); auto según sistema si no hay preferencia
 - 25 idiomas
 - Sonido on/off (persistente)
-- Grabar MP4 800x800 con audio
-- Confeti animado
-- Efecto ruleta loca (colores cambiantes)
-- Sets guardan/cargan estado de eliminación (Firebase)
-- Instalable como app (manifest)
+- Confeti animado en canvas
+- Sets guardan/cargan nombre, imágenes, eliminados y modo (Firebase, login requerido)
+- Errores en lenguaje humano (permiso/red/sesión) en tu idioma
+- Aviso para iniciar sesión al guardar sin sesión
+- Panel de atajos ⌨️ (Espacio, Esc, S, E, Ctrl+Z)
+- Aviso sin conexión, metas Open Graph, botón instalar PWA
+- Accesibilidad: resultado con aria-live, canvas con rol, foco visible
+- Instalable como app (manifest + service worker versionado)
+- Recargar empieza vacía (sin auto-restauración)
 
 ## 4. APIs/claves/recursos
 
 - Firebase Auth (Google Login)
-- Firestore (guardar/cargar sets)
+- Firestore (guardar/cargar sets, lotes de 100, 10 MB por lote)
 - Web Audio API (sonidos sintetizados)
 - Canvas 2D (dibujar ruleta)
-- MediaRecorder (grabar video)
-- localStorage (preferencias)
+- MediaRecorder / WebCodecs (grabar video)
+- Web Share API (compartir ganador, con respaldo a portapapeles)
+- localStorage (tema, sonido, eliminadas)
+- navigator.brave (detección para aviso de nombres)
 
 ## 5. Datos/memoria
 
-- localStorage: tema, idioma, sonido
+- localStorage: tema, sonido, eliminadas
 - Firestore: sets de imágenes por usuario
 - Session: imágenes cargadas, estado ruleta
+- Sin IndexedDB (eliminado: recargar empieza vacía)
 
 ## 6. Despliegue y operación
 
-- Repo: GitHub → GitHub Pages
-- Deploy: push a main → Pages auto-deploy
-- App: manifest.json (instalable). Sin service worker (eliminado por problemas de caché).
-- Actualizar: botón 🔄 limpia cache (visible para dev jdss07@outlook.fr)
+- Repo: GitHub → GitHub Pages (rama local master → main remoto)
+- Deploy: push a main → Pages auto-deploy (1-2 min)
+- Service worker versionado (ruleta-vN): subir número en cada deploy
+- Actualizar: botón 🔄 limpia cache; badge de versión visible para todos
+- Tests: test/smoke.js, 40 checks (npm test local, npm run test:live)
 
 ## 7. Skills y lecciones
 
-1. Service worker: no cachear scripts externos
+1. Service worker: no cachear scripts externos; versionar caché en cada deploy
 2. Confeti: dibujar en canvas, no en div
 3. Eliminación: no automática, esperar siguiente giro
-4. Traducciones: script Node para 25 idiomas
+4. Traducciones: script Node para 25 idiomas; normalizar comas tras insertar
 5. Sonido: Web Audio requiere gesto del usuario
-6. Service worker autodestructivo: versiones viejas quedan atrapadas en caché. El sw.js actual se desregistra y limpia caches al activarse.
-7. finishSpin sin resetear isSpinning: si no hay imágenes visibles, la función retornaba temprano dejando isSpinning=true permanente. Fix: resetear antes del early return.
-8. indexedDB.deleteDatabase al inicio: causaba errores async en beforeunload. Fix: eliminar el borrado, no persistir imágenes entre sesiones.
+6. Orden de scripts: 3 bloques inline; el 1 no puede usar nada del 3 al cargar
+7. finishSpin sin resetear isSpinning: resetear antes del early return
+8. Tests verdes falsos: reintroducir el bug a propósito para validar el test
+9. Nombres vacíos: si el navegador no entrega el nombre, ningún código lo recupera
+10. Restauración fantasma: no auto-restaurar sobre subidas en curso (epoch)
 
 ## 8. Estado y pendientes
 
-**Versión actual:** v3.0.1 (2026-09-25)
+**Versión actual:** v3.12.0
 
 **Pendientes:**
 - Ideas: importar CSV, modo pantalla completa, modo pesos
-- Mejoras: reordenar previews, animaciones de entrada
-- Fixes aplicados: SW autodestructivo, isSpinning reset, límite 100 img, max 12 visibles
+- Mejoras: ninguna pendiente conocida
