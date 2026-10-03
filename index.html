@@ -1053,7 +1053,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.4.2</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.5.0</div>
     </div>
 
     <script>
@@ -1098,7 +1098,6 @@ by <span>SandovalJon</span>
         const MAX_IMAGES = 100;
         const UNDO_LIMIT = 30;
         const undoStack = [];
-        let pendingRenames = 0;
         let imageEpoch = 0;
 
         let isBraveBrowser = false;
@@ -1200,7 +1199,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Eliminar',
                 undo: 'Deshacer',
                 undoWinner: 'Deshacer giro',
-                renamedImages: '{n} imágenes no guardaban su nombre, así que se muestran como «Imagen N». Vuelve a subirlas para recuperar los nombres originales.',
                 bulkTitle: 'Renombrar imágenes sin nombre',
                 bulkSave: 'Guardar',
                 bulkCancel: 'Cancelar',
@@ -1251,7 +1249,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Remove',
                 undo: 'Undo',
                 undoWinner: 'Undo spin',
-                renamedImages: '{n} images had no name saved, so they show as "Image N". Upload them again to restore the original names.',
                 bulkTitle: 'Rename unnamed images',
                 bulkSave: 'Save',
                 bulkCancel: 'Cancel',
@@ -1302,7 +1299,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Remover',
                 undo: 'Desfazer',
                 undoWinner: 'Desfazer giro',
-                renamedImages: '{n} imagens não tinham nome salvo, então aparecem como "Imagem N". Envie-as novamente para recuperar os nomes originais.',
                 bulkTitle: 'Renomear imagens sem nome',
                 bulkSave: 'Salvar',
                 bulkCancel: 'Cancelar',
@@ -1353,7 +1349,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Retirer',
                 undo: 'Annuler',
                 undoWinner: 'Annuler le tour',
-                renamedImages: '{n} images n\'avaient pas de nom enregistré, elles s\'affichent donc « Image N ». Réimportez-les pour retrouver les noms d\'origine.',
                 bulkTitle: 'Renommer les images sans nom',
                 bulkSave: 'Enregistrer',
                 bulkCancel: 'Annuler',
@@ -1404,7 +1399,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Entfernen',
                 undo: 'Rückgängig',
                 undoWinner: 'Drehung rückgängig',
-                renamedImages: '{n} Bilder hatten keinen gespeicherten Namen und zeigen sich als „Bild N“. Lade sie erneut hoch, um die Originalnamen wiederherzustellen.',
                 bulkTitle: 'Bilder ohne Namen umbenennen',
                 bulkSave: 'Speichern',
                 bulkCancel: 'Abbrechen',
@@ -1455,7 +1449,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '移除',
                 undo: '撤销',
                 undoWinner: '撤销旋转',
-                renamedImages: '{n} 张图片没有保存文件名，因此显示为“图片 N”。重新上传即可恢复原始名称。',
                 bulkTitle: '重命名未命名的图片',
                 bulkSave: '保存',
                 bulkCancel: '取消',
@@ -1506,7 +1499,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'हटाएं',
                 undo: 'पूर्ववत',
                 undoWinner: 'घुमाव पूर्ववत करें',
-                renamedImages: '{n} चित्रों का नाम सहेजा नहीं गया, इसलिए वे "चित्र N" के रूप में दिखते हैं। मूल नाम बहाल करने के लिए उन्हें फिर से अपलोड करें।',
                 bulkTitle: 'बिना नाम वाली छवियों का नाम बदलें',
                 bulkSave: 'सहेजें',
                 bulkCancel: 'रद्द करें',
@@ -1557,7 +1549,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'إزالة',
                 undo: 'تراجع',
                 undoWinner: 'تراجع الدوران',
-                renamedImages: '{n} صور لم يكن اسمها محفوظًا، لذا تظهر كـ "صورة N". أعد رفعها لاستعادة الأسماء الأصلية.',
                 bulkTitle: 'إعادة تسمية الصور بلا اسم',
                 bulkSave: 'حفظ',
                 bulkCancel: 'إلغاء',
@@ -1608,7 +1599,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'সরান',
                 undo: 'ফিরিয়ে আনুন',
                 undoWinner: 'ঘোরা ফিরিয়ে আনুন',
-                renamedImages: '{n}টি ছবির নাম সংরক্ষিত ছিল না, তাই সেগুলো "ছবি N" হিসেবে দেখাচ্ছে। মূল নাম ফিরিয়ে আনতে আবার আপলোড করুন।',
                 bulkTitle: 'নামহীন ছবিগুলোর নাম দিন',
                 bulkSave: 'সংরক্ষণ',
                 bulkCancel: 'বাতিল',
@@ -1659,7 +1649,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Убрать',
                 undo: 'Отменить',
                 undoWinner: 'Отменить вращение',
-                renamedImages: '{n} изображений не сохранили имя, поэтому они показаны как «Изображение N». Загрузите их снова, чтобы вернуть исходные имена.',
                 bulkTitle: 'Переименовать изображения без имени',
                 bulkSave: 'Сохранить',
                 bulkCancel: 'Отмена',
@@ -1710,7 +1699,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'ہٹائیں',
                 undo: 'واپس لیں',
                 undoWinner: 'گھماؤ واپس لیں',
-                renamedImages: '{n} تصاویر کے نام محفوظ نہیں تھے، اس لیے وہ "تصویر N" کے طور پر دکھائی دیتی ہیں۔ اصل نام بحال کرنے کے لیے انہیں دوبارہ اپ لوڈ کریں۔',
                 bulkTitle: 'بغیر نام تصاویر کا نام بدلیں',
                 bulkSave: 'محفوظ کریں',
                 bulkCancel: 'منسوخ کریں',
@@ -1761,7 +1749,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Hapus',
                 undo: 'Urungkan',
                 undoWinner: 'Urungkan putaran',
-                renamedImages: '{n} gambar tidak menyimpan nama, jadi tampil sebagai "Gambar N". Unggah ulang untuk memulihkan nama asli.',
                 bulkTitle: 'Ganti nama gambar tanpa nama',
                 bulkSave: 'Simpan',
                 bulkCancel: 'Batal',
@@ -1812,7 +1799,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '削除',
                 undo: '元に戻す',
                 undoWinner: '回転を元に戻す',
-                renamedImages: '{n}枚の画像に名前が保存されていなかったため「画像 N」と表示されています。再度アップロードすると元の名前が復元されます。',
                 bulkTitle: '名前のない画像の名前を変更',
                 bulkSave: '保存',
                 bulkCancel: 'キャンセル',
@@ -1863,7 +1849,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'ਹਟਾਓ',
                 undo: 'ਵਾਪਸ',
                 undoWinner: 'ਘੁੰਮਾਅ ਵਾਪਸ',
-                renamedImages: '{n} ਤਸਵੀਰਾਂ ਦੇ ਨਾਮ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ, ਇਸ ਲਈ ਉਹ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ। ਮੂਲ ਨਾਮ ਬਹਾਲ ਕਰਨ ਲਈ ਉਹਨਾਂ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰੋ।',
                 bulkTitle: 'ਬਿਨਾਂ ਨਾਮ ਤਸਵੀਰਾਂ ਦਾ ਨਾਮ ਬਦਲੋ',
                 bulkSave: 'ਸੰਭਾਲੋ',
                 bulkCancel: 'ਰੱਦ ਕਰੋ',
@@ -1914,7 +1899,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Busak',
                 undo: 'Batal',
                 undoWinner: 'Batal putar',
-                renamedImages: '{n} gambar tidak nyimpen jeneng, mula katon minangka "Gambar N". Unggah maneh deui kanggo mulihake jeneng asli.',
                 bulkTitle: 'Ganti jeneng gambar tanpa jeneng',
                 bulkSave: 'Simpen',
                 bulkCancel: 'Batal',
@@ -1965,7 +1949,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Xóa',
                 undo: 'Hoàn tác',
                 undoWinner: 'Hoàn tác vòng quay',
-                renamedImages: '{n} ảnh không lưu tên nên hiện là "Ảnh N". Tải lại để khôi phục tên gốc.',
                 bulkTitle: 'Đổi tên ảnh chưa có tên',
                 bulkSave: 'Lưu',
                 bulkCancel: 'Hủy',
@@ -2016,7 +1999,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'తొలగించండి',
                 undo: 'రద్దు',
                 undoWinner: 'ఫిర్రులను రద్దు',
-                renamedImages: '{n} చిత్రాల పేరు భద్రపరబడలేదు, అందువల్ల అవి "చిత్రం N"గా కనిపిస్తాయి. అసలు పేర్లు తిరిగి పొందడానికి మళ్లీ అప్‌లోడ్ చేయండి.',
                 bulkTitle: 'పేరు లేని చిత్రాలకు పేరు పెట్టండి',
                 bulkSave: 'సేవ్',
                 bulkCancel: 'రద్దు',
@@ -2067,7 +2049,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '제거',
                 undo: '실행 취소',
                 undoWinner: '회전 취소',
-                renamedImages: '{n}개의 이미지 이름이 저장되지 않아 "이미지 N"으로 표시됩니다. 원래 이름을 복원하려면 다시 업로드하세요.',
                 bulkTitle: '이름 없는 이미지 이름 바꾸기',
                 bulkSave: '저장',
                 bulkCancel: '취소',
@@ -2118,7 +2099,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Kaldır',
                 undo: 'Geri al',
                 undoWinner: 'Çevirmeyi geri al',
-                renamedImages: '{n} görselin adı kaydedilmemiş, bu yüzden "Görsel N" olarak görünüyor. Özgün adları geri yüklemek için yeniden yükleyin.',
                 bulkTitle: 'Adsız görselleri yeniden adlandır',
                 bulkSave: 'Kaydet',
                 bulkCancel: 'Vazgeç',
@@ -2169,7 +2149,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'حذف',
                 undo: 'واگرد',
                 undoWinner: 'واگرد چرخش',
-                renamedImages: '{n} تصویر نامش ذخیره نشده بود، بنابراین به شکل «تصویر N» نمایش داده می‌شوند. برای بازیابی نام اصلی دوباره بارگذاری کنید.',
                 bulkTitle: 'تغییر نام تصاویر بی‌نام',
                 bulkSave: 'ذخیره',
                 bulkCancel: 'لغو',
@@ -2220,7 +2199,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'काढा',
                 undo: 'पूर्ववत करा',
                 undoWinner: 'फिरवे पूर्ववत करा',
-                renamedImages: '{n} प्रतिमांचे नाव जतन करण्यात आले नाही, त्यामुळे त्या "प्रतिमा N" असे दिसतात. मूळ नावे पुनः प्राप्त करण्यासाठी त्यांना पुन्हा अपलोड करा.',
                 bulkTitle: 'नाव नसलेल्या प्रतिमांचे नाव बदला',
                 bulkSave: 'जतन करा',
                 bulkCancel: 'रद्द करा',
@@ -2271,7 +2249,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'நீக்கு',
                 undo: 'செயல்தவிர்',
                 undoWinner: 'சுழற்சியைச் செயல்தவிர்',
-                renamedImages: '{n} படங்களின் பெயர் சேமிக்கப்படவில்லை, எனவே அவை "படம் N" எனக் காட்டப்படுகின்றன. அசல் பெயர்களை மீட்டெடுக்க மீண்டும் பதிவேற்றவும்.',
                 bulkTitle: 'பெயரில்லாத படங்களுக்கு பெயரிடுக',
                 bulkSave: 'சேமி',
                 bulkCancel: 'ரத்து',
@@ -2322,7 +2299,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Cire',
                 undo: 'Sau',
                 undoWinner: 'Maida sau',
-                renamedImages: '{n} hotuna ba tucka sunan a bayan, suna ke nuna a cikin sanya “Hotuna N”. Sake upload don ya kuma dawo da asusun sunan.',
                 bulkTitle: 'Sanya wa hotuna marasa suna',
                 bulkSave: 'Ajiye',
                 bulkCancel: 'Soke',
@@ -2373,7 +2349,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Ondoa',
                 undo: 'Tendua',
                 undoWinner: 'Tendua mzunguko',
-                renamedImages: '{n} picha hazina jina lililohifadhiwa, hivyo zinaonyeshwa kama "Picha N". Pakua tena ili kurejesha majina halisi.',
                 bulkTitle: 'Weka majina picha zisizo na majina',
                 bulkSave: 'Hifadhi',
                 bulkCancel: 'Ghairi',
@@ -2424,7 +2399,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Rimuovi',
                 undo: 'Annulla',
                 undoWinner: 'Annulla giro',
-                renamedImages: '{n} immagini non hanno salvato il nome, quindi mostrano "Immagine N". Ricaricale per ripristinare i nomi originali.',
                 bulkTitle: 'Rinomina immagini senza nome',
                 bulkSave: 'Salva',
                 bulkCancel: 'Annulla',
@@ -2882,7 +2856,6 @@ let colors = themeColors[currentTheme];
                 recDiscard = true;
                 finishRecording();
             }
-            if (saveTimeout) { clearTimeout(saveTimeout); saveTimeout = null; }
             imageEpoch++;
             images = [];
             fullImages = [];
@@ -2893,7 +2866,6 @@ let colors = themeColors[currentTheme];
             clearUndo();
             currentSetId = null;
             saveEliminationState();
-            clearImagesDB();
             previewImages.replaceChildren();
             rouletteWrapper.classList.remove('winner-mode');
             isHovering = false;
@@ -2908,7 +2880,6 @@ let colors = themeColors[currentTheme];
         document.getElementById('restoreBtn').addEventListener('click', () => {
             eliminatedIndices.clear();
             saveEliminationState();
-            autoSaveImages();
             updatePreview();
             rebuildWheel();
             refreshMessages();
@@ -3146,7 +3117,6 @@ let colors = themeColors[currentTheme];
                 pushUndo({ type: 'renameBulk', changes: changes });
                 changes.forEach((c) => { fileNames[c.index] = c.newName; });
                 saveEliminationState();
-                autoSaveImages();
                 if (currentSetId) updateSetProgress();
             }
             closeBulkRename();
@@ -3741,117 +3711,6 @@ const wheelCache = document.createElement('canvas');
         }
 
         loadEliminationState();
-
-        const DB_NAME = 'RuletaDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'images';
-
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'index' });
-                    }
-                };
-            });
-        }
-
-        async function saveImagesToDB() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                store.clear();
-                images.forEach((dataUrl, index) => {
-                    store.put({ index, dataUrl, name: fileNames[index] || '' });
-                });
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-                db.close();
-            } catch (e) {}
-        }
-
-        async function clearImagesDB() {
-            let db;
-            try {
-                db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                tx.objectStore(STORE_NAME).clear();
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-                db.close();
-            } catch (e) {
-                try { if (db) db.close(); } catch (e2) {}
-            }
-        }
-
-        async function loadImagesFromDB() {
-            const myEpoch = imageEpoch;
-            let db;
-            try {
-                db = await openDB();
-            } catch (e) {
-                return false;
-            }
-            try {
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const request = store.getAll();
-                const results = await new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-                db.close();
-                if (myEpoch !== imageEpoch) return false;
-                if (!results || results.length === 0) return false;
-
-                results.sort((a, b) => a.index - b.index);
-                const dataUrls = results.map(r => r.dataUrl);
-                const unnamed = results.filter(r => !r.name).length;
-                const names = results.map((r, i) => r.name || ('Imagen ' + (i + 1)));
-
-                resetAndSetImages(dataUrls, names);
-                if (unnamed > 0) pendingRenames = unnamed;
-
-                const waitImages = setInterval(() => {
-                    if (myEpoch !== imageEpoch) { clearInterval(waitImages); return; }
-                    if (isLoading) return;
-                    clearInterval(waitImages);
-                    invalidateActive();
-                    updatePreview();
-                    rebuildWheel();
-                    refreshMessages();
-                    if (typeof updateSaveBtn === 'function') updateSaveBtn();
-                    if (pendingRenames > 0) {
-                        const n = pendingRenames;
-                        pendingRenames = 0;
-                        setMsg.textContent = t('renamedImages').replace('{n}', n);
-                        setTimeout(() => { setMsg.textContent = ''; }, 6000);
-                    }
-                }, 100);
-                return true;
-            } catch (e) {
-                try { if (db) db.close(); } catch (e2) {}
-                return false;
-            }
-        }
-
-        let saveTimeout = null;
-        function autoSaveImages() {
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                saveImagesToDB();
-                saveEliminationState();
-            }, 1000);
-        }
 
         soundBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
@@ -5123,8 +4982,6 @@ googleBtn.addEventListener('click', () => {
         saveSetBtn.addEventListener('click', saveCurrentSet);
         loadSetBtn.addEventListener('click', loadCurrentSet);
         deleteSetBtn.addEventListener('click', deleteCurrentSet);
-
-        loadImagesFromDB();
     </script>
 </body>
 </html>

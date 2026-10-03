@@ -199,8 +199,9 @@ const tests = [
       const required = [
         'handleFiles', 'spin', 'undo', 'clearUndo', 'getActiveIndices',
         'invalidateActive', 'rebuildWheel', 'updatePreview', 'compressImage',
-        'loadImagesFromDB', 'clearImagesDB', 'saveImagesToDB', 'addDataUrls',
-        'resetAndSetImages', 'toDataURLAsync', 'getMaxImages',
+        'addDataUrls', 'resetAndSetImages', 'toDataURLAsync', 'getMaxImages',
+        'openBulkRename', 'saveBulkRename', 'closeBulkRename',
+        'isUnnamed', 'unnamedIndices', 'updateBulkBtn',
       ];
       const missing = await c.eval(
         `(${JSON.stringify(required)}).filter(n => typeof window[n] !== 'function')`
@@ -488,32 +489,6 @@ const tests = [
     },
   },
   {
-    name: 'el renombrado masivo sobrevive a la recarga',
-    run: async (c, ctx) => {
-      await c.eval(`(async () => {
-        openBulkRename();
-        const inputs = document.querySelectorAll('#bulkList input[data-index]');
-        const nombres = ['Ana', 'Beto', 'Caro', 'Dora'];
-        inputs.forEach((inp, k) => { inp.value = nombres[k]; });
-        saveBulkRename();
-        await new Promise(r => setTimeout(r, 200));
-        autoSaveImages();
-        await new Promise(r => setTimeout(r, 2000));
-      })()`, true);
-      await c.navigate(ctx.url);
-      const r = await c.eval(`(async () => {
-        await new Promise(r => setTimeout(r, 3000));
-        return { total: images.length, nombres: fileNames.slice(0, 4) };
-      })()`, true);
-      if (r.total !== 4) return 'se esperaban 4 imagenes, hay ' + r.total;
-      const esperado = ['Ana', 'Beto', 'Caro', 'Dora'];
-      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
-        return 'nombres masivos no persistieron: ' + JSON.stringify(r.nombres);
-      }
-      return true;
-    },
-  },
-  {
     name: 'los nombres no se desalinean con archivos no-imagen',
     run: async (c) => {
       const r = await c.eval(`(async () => {
@@ -538,32 +513,6 @@ const tests = [
       const esperado = ['Ana.jpg', 'Beto.png'];
       if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
         return 'nombres desalineados: ' + JSON.stringify(r.nombres) + ' (esperado ' + JSON.stringify(esperado) + ')';
-      }
-      return true;
-    },
-  },
-  {
-    name: 'los nombres originales sobreviven a la recarga',
-    run: async (c) => {
-      // cargar con nombres reconocibles y autoguardar
-      await c.eval(`(async () => {
-        __t.clear();
-        await new Promise(r => setTimeout(r, 400));
-        const files = await __t.makeFiles(4);
-        handleFiles(files);
-        await __t.waitFor(() => !isLoading && images.length === 4, 15000);
-        autoSaveImages();
-        await new Promise(r => setTimeout(r, 2000));
-      })()`, true);
-      await c.navigate(c.currentUrl);
-      const r = await c.eval(`(async () => {
-        await new Promise(r => setTimeout(r, 3000));
-        return { total: images.length, nombres: fileNames.slice() };
-      })()`, true);
-      if (r.total !== 4) return 'se esperaban 4 imagenes, hay ' + r.total;
-      const esperado = ['Foto 0', 'Foto 1', 'Foto 2', 'Foto 3'];
-      if (JSON.stringify(r.nombres) !== JSON.stringify(esperado)) {
-        return 'nombres incorrectos tras recargar: ' + JSON.stringify(r.nombres);
       }
       return true;
     },
@@ -614,57 +563,6 @@ const tests = [
     },
   },
   {
-    name: 'los nombres sobreviven si IndexedDB no tiene el campo name',
-    run: async (c, ctx) => {
-      // sembrar datos con el formato antiguo (sin 'name') y comprobar
-      // que la app no rompe y que el historial no hereda nombres genericos
-      const seed = await c.eval(`(async () => {
-        const mk = (color) => {
-          const cv = document.createElement('canvas');
-          cv.width = 200; cv.height = 200;
-          const x = cv.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,200,200);
-          return cv.toDataURL('image/png');
-        };
-        return await new Promise(res => {
-          const req = indexedDB.open('RuletaDB', 1);
-          req.onupgradeneeded = e => {
-            const d = e.target.result;
-            if (!d.objectStoreNames.contains('images')) d.createObjectStore('images', { keyPath: 'index' });
-          };
-          req.onsuccess = e => {
-            const d = e.target.result;
-            const tx = d.transaction('images', 'readwrite');
-            const st = tx.objectStore('images');
-            st.clear();
-            for (let i = 0; i < 5; i++) st.put({ index: i, dataUrl: mk('#' + i + 'f0a0') });
-            tx.oncomplete = () => { d.close(); res(true); };
-            tx.onerror = () => { d.close(); res(false); };
-          };
-          req.onerror = () => res(false);
-        });
-      })()`, true);
-      if (!seed) return 'no se pudieron sembrar los datos';
-
-      await c.navigate(ctx.url);
-      const r = await c.eval(`(async () => {
-        await new Promise(r => setTimeout(r, 3000));
-        const nombresOk = fileNames.every(n => typeof n === 'string' && n.length > 0);
-        spin();
-        const t0 = Date.now();
-        while (Date.now() - t0 < 20000 && isSpinning) await new Promise(r => setTimeout(r, 50));
-        await new Promise(r => setTimeout(r, 300));
-        return {
-          total: images.length,
-          nombresOk: nombresOk,
-          nombres: fileNames.slice()
-        };
-      })()`, true);
-      if (r.total !== 5) return 'se esperaban 5 imagenes, hay ' + r.total;
-      if (!r.nombresOk) return 'hay nombres vacios tras recuperar datos antiguos';
-      return true;
-    },
-  },
-  {
     name: 'las eliminaciones de una sesion anterior no se heredan',
     run: async (c) => {
       const r = await c.eval(`(async () => {
@@ -682,105 +580,48 @@ const tests = [
     },
   },
   {
-    name: 'las imagenes se recuperan al recargar',
+    name: 'recargar empieza vacia, sin restaurar nada',
     run: async (c, ctx) => {
-      // esperar a que el autoguardado termine de escribir
-      await c.eval(`(async () => { autoSaveImages(); await new Promise(r => setTimeout(r, 2000)); })()`, true);
-      await c.navigate(ctx.url);
       const r = await c.eval(`(async () => {
-        await new Promise(r => setTimeout(r, 3000));
-        return {
-          total: images.length,
-          cargadas: loadedImages.length,
-          previews: document.getElementById('previewImages').children.length,
-          nombre: fileNames[0] || ''
-        };
-      })()`, true);
-      if (r.total !== 8) return 'se esperaban 8 recuperadas, hay ' + r.total;
-      if (r.previews !== 8) return r.previews + ' miniaturas tras recargar';
-      if (r.nombre !== 'Foto 0') return 'el nombre no se conservo: ' + r.nombre;
-      return true;
-    },
-  },
-  {
-    name: 'la restauracion automatica no borra subidas en curso',
-    run: async (c, ctx) => {
-      // sembrar 40 documentos PESADOS para que la lectura tarde,
-      // recargar y subir inmediatamente: la restauracion no debe borrar lo subido
-      await c.eval(`(async () => {
         __t.clear();
-        await new Promise(r => setTimeout(r, 400));
-        function mkBig(i) {
-          const cv = document.createElement('canvas');
-          cv.width = 900; cv.height = 900;
-          const x = cv.getContext('2d');
-          x.fillStyle = '#' + ((i * 1234567) % 16777215).toString(16).padStart(6, '0');
-          x.fillRect(0, 0, 900, 900);
-          x.fillStyle = '#fff'; x.font = 'bold 60px sans-serif';
-          x.fillText('VIEJA_' + i, 40, 460);
-          return new Promise(res => cv.toBlob(b => {
-            const fr = new FileReader();
-            fr.onload = () => res(fr.result);
-            fr.readAsDataURL(b);
-          }, 'image/png'));
-        }
-        const datas = [];
-        for (let i = 0; i < 40; i++) datas.push(await mkBig(i));
-        await new Promise(res => {
-          const req = indexedDB.open('RuletaDB', 1);
-          req.onupgradeneeded = e => {
-            const d = e.target.result;
-            if (!d.objectStoreNames.contains('images')) d.createObjectStore('images', { keyPath: 'index' });
-          };
-          req.onsuccess = e => {
-            const d = e.target.result;
-            const tx = d.transaction('images', 'readwrite');
-            const st = tx.objectStore('images');
-            st.clear();
-            datas.forEach((dataUrl, i) => st.put({ index: i, dataUrl, name: 'VIEJA_' + i + '.png' }));
-            tx.oncomplete = () => { d.close(); res(true); };
-          };
-        });
-      })()`, true);
-      await c.navigate(ctx.url);
-      // subir INMEDIATAMENTE, sin esperar a que termine la restauracion
-      const r = await c.eval(`(async () => {
-        function mk(name, color) {
-          const cc = document.createElement('canvas'); cc.width = 200; cc.height = 200;
-          const x = cc.getContext('2d'); x.fillStyle = color; x.fillRect(0,0,200,200);
-          x.fillStyle = '#fff'; x.font = 'bold 24px sans-serif'; x.fillText(name, 10, 110);
-          return new Promise(res => cc.toBlob(b => res(new File([b], name, { type: 'image/png' })), 'image/png'));
-        }
-        const files = [await mk('NUEVA_A.jpg', '#e94560'), await mk('NUEVA_B.jpg', '#0f3460')];
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(4);
         handleFiles(files);
-        const t0 = Date.now();
-        while (Date.now() - t0 < 45000 && (isLoading || images.length < 2)) {
-          await new Promise(rr => setTimeout(rr, 100));
-        }
-        // esperar a que cualquier restauracion pendiente termine
-        await new Promise(rr => setTimeout(rr, 8000));
+        await __t.waitFor(() => !isLoading && images.length === 4, 15000);
+        return images.length;
+      })()`, true);
+      if (r !== 4) return 'no se cargaron las 4 imagenes (hay ' + r + ')';
+      await c.navigate(ctx.url);
+      const r2 = await c.eval(`(async () => {
+        await new Promise(rr => setTimeout(rr, 3000));
         return {
           total: images.length,
-          nombres: fileNames.slice(0, 3).concat(['...']).concat(fileNames.slice(-3)),
-          tieneNuevas: fileNames.includes('NUEVA_A.jpg') && fileNames.includes('NUEVA_B.jpg')
+          previews: document.getElementById('previewImages').children.length,
+          mensaje: document.getElementById('result').textContent
         };
       })()`, true);
-      if (!r.tieneNuevas) {
-        return 'la restauracion borro las imagenes subidas (total ' + r.total + '): ' + JSON.stringify(r.nombres);
-      }
+      if (r2.total !== 0) return 'tras recargar hay ' + r2.total + ' imagenes, debia estar vacia';
+      if (r2.previews !== 0) return 'tras recargar hay miniaturas, debia estar vacia';
       return true;
     },
   },
   {
-    name: 'limpiar vacia memoria e IndexedDB',
+    name: 'limpiar vacia la memoria',
     run: async (c, ctx) => {
       const r = await c.eval(`(async () => {
+        const files = await __t.makeFiles(3);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 3, 15000);
         __t.clear();
-        await new Promise(r => setTimeout(r, 1200));
-        return { memoria: images.length, idb: await __t.idbCount() };
+        await new Promise(rr => setTimeout(rr, 600));
+        return {
+          memoria: images.length,
+          previews: document.getElementById('previewImages').children.length,
+          undoLimpio: typeof undoStack !== 'undefined' ? undoStack.length : -1
+        };
       })()`, true);
       if (r.memoria !== 0) return r.memoria + ' imagenes en memoria';
-      if (r.idb !== 0) return r.idb + ' documentos en IndexedDB';
+      if (r.previews !== 0) return r.previews + ' miniaturas en pantalla';
       return true;
     },
   },
