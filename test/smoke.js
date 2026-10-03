@@ -725,6 +725,87 @@ const tests = [
       return true;
     },
   },
+  {
+    name: 'los errores tecnicos se traducen a lenguaje humano',
+    run: async (c) => {
+      const r = await c.eval(`(() => {
+        if (typeof friendlyErr !== 'function') return { error: 'friendlyErr no existe' };
+        return {
+          permiso: friendlyErr({ code: 'permission-denied' }),
+          permisoMsg: friendlyErr({ message: 'Missing or insufficient permissions.' }),
+          red: friendlyErr({ message: 'Failed to fetch' }),
+          red2: friendlyErr({ code: 'auth/network-request-failed' }),
+          sesion: friendlyErr({ code: 'auth/popup-blocked' }),
+          raro: friendlyErr({ message: 'Something weird 123' }),
+          esperadoPermiso: tt('errPermission'),
+          esperadoRed: tt('errNetwork'),
+          esperadoAuth: tt('errAuth'),
+          esperadoGen: tt('err')
+        };
+      })()`);
+      if (r.error) return r.error;
+      if (r.permiso !== r.esperadoPermiso) return 'permiso por codigo no mapea: ' + r.permiso;
+      if (r.permisoMsg !== r.esperadoPermiso) return 'permiso por mensaje no mapea: ' + r.permisoMsg;
+      if (r.red !== r.esperadoRed) return 'red no mapea: ' + r.red;
+      if (r.red2 !== r.esperadoRed) return 'red auth no mapea: ' + r.red2;
+      if (r.sesion !== r.esperadoAuth) return 'sesion no mapea: ' + r.sesion;
+      if (r.raro.indexOf(r.esperadoGen) !== 0) return 'generico no conserva prefijo: ' + r.raro;
+      if (/permission|Missing/i.test(r.permiso)) return 'el texto filtraria el tecnico: ' + r.permiso;
+      return true;
+    },
+  },
+  {
+    name: 'sin sesion avisa que hay que entrar para guardar',
+    run: async (c) => {
+      const r = await c.eval(`(() => {
+        handleAuth(null);
+        return {
+          aviso: document.getElementById('setMsg').textContent,
+          esperado: tt('loginToSave'),
+          guardarBloqueado: document.getElementById('saveSetBtn').disabled
+        };
+      })()`);
+      if (!r.aviso) return 'sin sesion no hay ningun aviso';
+      if (r.aviso !== r.esperado) return 'aviso inesperado: ' + r.aviso;
+      if (!r.guardarBloqueado) return 'guardar habilitado sin sesion';
+      return true;
+    },
+  },
+  {
+    name: 'el boton de ayuda abre el panel de atajos',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const btn = document.getElementById('shortcutsBtn');
+        if (!btn) return { error: 'sin boton de atajos' };
+        btn.click();
+        await new Promise(rr => setTimeout(rr, 200));
+        const modal = document.getElementById('helpModal');
+        const filas = Array.from(document.querySelectorAll('#helpList .help-row'));
+        const out = {
+          abierto: modal.style.display !== 'none',
+          titulo: document.getElementById('helpTitle').textContent,
+          filas: filas.length,
+          teclas: filas.map(f => f.querySelector('kbd') ? f.querySelector('kbd').textContent : ''),
+          descripcionesVacias: filas.filter(f => !(f.querySelector('span') && f.querySelector('span').textContent)).length
+        };
+        document.getElementById('helpCloseBtn').click();
+        await new Promise(rr => setTimeout(rr, 200));
+        out.cerrado = modal.style.display === 'none';
+        return out;
+      })()`, true);
+      if (r.error) return r.error;
+      if (!r.abierto) return 'el modal no abrio';
+      if (!r.titulo) return 'el modal no tiene titulo';
+      if (r.filas !== 5) return 'se esperaban 5 filas, hay ' + r.filas;
+      const esperadas = ['Espacio', 'Escape', 'S', 'E', 'Ctrl + Z'];
+      if (JSON.stringify(r.teclas) !== JSON.stringify(esperadas)) {
+        return 'teclas incorrectas: ' + JSON.stringify(r.teclas);
+      }
+      if (r.descripcionesVacias > 0) return r.descripcionesVacias + ' descripciones vacias';
+      if (!r.cerrado) return 'el modal no cerro';
+      return true;
+    },
+  },
 ];
 
 // --- Motor ---
