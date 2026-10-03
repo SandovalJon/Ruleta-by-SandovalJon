@@ -999,7 +999,7 @@ canvas {
                 <div class="drop-zone-icon">📸</div>
                 <div class="drop-zone-text">
                     <span id="dropText">Arrastra imágenes aquí</span><br>
-                    <small id="dropHint">(mínimo 2, máximo 100)</small>
+                    <small id="dropHint">(mínimo 2, máximo 150)</small>
                 </div>
             </label>
             <input type="file" id="fileInput" multiple accept="image/*" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" />
@@ -1053,7 +1053,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.5.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.5.1</div>
     </div>
 
     <script>
@@ -1095,7 +1095,7 @@ by <span>SandovalJon</span>
         let activeCacheKey = '';
         let elimVersion = 0;
 
-        const MAX_IMAGES = 100;
+        const MAX_IMAGES = 150;
         const UNDO_LIMIT = 30;
         const undoStack = [];
         let imageEpoch = 0;

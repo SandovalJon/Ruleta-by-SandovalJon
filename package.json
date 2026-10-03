@@ -1,6 +1,6 @@
 {
   "name": "ruleta-de-imagenes",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Ruleta de imagenes para sorteos y giros aleatorios",
   "private": true,
   "scripts": {
