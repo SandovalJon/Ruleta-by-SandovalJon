@@ -1099,7 +1099,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.9.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.9.1</div>
     </div>
 
     <script>
@@ -4043,12 +4043,10 @@ const wheelCache = document.createElement('canvas');
             const name = fileNames[winnerIndex] || ('Imagen ' + (winnerIndex + 1));
             const text = t('winner') + ' ' + name;
             try {
-                const dataUrl = fullImages[winnerIndex] || images[winnerIndex];
+                const blob = await renderWinnerCard();
                 let file = null;
-                if (dataUrl) {
-                    const res = await fetch(dataUrl);
-                    const blob = await res.blob();
-                    file = new File([blob], (name || 'ganador') + '.jpg', { type: blob.type || 'image/jpeg' });
+                if (blob) {
+                    file = new File([blob], (name || 'ganador') + '-ruleta.png', { type: 'image/png' });
                 }
                 if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({ files: [file], title: t('title'), text: text });
@@ -4067,6 +4065,63 @@ const wheelCache = document.createElement('canvas');
                 resultHint.classList.remove('hidden');
                 setTimeout(() => { refreshMessages(); }, 2500);
             } catch (e2) {}
+        }
+
+        function renderWinnerCard() {
+            return new Promise((resolve) => {
+                const S = 512;
+                const cv = document.createElement('canvas');
+                cv.width = S;
+                cv.height = S;
+                const c = cv.getContext('2d');
+                const cx = S / 2;
+                const cy = S / 2;
+                const R = S / 2 - 14;
+                const finish = (img) => {
+                    const g = c.createRadialGradient(cx, cy, 10, cx, cy, S / 2);
+                    g.addColorStop(0, '#1a1a2e');
+                    g.addColorStop(1, '#0a0a14');
+                    c.fillStyle = g;
+                    c.fillRect(0, 0, S, S);
+                    c.save();
+                    c.beginPath();
+                    c.arc(cx, cy, R, 0, Math.PI * 2);
+                    c.clip();
+                    c.fillStyle = '#000';
+                    c.fillRect(cx - R, cy - R, R * 2, R * 2);
+                    if (img && img.width) {
+                        const ratio = (R * 2) / Math.max(img.width, img.height);
+                        const dw = img.width * ratio;
+                        const dh = img.height * ratio;
+                        c.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
+                    }
+                    c.restore();
+                    c.beginPath();
+                    c.arc(cx, cy, R - 3, 0, Math.PI * 2);
+                    c.strokeStyle = '#ffd700';
+                    c.lineWidth = 6;
+                    c.stroke();
+                    c.beginPath();
+                    c.arc(cx, cy, R - 12, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(255,215,0,0.5)';
+                    c.lineWidth = 2;
+                    c.stroke();
+                    if (typeof cv.toBlob === 'function') {
+                        cv.toBlob((b) => resolve(b), 'image/png');
+                    } else {
+                        resolve(null);
+                    }
+                };
+                const src = fullImages[winnerIndex];
+                if (src) {
+                    const img = new Image();
+                    img.onload = () => finish(img);
+                    img.onerror = () => finish(null);
+                    img.src = src;
+                } else {
+                    finish(null);
+                }
+            });
         }
 
         const shareBtnEl = document.getElementById('shareBtn');

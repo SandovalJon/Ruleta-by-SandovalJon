@@ -201,7 +201,7 @@ const tests = [
         'invalidateActive', 'rebuildWheel', 'updatePreview', 'compressImage',
         'addDataUrls', 'resetAndSetImages', 'toDataURLAsync', 'getMaxImages',
         'openBulkRename', 'saveBulkRename', 'closeBulkRename',
-        'isUnnamed', 'unnamedIndices', 'updateBulkBtn',
+        'isUnnamed', 'unnamedIndices', 'updateBulkBtn', 'renderWinnerCard',
       ];
       const missing = await c.eval(
         `(${JSON.stringify(required)}).filter(n => typeof window[n] !== 'function')`
@@ -845,7 +845,7 @@ const tests = [
     },
   },
   {
-    name: 'compartir con soporte envia la foto',
+    name: 'compartir con soporte envia la tarjeta con marco',
     run: async (c) => {
       const r = await c.eval(`(async () => {
         const realShare = navigator.share;
@@ -855,26 +855,40 @@ const tests = [
         navigator.share = async (data) => { enviado = data; };
         try {
           document.getElementById('shareBtn').click();
-          await new Promise(rr => setTimeout(rr, 800));
+          await new Promise(rr => setTimeout(rr, 1500));
         } finally {
           navigator.share = realShare;
           navigator.canShare = realCanShare;
         }
         if (!enviado) return { error: 'share no fue llamado' };
         const f = enviado.files && enviado.files[0];
+        if (!f) return { error: 'sin archivos' };
+        const dims = await new Promise((res) => {
+          const img = new Image();
+          const url = URL.createObjectURL(f);
+          img.onload = () => { res({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+          img.onerror = () => res({ w: 0, h: 0 });
+          img.src = url;
+        });
         return {
-          tieneArchivos: !!(enviado.files && enviado.files.length === 1),
-          tipo: f ? f.type : null,
-          tamano: f ? f.size : 0,
-          nombreArchivo: f ? f.name : null,
-          ganador: fileNames[winnerIndex]
+          tipo: f.type,
+          tamano: f.size,
+          nombreArchivo: f.name,
+          ganador: fileNames[winnerIndex],
+          ancho: dims.w,
+          alto: dims.h
         };
       })()`, true);
       if (r.error) return r.error;
-      if (!r.tieneArchivos) return 'no se envio la foto';
-      if (!r.tipo || r.tipo.indexOf('image/') !== 0) return 'tipo incorrecto: ' + r.tipo;
+      if (r.tipo !== 'image/png') return 'tipo incorrecto: ' + r.tipo;
       if (!(r.tamano > 0)) return 'archivo vacio';
-      if (!r.nombreArchivo || !r.ganador || r.nombreArchivo.indexOf(r.ganador) < 0) {
+      if (r.ancho !== 512 || r.alto !== 512) {
+        return 'la tarjeta no es 512x512: ' + r.ancho + 'x' + r.alto;
+      }
+      if (!r.nombreArchivo || r.nombreArchivo.indexOf('-ruleta.png') < 0) {
+        return 'el archivo no es la tarjeta: ' + r.nombreArchivo;
+      }
+      if (!r.ganador || r.nombreArchivo.indexOf(r.ganador) < 0) {
         return 'el archivo no lleva el nombre (' + r.nombreArchivo + ' vs ' + r.ganador + ')';
       }
       return true;
