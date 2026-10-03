@@ -999,7 +999,7 @@ canvas {
                 <div class="drop-zone-icon">📸</div>
                 <div class="drop-zone-text">
                     <span id="dropText">Arrastra imágenes aquí</span><br>
-                    <small id="dropHint">(mínimo 2, máximo 150)</small>
+                    <small id="dropHint">(mínimo 2, máximo 500)</small>
                 </div>
             </label>
             <input type="file" id="fileInput" multiple accept="image/*" style="position:fixed;top:-9999px;left:-9999px;opacity:0;" />
@@ -1053,7 +1053,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.5.2</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.6.0</div>
     </div>
 
     <script>
@@ -1095,7 +1095,7 @@ by <span>SandovalJon</span>
         let activeCacheKey = '';
         let elimVersion = 0;
 
-        const MAX_IMAGES = 150;
+        const MAX_IMAGES = 500;
         const DRAW_IMAGE_LIMIT = 50;
         const UNDO_LIMIT = 30;
         const undoStack = [];
@@ -4806,14 +4806,23 @@ googleBtn.addEventListener('click', () => {
                 eliminated: [...eliminatedIndices],
                 elimMode: elimMode,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then((setRef) => {
-                const compressPromises = images.map((dataUrl, i) => {
-                    const source = fullImages[i] || dataUrl;
-                    return compressImage(source).then((compressed) => {
-                        return { index: i, dataUrl: compressed, name: fileNames[i] || ('Imagen ' + (i + 1)) };
-                    });
-                });
-                return Promise.all(compressPromises).then((compressedImages) => {
+            }).then(async (setRef) => {
+                const compressedImages = [];
+                const COMPRESS_BATCH = 25;
+                for (let s = 0; s < images.length; s += COMPRESS_BATCH) {
+                    const end = Math.min(s + COMPRESS_BATCH, images.length);
+                    const slice = [];
+                    for (let i = s; i < end; i++) {
+                        const source = fullImages[i] || images[i];
+                        slice.push(compressImage(source).then((compressed) => {
+                            return { index: i, dataUrl: compressed, name: fileNames[i] || ('Imagen ' + (i + 1)) };
+                        }));
+                    }
+                    const done = await Promise.all(slice);
+                    compressedImages.push(...done);
+                    setMsg.textContent = tt('saving') + ' (' + end + '/' + images.length + ')';
+                }
+                {
                     const BATCH_SIZE = 100;
                     let chain = Promise.resolve();
                     for (let i = 0; i < compressedImages.length; i += BATCH_SIZE) {
@@ -4828,7 +4837,7 @@ googleBtn.addEventListener('click', () => {
                         });
                     }
                     return chain.then(() => setRef);
-                });
+                }
             }).then(() => {
                 setMsg.textContent = tt('savedOk');
                 setTimeout(() => { setMsg.textContent = ''; }, 2200);

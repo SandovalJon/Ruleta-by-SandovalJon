@@ -249,6 +249,27 @@ const tests = [
     },
   },
   {
+    name: 'se pueden subir mas de 150 imagenes',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        if (getMaxImages() < 160) return { error: 'limite=' + getMaxImages() };
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(160);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 160, 120000);
+        return {
+          total: images.length,
+          hint: document.getElementById('dropHint').textContent
+        };
+      })()`, true);
+      if (r.error) return r.error;
+      if (r.total !== 160) return 'solo se cargaron ' + r.total + ' de 160';
+      if (!/500/.test(r.hint)) return 'el hint no muestra 500: ' + r.hint;
+      return true;
+    },
+  },
+  {
     name: 'subir imagenes respeta el orden seleccionado',
     run: async (c) => {
       const r = await c.eval(`(async () => {
