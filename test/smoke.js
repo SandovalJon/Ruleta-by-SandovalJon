@@ -661,6 +661,49 @@ const tests = [
       return true;
     },
   },
+  {
+    name: 'con mas de 50 imagenes avisa que dibuja colores',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(60);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 60, 45000);
+        const hint = document.getElementById('result-hint');
+        return {
+          total: images.length,
+          hintVisible: !hint.classList.contains('hidden'),
+          hintTexto: hint.textContent,
+          menciona50: /50/.test(hint.textContent)
+        };
+      })()`, true);
+      if (r.total !== 60) return 'no se cargaron las 60 imagenes (hay ' + r.total + ')';
+      if (!r.hintVisible) return 'el aviso no se mostro con 60 imagenes';
+      if (!r.menciona50) return 'el aviso no menciona el limite: ' + r.hintTexto;
+      return true;
+    },
+  },
+  {
+    name: 'con 50 o menos no muestra el aviso de dibujo',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(5);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 5, 15000);
+        const hint = document.getElementById('result-hint');
+        return {
+          total: images.length,
+          hintOculto: hint.classList.contains('hidden')
+        };
+      })()`, true);
+      if (r.total !== 5) return 'no se cargaron las 5 imagenes (hay ' + r.total + ')';
+      if (!r.hintOculto) return 'el aviso aparece con solo 5 imagenes';
+      return true;
+    },
+  },
 ];
 
 // --- Motor ---
