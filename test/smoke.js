@@ -785,6 +785,102 @@ const tests = [
     },
   },
   {
+    name: 'el boton compartir aparece solo con ganador',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const sinGanador = document.getElementById('shareBtn').style.display;
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(3);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 3, 15000);
+        const sinGirar = document.getElementById('shareBtn').style.display;
+        spin();
+        await __t.waitSpin();
+        await new Promise(rr => setTimeout(rr, 300));
+        const conGanador = document.getElementById('shareBtn').style.display;
+        const etiqueta = document.getElementById('shareLabel').textContent;
+        return { sinGanador, sinGirar, conGanador, etiqueta, ganador: winnerIndex };
+      })()`, true);
+      if (r.sinGanador !== 'none') return 'visible sin ganador al inicio: ' + r.sinGanador;
+      if (r.sinGirar !== 'none') return 'visible antes de girar: ' + r.sinGirar;
+      if (r.ganador < 0) return 'el giro no dio ganador';
+      if (r.conGanador === 'none') return 'oculto tras el giro';
+      if (!r.etiqueta) return 'etiqueta vacia';
+      return true;
+    },
+  },
+  {
+    name: 'compartir sin soporte copia el texto',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const realShare = navigator.share;
+        const realCanShare = navigator.canShare;
+        const realWrite = navigator.clipboard.writeText.bind(navigator.clipboard);
+        let copiado = null;
+        navigator.share = undefined;
+        navigator.canShare = undefined;
+        navigator.clipboard.writeText = async (t) => { copiado = t; };
+        try {
+          document.getElementById('shareBtn').click();
+          await new Promise(rr => setTimeout(rr, 800));
+        } finally {
+          navigator.share = realShare;
+          navigator.canShare = realCanShare;
+          navigator.clipboard.writeText = realWrite;
+        }
+        const nombre = fileNames[winnerIndex];
+        return {
+          copiado,
+          nombre,
+          mensaje: document.getElementById('result-hint').textContent
+        };
+      })()`, true);
+      if (!r.copiado) return 'no se copio nada al portapapeles';
+      if (!r.nombre || r.copiado.indexOf(r.nombre) < 0) {
+        return 'el texto no incluye al ganador (' + r.nombre + '): ' + r.copiado;
+      }
+      if (!r.mensaje) return 'sin mensaje de confirmacion';
+      return true;
+    },
+  },
+  {
+    name: 'compartir con soporte envia la foto',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const realShare = navigator.share;
+        const realCanShare = navigator.canShare;
+        let enviado = null;
+        navigator.canShare = () => true;
+        navigator.share = async (data) => { enviado = data; };
+        try {
+          document.getElementById('shareBtn').click();
+          await new Promise(rr => setTimeout(rr, 800));
+        } finally {
+          navigator.share = realShare;
+          navigator.canShare = realCanShare;
+        }
+        if (!enviado) return { error: 'share no fue llamado' };
+        const f = enviado.files && enviado.files[0];
+        return {
+          tieneArchivos: !!(enviado.files && enviado.files.length === 1),
+          tipo: f ? f.type : null,
+          tamano: f ? f.size : 0,
+          nombreArchivo: f ? f.name : null,
+          ganador: fileNames[winnerIndex]
+        };
+      })()`, true);
+      if (r.error) return r.error;
+      if (!r.tieneArchivos) return 'no se envio la foto';
+      if (!r.tipo || r.tipo.indexOf('image/') !== 0) return 'tipo incorrecto: ' + r.tipo;
+      if (!(r.tamano > 0)) return 'archivo vacio';
+      if (!r.nombreArchivo || !r.ganador || r.nombreArchivo.indexOf(r.ganador) < 0) {
+        return 'el archivo no lleva el nombre (' + r.nombreArchivo + ' vs ' + r.ganador + ')';
+      }
+      return true;
+    },
+  },
+  {
     name: 'los errores tecnicos se traducen a lenguaje humano',
     run: async (c) => {
       const r = await c.eval(`(() => {
