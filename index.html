@@ -479,6 +479,10 @@
             color: #fff;
         }
 
+        .help-row kbd.wide {
+            min-width: 96px;
+        }
+
         .preview-item.removed {
             animation: fadeOut 0.3s ease forwards;
         }
@@ -1085,7 +1089,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.7.1</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.7.2</div>
     </div>
 
     <script>
@@ -4911,18 +4915,19 @@ const wheelCache = document.createElement('canvas');
             document.getElementById('helpTitle').textContent = t('shortcutsTitle');
             document.getElementById('helpCloseBtn').textContent = t('bulkCancel');
             const rows = [
-                ['Espacio', t('keySpace')],
-                ['Escape', t('keyEscape')],
-                ['S', t('keyS')],
-                ['E', t('keyE')],
-                ['Ctrl + Z', t('undo')]
+                ['Space', t('keySpace'), true],
+                ['Esc', t('keyEscape'), false],
+                ['S', t('keyS'), false],
+                ['E', t('keyE'), false],
+                ['Ctrl + Z', t('undo'), false]
             ];
             list.replaceChildren();
-            rows.forEach(([key, desc]) => {
+            rows.forEach(([key, desc, wide]) => {
                 const row = document.createElement('div');
                 row.className = 'help-row';
                 const kbd = document.createElement('kbd');
                 kbd.textContent = key;
+                if (wide) kbd.classList.add('wide');
                 const span = document.createElement('span');
                 span.textContent = desc;
                 row.appendChild(kbd);

@@ -797,7 +797,7 @@ const tests = [
       if (!r.abierto) return 'el modal no abrio';
       if (!r.titulo) return 'el modal no tiene titulo';
       if (r.filas !== 5) return 'se esperaban 5 filas, hay ' + r.filas;
-      const esperadas = ['Espacio', 'Escape', 'S', 'E', 'Ctrl + Z'];
+      const esperadas = ['Space', 'Esc', 'S', 'E', 'Ctrl + Z'];
       if (JSON.stringify(r.teclas) !== JSON.stringify(esperadas)) {
         return 'teclas incorrectas: ' + JSON.stringify(r.teclas);
       }
