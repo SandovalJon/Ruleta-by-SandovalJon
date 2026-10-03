@@ -347,6 +347,25 @@
             transform: scale(1.15);
         }
 
+        .preview-pos {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            min-width: 20px;
+            height: 18px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 9px;
+            pointer-events: none;
+        }
+
         .bulk-rename-btn {
             display: block;
             width: 100%;
@@ -959,6 +978,14 @@ canvas {
             font-family: monospace;
         }
 
+        .history-thumb {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
         .history-name {
             flex: 1;
             min-width: 0;
@@ -1136,7 +1163,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.3.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.4.0</div>
     </div>
 
     <script>
@@ -3456,6 +3483,10 @@ let colors = themeColors[currentTheme];
                 img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:6px;'
                     + (isEliminated ? 'opacity:0.3;filter:grayscale(100%)' : '');
                 item.appendChild(img);
+                const pos = document.createElement('div');
+                pos.className = 'preview-pos';
+                pos.textContent = String(index + 1);
+                item.appendChild(pos);
                 if (!fileName || /^Imagen \d+$/.test(fileName)) {
                     const warn = document.createElement('div');
                     warn.className = 'preview-nameless';
@@ -3900,10 +3931,12 @@ const wheelCache = document.createElement('canvas');
 
         function recordSpin() {
             const name = fileNames[winnerIndex] || ('Imagen ' + (winnerIndex + 1));
+            const thumb = images[winnerIndex];
             spinHistory.unshift({
                 nombre: name,
                 index: winnerIndex,
-                fecha: new Date().toISOString()
+                fecha: new Date().toISOString(),
+                thumb: (typeof thumb === 'string' && thumb.length < 200000) ? thumb : ''
             });
             if (spinHistory.length > HISTORY_LIMIT) spinHistory.length = HISTORY_LIMIT;
             saveHistory();
@@ -3922,7 +3955,14 @@ const wheelCache = document.createElement('canvas');
                 if (!saved) return;
                 const parsed = JSON.parse(saved);
                 if (Array.isArray(parsed)) {
-                    spinHistory = parsed.filter(e => e && typeof e.nombre === 'string' && e.fecha);
+                    spinHistory = parsed
+                        .filter(e => e && typeof e.nombre === 'string' && e.fecha)
+                        .map(e => ({
+                            nombre: e.nombre,
+                            index: e.index,
+                            fecha: e.fecha,
+                            thumb: (typeof e.thumb === 'string' && e.thumb.length < 200000) ? e.thumb : ''
+                        }));
                 }
             } catch (e) {}
         }
@@ -3945,6 +3985,15 @@ const wheelCache = document.createElement('canvas');
                 const pos = document.createElement('span');
                 pos.className = 'history-pos';
                 pos.textContent = String(i + 1) + '.';
+                li.appendChild(pos);
+                if (typeof entry.thumb === 'string' && entry.thumb) {
+                    const th = document.createElement('img');
+                    th.className = 'history-thumb';
+                    th.src = entry.thumb;
+                    th.alt = '';
+                    th.loading = 'lazy';
+                    li.appendChild(th);
+                }
                 const name = document.createElement('span');
                 name.className = 'history-name';
                 name.textContent = entry.nombre;
