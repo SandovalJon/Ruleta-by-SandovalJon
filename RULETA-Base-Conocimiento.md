@@ -6,54 +6,71 @@
 - **Stack:** HTML5, CSS3, JavaScript vanilla, Web Audio API, Canvas 2D
 - **Repo:** https://github.com/SandovalJon/Ruleta-by-SandovalJon
 - **URL:** https://sandovaljon.github.io/Ruleta-by-SandovalJon/
-- **Versión:** v3.0.1
-- **Fecha:** 2026-09-25
-- **Último commit:** bea8a0c
+- **Versión:** v3.11.0
+- **Rama:** local `master` → remoto `main`
+- **Último commit:** ab2ecb8
 
 ## 2. ARQUITECTURA
 
-- **Entry point:** index.html (SPA single-file)
-- **PWA:** manifest.json (instalable). El service worker (sw.js) es autodestructivo: limpia cachés viejas, se desregistra y recarga. No hay modo offline (Firebase requiere red).
-- **Firebase:** Auth (Google) + Firestore (guardar/cargar sets)
-- **Audio:** Web Audio API (tick, whoosh, win sound, notif, error)
-- **Canvas:** Ruleta animada con requestAnimationFrame
-- **Grabación:** MediaRecorder (canvas + audio) o WebCodecs (fallback)
-- **Idiomas:** 25 idiomas (sistema i18n con objeto L)
-- **Temas:** Noche, Claro, Esmeralda (solo dev)
+- **Entry point:** index.html (SPA single-file, ~5000 líneas)
+- **Scripts inline:** 3 bloques. El bloque 1 NO puede usar nada del bloque 3 al cargar (solo en runtime). `t()`/L viven en el 1, `tt()`/U en el 3.
+- **PWA:** manifest.json (instalable, botón 📲 cuando el navegador lo permite). Service worker con caché versionada (`ruleta-vN`, subir en cada deploy).
+- **Firebase:** Auth (Google) + Firestore (guardar/cargar sets). Reglas en firestore.rules. Sin auto-guardado local: recargar empieza vacía.
+- **Audio:** Web Audio API (tick, whoosh, win sound). Respeta `prefers-reduced-motion` (giro corto, sin confeti ni fondo animado).
+- **Canvas:** Ruleta 512x512 con requestAnimationFrame. Más de 50 imágenes: solo colores, sin fotos.
+- **Grabación:** MediaRecorder (canvas + audio) o WebCodecs (fallback). Salida 512x512.
+- **Idiomas:** 25 idiomas, objetos L (general) y U (sets). Toda clave nueva va a los 25.
+- **Temas:** Noche, Claro, Esmeralda (solo dev). Sin preferencia guardada sigue al sistema.
 
 ## 3. RECURSOS
 
-- **Firebase Config:** En index.html línea 3220+
-- **APIs:** Ninguna externa (todo local)
-- **Datos:** Firestore (sets de imágenes por usuario)
-- **Memoria:** localStorage (tema, idioma, sonido)
+- **Firebase Config:** En index.html (proyecto ruleta-d53d9)
+- **APIs externas:** Firebase (gstatic). Sin red no hay login ni sets; la ruleta local sí funciona.
+- **Datos:** Firestore (sets por usuario, límite 10 MB por lote de escritura, 1 MB por documento).
+- **Memoria:** localStorage (tema, sonido, eliminadas). Sin IndexedDB.
 
 ## 4. CAPACIDADES
 
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
-| Girar ruleta | ✅ | Animación con easeOut, sonido tick |
-| Subir imágenes | ✅ | Drag & drop, máximo 500 |
-| Reordenar imágenes | ✅ | Drag & drop en previews |
-| Eliminar imagen | ✅ | Click en X |
+| Girar ruleta | ✅ | Animación con easeOut, sonido tick (1/frame) |
+| Subir imágenes | ✅ | Click o drag & drop, máximo 500, compresión por lotes |
+| Nombres | ✅ | Del archivo; aviso si llegan vacíos (Brave); renombrado masivo con deshacer |
+| Reordenar | ✅ | Drag ratón + táctil (umbral anti-scroll), función moveImage compartida |
+| Eliminar imagen | ✅ | Botón ✕ (hover en PC, siempre visible en táctil) |
 | Limpiar todo | ✅ | Con confirmación |
-| Seleccionar tema | ✅ | Noche, Claro, Esmeralda (dev) |
+| Buscador | ✅ | Filtra miniaturas por texto, debounce 120 ms |
+| Preview | ✅ | Máximo 10 miniaturas + aviso "+N más", insignia de posición |
+| Deshacer | ✅ | Giro, eliminación, borrado y renombrados. Botón ↩️ + Ctrl+Z |
+| Modo eliminación | ✅ | Ganador se elimina al girar de nuevo |
+| Grabar MP4 | ✅ | 512x512, con audio |
+| Compartir ganador | ✅ | Tarjeta 512px PNG con marco dorado (no la foto original) o texto |
+| Seleccionar tema | ✅ | Noche, Claro, Esmeralda (dev); auto según sistema |
 | Seleccionar idioma | ✅ | 25 idiomas |
 | Sonido on/off | ✅ | Persiste en localStorage |
-| Modo eliminación | ✅ | Borde rojo, ganador se queda |
-| Grabar MP4 | ✅ | 800x800, con audio |
-| Confeti | ✅ | Canvas, colores aleatorios |
-| Efecto ruleta loca | ✅ | Colores cambiantes durante giro |
-| PWA | ✅ | Offline, installable |
-| Badge versión | ✅ | Solo para dev |
+| Confeti | ✅ | En canvas, desactivado con movimiento reducido |
+| Atajos | ✅ | Espacio, Esc, S, E, Ctrl+Z. Panel ⌨️ de ayuda |
+| Errores humanos | ✅ | friendlyErr: permiso/red/sesión en tu idioma |
+| Aviso login | ✅ | Sin sesión se indica que hay que entrar para guardar |
+| Aviso offline | ✅ | Banda cuando se pierde la red |
+| Aviso +50 | ✅ | Con más de 50, la ruleta dibuja colores (todas participan) |
+| Open Graph | ✅ | Título, descripción e imagen para compartir el link |
+| Badge versión | ✅ | Visible para todos |
 | Botón actualizar | ✅ | Limpia cache y recarga |
+| Tests humo | ✅ | test/smoke.js, 39 checks (npm test local, test:live en .io) |
 
 ## 5. LECCIONES
 
-1. **Service worker caché:** Cachear solo archivos locales, no externos (Firebase). Causa: Firebase scripts bloquean carga offline. Fix: fetch solo origin === location.origin. Verificación: funciona offline.
+1. **Orden de scripts:** El bloque 1 se ejecuta antes que el 3. Referenciar funciones del 3 al cargar rompe todo (TDZ en cascada). Fix: mover estado arriba, envolver callbacks en arrow functions. Verificación: suite detecta excepciones al cargar.
 
-2. **Confeti posición:** Usar position:fixed en mobile causa desalineación. Fix: dibujar directamente en el canvas de la ruleta. Verificación: confeti siempre en la posición correcta.
+2. **Comas en traducciones:** Los scripts de inserción duplicaban u omitían comas. Fix: normalizador que valida cada bloque (exactamente una coma entre claves). Verificación: node --check en los 3 scripts.
 
-3. **Eliminación automática:** No eliminar ganador inmediatamente. Fix: eliminar solo al girar de nuevo. Verificación: ganador visible hasta nuevo giro.
+3. **Caché vieja:** El service worker servía HTML antiguo tras cada deploy. Fix: bump de `ruleta-vN` en cada cambio + Ctrl+Shift+R. Verificación: badge de versión visible.
 
-4. **Traducciones:** Agregar nuevas claves a los 25 idiomas. Fix: script Node.js para insertar en todos los bloques. Verificación: verificar cada idioma.
+4. **Eliminaciones heredadas:** Los índices eliminados persistían y se aplicaban a imágenes nuevas. Fix: descartar estado al cargar set nuevo. Verificación: test dedicado.
+
+5. **Nombres vacíos (Brave):** Algunos navegadores entregan archivos sin nombre, irrecuperable por código. Fix: aviso + renombrado masivo + números de posición. Verificación: tests con archivos sin nombre.
+
+6. **Restauración fantasma:** La carga automática borraba subidas en curso. Fix: se eliminó el auto-restore; recargar empieza vacía. Verificación: test de recarga vacía.
+
+7. **Tests que pasan con el bug:** Un test verde no prueba nada si no falla con el bug presente. Fix: reintroducir el bug a propósito y comprobar que el test lo detecta. Verificación: hacerlo siempre en tests nuevos críticos.

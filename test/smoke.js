@@ -1168,6 +1168,57 @@ const tests = [
       return true;
     },
   },
+  {
+    name: 'grabar produce un video descargable',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const out = {};
+        const tipo = pickRecorderType();
+        out.tipo = tipo;
+        if (!tipo) return out;
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(3);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 3, 15000);
+        const origClick = HTMLAnchorElement.prototype.click;
+        window.__dl = null;
+        HTMLAnchorElement.prototype.click = function () {
+          if (this.download && this.download.indexOf('ruleta_') === 0) {
+            window.__dl = { href: this.href, download: this.download };
+          }
+        };
+        try {
+          document.getElementById('recordBtn').click();
+          const t0 = Date.now();
+          while (Date.now() - t0 < 40000 && !window.__dl) {
+            await new Promise(rr => setTimeout(rr, 200));
+          }
+        } finally {
+          HTMLAnchorElement.prototype.click = origClick;
+        }
+        out.descarga = !!window.__dl;
+        if (window.__dl) {
+          out.nombre = window.__dl.download;
+          try {
+            const b = await (await fetch(window.__dl.href)).blob();
+            out.bytes = b.size;
+            out.mime = b.type;
+          } catch (e) {
+            out.bytes = -1;
+          }
+          out.aviso = document.getElementById('result-hint').textContent;
+        }
+        return out;
+      })()`, true);
+      if (!r.tipo) return 'sin codificador disponible en este navegador';
+      if (!r.descarga) return 'no se genero la descarga tras 40s';
+      if (!/^ruleta_.*\.(mp4|webm)$/.test(r.nombre)) return 'nombre incorrecto: ' + r.nombre;
+      if (!(r.bytes > 0)) return 'video vacio (' + r.bytes + ' bytes)';
+      if (!r.aviso) return 'sin aviso de guardado';
+      return true;
+    },
+  },
 ];
 
 // --- Motor ---
