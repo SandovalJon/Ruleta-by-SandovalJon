@@ -367,9 +367,11 @@ const tests = [
         const hayAviso = document.getElementById('setMsg').textContent.length > 0;
         const hayInsignia = document.querySelectorAll('.preview-nameless').length;
 
-        // renombrar la primera
-        window.prompt = () => 'Maria Perez';
-        renameImage(0);
+        // renombrar la primera via modal masivo
+        openBulkRename();
+        const inputs = document.querySelectorAll('#bulkList input[data-index]');
+        if (inputs.length > 0) inputs[0].value = 'Maria Perez';
+        saveBulkRename();
         await new Promise(r => setTimeout(r, 300));
 
         return {
@@ -389,20 +391,21 @@ const tests = [
     },
   },
   {
-    name: 'deshacer un renombrado lo revierte',
+    name: 'el lapiz abre el renombrado masivo',
     run: async (c) => {
       const r = await c.eval(`(async () => {
-        const antes = fileNames[0];
-        window.prompt = () => 'Otro Nombre';
-        renameImage(0);
-        await new Promise(r => setTimeout(r, 200));
-        const trasRenombrar = fileNames[0];
-        undo();
-        await new Promise(r => setTimeout(r, 200));
-        return { antes, trasRenombrar, trasUndo: fileNames[0] };
+        const insignia = document.querySelector('.preview-nameless');
+        if (!insignia) return { error: 'sin insignias' };
+        insignia.click();
+        await new Promise(r => setTimeout(r, 300));
+        const abierto = document.getElementById('bulkModal').style.display !== 'none';
+        const filas = document.querySelectorAll('#bulkList .bulk-row').length;
+        closeBulkRename();
+        return { abierto, filas };
       })()`, true);
-      if (r.trasRenombrar !== 'Otro Nombre') return 'el renombrado no aplico: ' + r.trasRenombrar;
-      if (r.trasUndo !== r.antes) return 'deshacer no revirtio el nombre (quedo "' + r.trasUndo + '" en vez de "' + r.antes + '")';
+      if (r.error) return r.error;
+      if (!r.abierto) return 'el lapiz no abrio el modal masivo';
+      if (r.filas === 0) return 'el modal abrio vacio';
       return true;
     },
   },
