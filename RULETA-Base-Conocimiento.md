@@ -6,9 +6,9 @@
 - **Stack:** HTML5, CSS3, JavaScript vanilla, Web Audio API, Canvas 2D
 - **Repo:** https://github.com/SandovalJon/Ruleta-by-SandovalJon
 - **URL:** https://sandovaljon.github.io/Ruleta-by-SandovalJon/
-- **Versión:** v3.11.0
+- **Versión:** v3.12.0
 - **Rama:** local `master` → remoto `main`
-- **Último commit:** ab2ecb8
+- **Último commit:** 6fb15fe
 
 ## 2. ARQUITECTURA
 
