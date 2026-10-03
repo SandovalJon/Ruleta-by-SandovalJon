@@ -975,6 +975,113 @@ const tests = [
       return true;
     },
   },
+  {
+    name: 'el tema sigue al sistema si no hay preferencia',
+    run: async (c, ctx) => {
+      const stub = `(function () {
+        window.__sysTheme = 'light';
+        const orig = window.matchMedia.bind(window);
+        window.matchMedia = function (q) {
+          if (String(q).indexOf('prefers-color-scheme') >= 0) {
+            return {
+              get matches() { return window.__sysTheme === 'light' ? /light/.test(q) : /dark/.test(q); },
+              media: q, addEventListener: function () {}, addListener: function () {},
+              removeEventListener: function () {}, removeListener: function () {}, dispatchEvent: function () { return false; }
+            };
+          }
+          return orig(q);
+        };
+      })();`;
+      const added = await c.send('Page.addScriptToEvaluateOnNewDocument', { source: stub });
+      await c.eval(`localStorage.removeItem('roulette-theme')`);
+      await c.navigate(ctx.url);
+      const r = await c.eval(`document.body.dataset.theme`);
+      let out;
+      if (r !== 'claro') {
+        out = 'con sistema claro quedo ' + r;
+      } else {
+        await c.eval(`localStorage.setItem('roulette-theme', 'noche')`);
+        await c.navigate(ctx.url);
+        const r2 = await c.eval(`document.body.dataset.theme`);
+        out = r2 === 'noche' ? true : 'la preferencia no gano al sistema: ' + r2;
+      }
+      if (added && added.identifier) {
+        await c.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: added.identifier }).catch(() => {});
+      }
+      return out;
+    },
+  },
+  {
+    name: 'las metas Open Graph estan completas',
+    run: async (c) => {
+      const r = await c.eval(`(() => {
+        function meta(sel) {
+          const el = document.querySelector(sel);
+          return el ? (el.getAttribute('content') || '') : null;
+        }
+        return {
+          ogTitle: meta('meta[property="og:title"]'),
+          ogDesc: meta('meta[property="og:description"]'),
+          ogImage: meta('meta[property="og:image"]'),
+          ogUrl: meta('meta[property="og:url"]'),
+          ogType: meta('meta[property="og:type"]'),
+          twCard: meta('meta[name="twitter:card"]'),
+          twTitle: meta('meta[name="twitter:title"]'),
+          twImage: meta('meta[name="twitter:image"]')
+        };
+      })()`);
+      for (const k of Object.keys(r)) {
+        if (!r[k]) return 'falta o vacia: ' + k;
+      }
+      if (r.ogImage.indexOf('https://') !== 0) return 'og:image no es absoluta: ' + r.ogImage;
+      if (r.ogUrl.indexOf('https://') !== 0) return 'og:url no es absoluta: ' + r.ogUrl;
+      return true;
+    },
+  },
+  {
+    name: 'sin conexion aparece el aviso',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const out = {};
+        window.dispatchEvent(new Event('offline'));
+        await new Promise(rr => setTimeout(rr, 300));
+        const banner = document.getElementById('offlineBanner');
+        out.visibleSinRed = banner.style.display !== 'none';
+        out.texto = document.getElementById('offlineText').textContent;
+        window.dispatchEvent(new Event('online'));
+        await new Promise(rr => setTimeout(rr, 300));
+        out.ocultoConRed = banner.style.display === 'none';
+        return out;
+      })()`, true);
+      if (!r.visibleSinRed) return 'el aviso no aparecio sin red';
+      if (!r.texto) return 'el aviso no tiene texto';
+      if (!r.ocultoConRed) return 'el aviso no se oculto al volver la red';
+      return true;
+    },
+  },
+  {
+    name: 'el boton instalar aparece con el evento',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        const btn = document.getElementById('installBtn');
+        const antes = btn.style.display;
+        window.dispatchEvent(new Event('beforeinstallprompt'));
+        await new Promise(rr => setTimeout(rr, 300));
+        const visible = btn.style.display !== 'none';
+        const etiqueta = document.getElementById('installLabel').textContent;
+        btn.click();
+        await new Promise(rr => setTimeout(rr, 300));
+        window.dispatchEvent(new Event('appinstalled'));
+        await new Promise(rr => setTimeout(rr, 300));
+        return { antes, visible, etiqueta, ocultoTrasInstalar: btn.style.display === 'none' };
+      })()`, true);
+      if (r.antes !== 'none') return 'el boton se veia antes del evento: ' + r.antes;
+      if (!r.visible) return 'el boton no aparecio con el evento';
+      if (!r.etiqueta) return 'el boton no tiene texto';
+      if (!r.ocultoTrasInstalar) return 'el boton no se oculto tras instalar';
+      return true;
+    },
+  },
 ];
 
 // --- Motor ---

@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#e94560">
     <meta name="description" content="Ruleta de imágenes para sorteos y giros aleatorios">
+    <meta property="og:title" content="🎰 Ruleta de Imágenes">
+    <meta property="og:description" content="Ruleta de imágenes para sorteos y giros aleatorios">
+    <meta property="og:image" content="https://sandovaljon.github.io/Ruleta-by-SandovalJon/icon-512.png">
+    <meta property="og:url" content="https://sandovaljon.github.io/Ruleta-by-SandovalJon/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="🎰 Ruleta de Imágenes">
+    <meta name="twitter:description" content="Ruleta de imágenes para sorteos y giros aleatorios">
+    <meta name="twitter:image" content="https://sandovaljon.github.io/Ruleta-by-SandovalJon/icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ruleta">
@@ -980,6 +989,7 @@ canvas {
 <body>
     <h1 id="title">🎰 Ruleta de Imágenes</h1>
 
+    <div id="offlineBanner" style="display:none;margin-bottom:14px;padding:8px 18px;background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.5);border-radius:20px;font-size:0.85rem;color:#f85149;" role="alert">📡 <span id="offlineText"></span></div>
     <div class="auth-panel" id="authPanel">
         <button class="google-btn" id="googleBtn" style="display:none;">
             <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -1026,6 +1036,7 @@ canvas {
         </select>
         <button onclick="checkForUpdates()" style="padding:5px 10px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:8px;color:#ffd700;font-size:0.82rem;cursor:pointer;" title="Buscar actualizaciones">🔄</button>
         <button id="shortcutsBtn" type="button" style="padding:5px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:#fff;font-size:0.82rem;cursor:pointer;" title="⌨️">⌨️</button>
+        <button id="installBtn" type="button" style="display:none;padding:5px 10px;background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.5);border-radius:8px;color:#3fb950;font-size:0.82rem;cursor:pointer;">📲 <span id="installLabel"></span></button>
     </div>
     
 <div class="container">
@@ -1099,7 +1110,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.9.1</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.10.0</div>
     </div>
 
     <script>
@@ -1268,6 +1279,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Inicia sesión con Google para guardar tus sets.',
                 share: 'Compartir',
                 shareCopied: 'Resultado copiado, pégalo donde quieras.',
+                offline: 'Sin conexión. Algunas funciones necesitan internet.',
+                installApp: 'Instalar app',
                 moreImages: '+{n} más · usa el buscador',
                 noFileNames: '{n} imágenes llegaron sin nombre de archivo y se mostrarán como «Imagen N». Si arrastras desde una página web o la nube, usa el botón para elegir los archivos.',
                 renameHint: 'Toca para poner el nombre'
@@ -1323,6 +1336,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Sign in with Google to save your sets.',
                 share: 'Share',
                 shareCopied: 'Result copied, paste it wherever you want.',
+                offline: 'Offline. Some features need internet.',
+                installApp: 'Install app',
                 moreImages: '+{n} more · use the search',
                 noFileNames: '{n} images arrived without a filename and will show as "Image N". If you drag from a web page or cloud, use the button to pick the files instead.',
                 renameHint: 'Tap to set the name'
@@ -1378,6 +1393,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Entre com o Google para salvar seus sets.',
                 share: 'Compartilhar',
                 shareCopied: 'Resultado copiado, cole onde quiser.',
+                offline: 'Sem conexão. Alguns recursos precisam de internet.',
+                installApp: 'Instalar app',
                 moreImages: '+{n} a mais · use a busca',
                 noFileNames: '{n} imagens chegaram sem nome de arquivo e aparecerão como "Imagem N". Se arrastar de uma página web ou da nuvem, use o botão para escolher os arquivos.',
                 renameHint: 'Toque para dar o nome'
@@ -1433,6 +1450,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Connectez-vous avec Google pour enregistrer vos sets.',
                 share: 'Partager',
                 shareCopied: 'Résultat copié, collez-le où vous voulez.',
+                offline: 'Hors ligne. Certaines fonctions nécessitent internet.',
+                installApp: 'Installer l’app',
                 moreImages: '+{n} en plus · utilisez la recherche',
                 noFileNames: '{n} images sont arrivées sans nom de fichier et s\'afficheront comme « Image N ». Si vous glissez depuis une page web ou un cloud, utilisez le bouton pour choisir les fichiers.',
                 renameHint: 'Touchez pour donner un nom'
@@ -1488,6 +1507,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Melde dich mit Google an, um deine Sets zu speichern.',
                 share: 'Teilen',
                 shareCopied: 'Ergebnis kopiert, füge es ein, wo du willst.',
+                offline: 'Offline. Manche Funktionen brauchen Internet.',
+                installApp: 'App installieren',
                 moreImages: '+{n} weitere · nutze die Suche',
                 noFileNames: '{n} Bilder kamen ohne Dateinamen an und zeigen sich als „Bild N“. Wenn du von einer Webseite oder Cloud ziehst, nutze die Schaltfläche zum Auswählen.',
                 renameHint: 'Tippen zum Benennen'
@@ -1543,6 +1564,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: '使用 Google 登录以保存您的套装。',
                 share: '分享',
                 shareCopied: '结果已复制，可粘贴到任何地方。',
+                offline: '已离线。部分功能需要联网。',
+                installApp: '安装应用',
                 moreImages: '还有 {n} 张 · 请使用搜索',
                 noFileNames: '{n} 张图片没有文件名，将显示为“图片 N”。如果从网页或云盘拖拽，请使用按钮选择文件。',
                 renameHint: '点击以设置名称'
@@ -1598,6 +1621,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'अपने सेट सहेजने के लिए Google से साइन इन करें।',
                 share: 'साझा करें',
                 shareCopied: 'परिणाम कॉपी हो गया, जहाँ चाहें पेस्ट करें।',
+                offline: 'ऑफ़लाइन। कुछ सुविधाओं को इंटरनेट चाहिए।',
+                installApp: 'ऐप इंस्टॉल करें',
                 moreImages: 'और {n} · खोज का उपयोग करें',
                 noFileNames: '{n} चित्र फ़ाइल नाम के बिना आए हैं और "चित्र N" के रूप में दिखेंगे। वेब पेज या क्लाउड से खींच रहे हैं, तो फ़ाइलें चुनने के लिए बटन का उपयोग करें।',
                 renameHint: 'नाम सेट करने के लिए टैप करें'
@@ -1653,6 +1678,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'سجّل الدخول بـ Google لحفظ مجموعاتك.',
                 share: 'مشاركة',
                 shareCopied: 'تم نسخ النتيجة، الصقها أينما تريد.',
+                offline: 'غير متصل. بعض الميزات تحتاج إلى الإنترنت.',
+                installApp: 'ثبّت التطبيق',
                 moreImages: '+{n} أخرى · استخدم البحث',
                 noFileNames: '{n} صورة وصلت بدون اسم ملف وستظهر كـ "صورة N". إذا كنت تسحب من صفحة ويب أو سحابة، استخدم الزر لاختيار الملفات.',
                 renameHint: 'انقر لتعيين الاسم'
@@ -1708,6 +1735,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'আপনার সেট সংরক্ষণ করতে Google দিয়ে সাইন ইন করুন।',
                 share: 'শেয়ার',
                 shareCopied: 'ফলাফল কপি হয়েছে, যেখানে খুশি পেস্ট করুন।',
+                offline: 'অফলাইন। কিছু ফিচারের জন্য ইন্টারনেট লাগবে।',
+                installApp: 'অ্যাপ ইনস্টল করুন',
                 moreImages: 'আরও {n}টি · সার্চ ব্যবহার করুন',
                 noFileNames: '{n}টি ছবি ফাইলের নাম ছাড়া এসেছে এবং "ছবি N" হিসেবে দেখাবে। ওয়েব পেজ বা ক্লাউড থেকে টেনে আনলে ফাইল বাছাই করার বোতাম ব্যবহার করুন।',
                 renameHint: 'নাম দিতে ট্যাপ করুন'
@@ -1763,6 +1792,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Войдите через Google, чтобы сохранять наборы.',
                 share: 'Поделиться',
                 shareCopied: 'Результат скопирован, вставьте куда хотите.',
+                offline: 'Нет сети. Некоторым функциям нужен интернет.',
+                installApp: 'Установить приложение',
                 moreImages: 'ещё {n} · используйте поиск',
                 noFileNames: '{n} изображений пришли без имени файла и будут показаны как «Изображение N». Если перетаскиваете с веб-страницы или облака, используйте кнопку выбора файлов.',
                 renameHint: 'Нажмите, чтобы задать имя'
@@ -1818,6 +1849,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'اپنے سیٹ محفوظ کرنے کے لیے Google سے سائن ان کریں۔',
                 share: 'شیئر کریں',
                 shareCopied: 'نتیجہ کاپی ہو گیا، جہاں چاہیں پیسٹ کریں۔',
+                offline: 'آف لائن۔ کچھ فیچرز کو انٹرنیٹ چاہیے۔',
+                installApp: 'ایپ انسٹال کریں',
                 moreImages: 'مزید {n} · تلاش استعمال کریں',
                 noFileNames: '{n} تصاویر بدون نام فایل آمدند و به شکل «تصویر N» نمایش داده می‌شوند. اگر از یک صفحه وب یا فضای ابری می‌کشید، از دکمه انتخاب فایل استفاده کنید.',
                 renameHint: 'نام Setsat کے لیے ٹیپ کریں'
@@ -1873,6 +1906,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Masuk dengan Google untuk menyimpan set Anda.',
                 share: 'Bagikan',
                 shareCopied: 'Hasil disalin, tempel di mana saja.',
+                offline: 'Luring. Beberapa fitur butuh internet.',
+                installApp: 'Instal aplikasi',
                 moreImages: '+{n} lagi · gunakan pencarian',
                 noFileNames: '{n} gambar tiba tanpa nama file dan akan tampil sebagai "Gambar N". Jika menarik dari halaman web atau cloud, gunakan tombol untuk memilih file.',
                 renameHint: 'Ketuk untuk menetapkan nama'
@@ -1928,6 +1963,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'セットを保存するには Google でログインしてください。',
                 share: '共有',
                 shareCopied: '結果をコピーしました。好きな場所に貼り付けてください。',
+                offline: 'オフラインです。一部の機能にはインターネットが必要です。',
+                installApp: 'アプリをインストール',
                 moreImages: 'あと{n}枚 · 検索を使ってください',
                 noFileNames: '{n}枚の画像にファイル名がありません。「画像 N」と表示されます。ウェブページやクラウドからドラッグしている場合は、ボタンからファイルを選択してください。',
                 renameHint: 'タップして名前を設定'
@@ -1983,6 +2020,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'ਆਪਣੇ ਸੈੱਟ ਸੰਭਾਲਣ ਲਈ Google ਨਾਲ ਸਾਈਨ ਇਨ ਕਰੋ।',
                 share: 'ਸਾਂਝਾ ਕਰੋ',
                 shareCopied: 'ਨਤੀਜਾ ਕਾਪੀ ਹੋ ਗਿਆ, ਜਿੱਥੇ ਚਾਹੋ ਪੇਸਟ ਕਰੋ।',
+                offline: 'ਔਫਲਾਈਨ। ਕੁਝ ਫੀਚਰਾਂ ਲਈ ਇੰਟਰਨੈੱਟ ਚਾਹੀਦਾ ਹੈ।',
+                installApp: 'ਐਪ ਇੰਸਟਾਲ ਕਰੋ',
                 moreImages: 'ਹੋਰ {n} · ਖੋਜ ਵਰਤੋ',
                 noFileNames: '{n} ਤਸਵੀਰਾਂ ਫ਼ਾਈਲ ਨਾਮ ਤੋਂ ਬਿਨਾਂ ਆਈਆਂ ਹਨ ਅਤੇ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਣਗੀਆਂ ਹਨ। ਜੇ ਤੁਸੀਂ ਵੈੱਬ ਪੇਜ ਜਾਂ ਕਲਾਉਡ ਤੋਂ ਖਿੱਚ ਰਹੇ ਹੋ, ਤਾਂ ਫ਼ਾਈਲਾਂ ਚੁਣਨ ਲਈ ਬਟਨ ਵਰਤੋ।',
                 renameHint: 'ਨਾਮ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ'
@@ -2038,6 +2077,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Mlebu nganggo Google kanggo nyimpen set-mu.',
                 share: 'Tuduhake',
                 shareCopied: 'Hasil disalin, tempelake ing ngendi wae.',
+                offline: 'Luring. Sawetara fitur butuh internet.',
+                installApp: 'Instal app',
                 moreImages: '+{n} maneh · gunakake panelusuran',
                 noFileNames: '{n} gambar teka tanpa jeneng file lan bakal nunjuk minangka "Gambar N". Yen nyeret saka halaman web utawa awan, gunakake tombol kanggo milih file.',
                 renameHint: 'Ketuk kanggo set jeneng'
@@ -2093,6 +2134,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Đăng nhập bằng Google để lưu bộ của bạn.',
                 share: 'Chia sẻ',
                 shareCopied: 'Đã sao chép kết quả, dán ở bất cứ đâu.',
+                offline: 'Ngoại tuyến. Một số tính năng cần internet.',
+                installApp: 'Cài đặt ứng dụng',
                 moreImages: 'còn {n} · hãy dùng tìm kiếm',
                 noFileNames: '{n} ảnh đến mà không có tên tệp và sẽ hiện là "Ảnh N". Nếu kéo từ trang web hoặc đám mây, hãy dùng nút để chọn tệp.',
                 renameHint: 'Chạm để đặt tên'
@@ -2148,6 +2191,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'మీ సెట్‌లను సేవ్ చేయడానికి Googleతో సైన్ ఇన్ చేయండి.',
                 share: 'షేర్',
                 shareCopied: 'ఫలితం కాపీ అయింది, ఎక్కడైనా పేస్ట్ చేయండి.',
+                offline: 'ఆఫ్‌లైన్. కొన్ని ఫీచర్లకు ఇంటర్నెట్ అవసరం.',
+                installApp: 'యాప్‌ను ఇన్‌స్టాల్ చేయండి',
                 moreImages: 'మరో {n} · శోధనను ఉపయోగించండి',
                 noFileNames: '{n} చిత్రాలు ఫైల్ పేరు లేకుండా వచ్చాయి, "చిత్రం N"గా కనిపిస్తాయి. వెబ్ పేజ్ లేదా క్లౌడ్ నుండి గీసుస్తే, ఫైళ్లు ఎంచుకోవడానికి బటన్ ఉపయోగించండి.',
                 renameHint: 'పేరు పెట్టడానికి టాప్ చేయండి'
@@ -2203,6 +2248,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: '세트를 저장하려면 Google로 로그인하세요.',
                 share: '공유',
                 shareCopied: '결과가 복사되었습니다. 원하는 곳에 붙여넣으세요.',
+                offline: '오프라인 상태입니다. 일부 기능은 인터넷이 필요합니다.',
+                installApp: '앱 설치',
                 moreImages: '{n}개 더보기 · 검색을 사용하세요',
                 noFileNames: '{n}개의 이미지에 파일 이름이 없어 "이미지 N"으로 표시됩니다. 웹페이지나 클라우드에서 끌어온 경우 파일 선택 버튼을 사용하세요.',
                 renameHint: '이름을 지정하려면 탭하세요'
@@ -2258,6 +2305,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Setlerinizi kaydetmek için Google ile giriş yapın.',
                 share: 'Paylaş',
                 shareCopied: 'Sonuç kopyalandı, istediğiniz yere yapıştırın.',
+                offline: 'Çevrimdışı. Bazı özellikler internet gerektirir.',
+                installApp: 'Uygulamayı yükle',
                 moreImages: '+{n} tane daha · aramayı kullanın',
                 noFileNames: '{n} görsel dosya adı olmadan geldi ve "Görsel N" olarak görünecek. Bir web sayfasından veya buluttan sürüklüyorsanız, dosyaları seçmek için düğmeyi kullanın.',
                 renameHint: 'Ad vermek için dokunun'
@@ -2313,6 +2362,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'برای ذخیره ست‌ها با Google وارد شوید.',
                 share: 'اشتراک‌گذاری',
                 shareCopied: 'نتیجه کپی شد، هرجا می‌خواهید بچسبانید.',
+                offline: 'آفلاین. برخی قابلیت‌ها به اینترنت نیاز دارند.',
+                installApp: 'نصب اپ',
                 moreImages: '{n} مورد دیگر · از جستجو استفاده کنید',
                 noFileNames: '{n} تصویر بدون نام فایل رسید و به شکل «تصویر N» نمایش داده می‌شود. اگر از یک صفحه وب یا فضای ابری می‌کشید، از دکمه انتخاب فایل استفاده کنید.',
                 renameHint: 'انقر لتعيين الاسم'
@@ -2368,6 +2419,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'तुमचे सेट जतन करण्यासाठी Google ने साइन इन करा.',
                 share: 'शेअर करा',
                 shareCopied: 'निकाल कॉपी झाला, हवा तिथे पेस्ट करा.',
+                offline: 'ऑफलाइन. काही वैशिष्ट्यांना इंटरनेट लागते.',
+                installApp: 'अ‍ॅप स्थापित करा',
                 moreImages: 'आणखी {n} · शोध वापरा',
                 noFileNames: '{n} प्रतिमा फाइलच्या नावाशिवाय आल्या आहेत आणि "प्रतिमा N" असे दिसतील. वेब पेज किंवा क्लाउडमधून ओढत असाल तर फाइल निवडण्यासाठी बटण वापरा.',
                 renameHint: 'नाव ठेवण्यासाठी टॅप करा'
@@ -2423,6 +2476,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'உங்கள் தொகுப்புகளைச் சேமிக்க Google மூலம் உள்நுழையவும்.',
                 share: 'பகிர்',
                 shareCopied: 'முடிவு நகலெடுக்கப்பட்டது, விரும்பும் இடத்தில் ஒட்டவும்.',
+                offline: 'ஆஃப்லைன். சில அம்சங்களுக்கு இணையம் தேவை.',
+                installApp: 'பயன்பாட்டை நிறுவு',
                 moreImages: 'மேலும் {n} · தேடலைப் பயன்படுத்தவும்',
                 noFileNames: '{n} படங்கள் கோப்பு பெயர் இல்லாமல் வந்துள்ளன, "படம் N" எனக் காட்டப்படும். இணையப் பக்கம் அல்லது மேகத்திலிருந்து இழுக்கிறீர்கள் என்றால், கோப்புகளைத் தேர்ந்தெடுக்கப் பொத்தானைப் பயன்படுத்தவும்.',
                 renameHint: 'பெயரை அமைக்க தட்டவும்'
@@ -2478,6 +2533,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Shiga da Google don ajiye set ɗinka.',
                 share: 'Raba',
                 shareCopied: 'An kwafi sakamako, liƙa a duk inda kake so.',
+                offline: 'Babu haɗi. Wasu abubuwan na buƙatar intanet.',
+                installApp: 'Shigar da app',
                 moreImages: 'sauran {n} · yi amfani da bincike',
                 noFileNames: '{n} hotuna ba suna ba fili sunan zuwa tare kuma za a nuna sanya “Hotuna N”. Idan ka jawo daga shafi na yan\'a ko rumbewa, amfani mada button don zaɗi fayiloli.',
                 renameHint: 'Sanya don sanya'
@@ -2533,6 +2590,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Ingia na Google kuhifadhi seti zako.',
                 share: 'Shiriki',
                 shareCopied: 'Matokeo yamenakiliwa, bandika popote unapotaka.',
+                offline: 'Nje ya mtandao. Vipengele vingine vinahitaji intaneti.',
+                installApp: 'Sakinisha programu',
                 moreImages: 'nyingine {n} · tumia utafutaji',
                 noFileNames: '{n} picha zinaingia bila jina la faili na zitaonyeshwa kama "Picha N". Ukichovuta kutoka tovuti au wingu, tumia kitufe kuchagua faili.',
                 renameHint: 'Gong clicking iliweka jina'
@@ -2588,6 +2647,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 loginToSave: 'Accedi con Google per salvare i tuoi set.',
                 share: 'Condividi',
                 shareCopied: 'Risultato copiato, incollalo dove vuoi.',
+                offline: 'Offline. Alcune funzioni richiedono internet.',
+                installApp: 'Installa l’app',
                 moreImages: 'altre {n} · usa la ricerca',
                 noFileNames: '{n} immagini arrivano senza nome file e mostreranno "Immagine N". Se trascini da una pagina web o dal cloud, usa il pulsante per scegliere i file.',
                 renameHint: 'Tocca per assegnare un nome'
@@ -2618,6 +2679,11 @@ const themeSwitcher = document.getElementById('themeSwitcher');
             langSelect.value = lang;
             const scBtn = document.getElementById('shortcutsBtn');
             if (scBtn) scBtn.title = t('shortcutsBtn');
+            const instLab = document.getElementById('installLabel');
+            if (instLab && document.getElementById('installBtn').style.display !== 'none') {
+                instLab.textContent = t('installApp');
+            }
+            updateOnlineStatus();
             if (!currentUser) {
                 setMsg.textContent = t('loginToSave');
             }
@@ -2742,6 +2808,23 @@ function setTheme(theme) {
 
 let colors = themeColors[currentTheme];
 
+        const systemThemeQuery = (typeof window.matchMedia === 'function')
+            ? window.matchMedia('(prefers-color-scheme: light)')
+            : null;
+
+        function systemTheme() {
+            return (systemThemeQuery && systemThemeQuery.matches) ? 'claro' : 'noche';
+        }
+
+        function applyTheme(theme, redraw) {
+            if (!themeColors[theme]) return;
+            document.body.dataset.theme = theme;
+            currentTheme = theme;
+            colors = themeColors[theme];
+            document.getElementById('themeSelect').value = theme;
+            if (redraw !== false) rebuildWheel();
+        }
+
         try {
             const savedTheme = localStorage.getItem('roulette-theme');
             if (savedTheme && themeColors[savedTheme]) {
@@ -2749,8 +2832,22 @@ let colors = themeColors[currentTheme];
                 currentTheme = savedTheme;
                 colors = themeColors[savedTheme];
                 document.getElementById('themeSelect').value = savedTheme;
+            } else if (systemThemeQuery) {
+                applyTheme(systemTheme(), false);
             }
         } catch (e) {}
+
+        if (systemThemeQuery) {
+            const onSystemTheme = () => {
+                try {
+                    if (!localStorage.getItem('roulette-theme')) {
+                        applyTheme(systemTheme());
+                    }
+                } catch (e) {}
+            };
+            if (systemThemeQuery.addEventListener) systemThemeQuery.addEventListener('change', onSystemTheme);
+            else if (systemThemeQuery.addListener) systemThemeQuery.addListener(onSystemTheme);
+        }
 
         try {
             const navLang = (navigator.languages && navigator.languages[0]) ? navigator.languages[0] : navigator.language;
@@ -3056,6 +3153,53 @@ let colors = themeColors[currentTheme];
         if (helpModal) {
             helpModal.addEventListener('click', (e) => {
                 if (e.target === helpModal) closeHelpModal();
+            });
+        }
+
+        function updateOnlineStatus(force) {
+            const banner = document.getElementById('offlineBanner');
+            if (!banner) return;
+            const offline = (typeof force === 'boolean')
+                ? force
+                : (typeof navigator.onLine === 'boolean' && !navigator.onLine);
+            if (offline) {
+                document.getElementById('offlineText').textContent = t('offline');
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('online', () => updateOnlineStatus(false));
+        window.addEventListener('offline', () => updateOnlineStatus(true));
+        updateOnlineStatus();
+
+        let deferredInstall = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstall = e;
+            const b = document.getElementById('installBtn');
+            const lab = document.getElementById('installLabel');
+            if (b && lab) {
+                b.style.display = 'inline-block';
+                lab.textContent = t('installApp');
+            }
+        });
+        window.addEventListener('appinstalled', () => {
+            deferredInstall = null;
+            const b = document.getElementById('installBtn');
+            if (b) b.style.display = 'none';
+        });
+
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', () => {
+                if (deferredInstall && typeof deferredInstall.prompt === 'function') {
+                    deferredInstall.prompt();
+                    if (deferredInstall.userChoice && typeof deferredInstall.userChoice.then === 'function') {
+                        deferredInstall.userChoice.then(() => { deferredInstall = null; }).catch(() => {});
+                    }
+                }
             });
         }
 
