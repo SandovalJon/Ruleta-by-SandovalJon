@@ -716,6 +716,32 @@ const tests = [
     },
   },
   {
+    name: 'el preview muestra 10 miniaturas como maximo',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(15);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 15, 20000);
+        const items = document.querySelectorAll('#previewImages .preview-item').length;
+        const more = document.getElementById('previewMore');
+        return {
+          total: images.length,
+          items,
+          hayAviso: !!more,
+          texto: more ? more.textContent : '',
+          menciona5: more ? /5/.test(more.textContent) : false
+        };
+      })()`, true);
+      if (r.total !== 15) return 'no se cargaron las 15 (hay ' + r.total + ')';
+      if (r.items !== 10) return 'se muestran ' + r.items + ' en vez de 10';
+      if (!r.hayAviso) return 'no aparece el aviso de restantes';
+      if (!r.menciona5) return 'el aviso no dice 5: ' + r.texto;
+      return true;
+    },
+  },
+  {
     name: 'con mas de 50 imagenes avisa que dibuja colores',
     run: async (c) => {
       const r = await c.eval(`(async () => {
