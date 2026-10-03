@@ -202,11 +202,92 @@ const tests = [
         'addDataUrls', 'resetAndSetImages', 'toDataURLAsync', 'getMaxImages',
         'openBulkRename', 'saveBulkRename', 'closeBulkRename',
         'isUnnamed', 'unnamedIndices', 'updateBulkBtn', 'renderWinnerCard',
+        'moveImage',
       ];
       const missing = await c.eval(
         `(${JSON.stringify(required)}).filter(n => typeof window[n] !== 'function')`
       );
       return missing.length === 0 ? true : 'faltan: ' + missing.join(', ');
+    },
+  },
+  {
+    name: 'moveImage reordena y ajusta al ganador',
+    run: async (c) => {
+      const r = await c.eval(`(() => {
+        images = ['a', 'b', 'c', 'd'];
+        fullImages = ['a', 'b', 'c', 'd'];
+        loadedImages = [null, null, null, null];
+        fileNames = ['A', 'B', 'C', 'D'];
+        eliminatedIndices = new Set();
+        winnerIndex = 1;
+        const ok1 = moveImage(0, 2);
+        const tras1 = { orden: fileNames.slice(), ganador: winnerIndex };
+        const ok2 = moveImage(2, 2);
+        const ok3 = moveImage(-1, 9);
+        const ok4 = moveImage(0, 0);
+        return { ok1, tras1, ok2, ok3, ok4, final: fileNames.slice() };
+      })()`);
+      if (r.ok1 !== true) return 'moveImage(0,2) devolvio ' + r.ok1;
+      if (JSON.stringify(r.tras1.orden) !== JSON.stringify(['B', 'C', 'A', 'D'])) {
+        return 'orden incorrecto: ' + JSON.stringify(r.tras1.orden);
+      }
+      if (r.tras1.ganador !== 0) return 'ganador quedo en ' + r.tras1.ganador + ', debia ser 0';
+      if (r.ok2 !== false || r.ok3 !== false || r.ok4 !== false) return 'acepto indices invalidos';
+      if (JSON.stringify(r.final) !== JSON.stringify(['B', 'C', 'A', 'D'])) {
+        return 'los invalidos alteraron el orden';
+      }
+      return true;
+    },
+  },
+  {
+    name: 'arrastrar con tactil reordena',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        if (typeof Touch !== 'function' || typeof TouchEvent !== 'function') {
+          return { error: 'sin API tactil' };
+        }
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(5);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 5, 15000);
+        const panel = document.getElementById('previewImages');
+        panel.scrollIntoView();
+        await new Promise(rr => setTimeout(rr, 300));
+        const antes = fileNames.slice();
+        function rect(el) {
+          const b = el.getBoundingClientRect();
+          return { x: b.left + b.width / 2, y: b.top + b.height / 2 };
+        }
+        function touchOn(node, type, x, y) {
+          const t = new Touch({ identifier: 7, target: node, clientX: x, clientY: y });
+          node.dispatchEvent(new TouchEvent(type, {
+            touches: type === 'touchend' ? [] : [t],
+            targetTouches: [],
+            changedTouches: [t],
+            bubbles: true,
+            cancelable: true
+          }));
+        }
+        let els = Array.from(panel.querySelectorAll('.preview-item'));
+        const p0 = rect(els[0]);
+        const p3 = rect(els[3]);
+        touchOn(els[0], 'touchstart', p0.x, p0.y);
+        for (let k = 1; k <= 8; k++) {
+          const x = p0.x + (p3.x - p0.x) * k / 8;
+          const y = p0.y + (p3.y - p0.y) * k / 8;
+          touchOn(panel, 'touchmove', x, y);
+        }
+        touchOn(panel, 'touchend', p3.x, p3.y);
+        await new Promise(rr => setTimeout(rr, 400));
+        return { antes, despues: fileNames.slice() };
+      })()`, true);
+      if (r.error) return r.error;
+      const esperado = [r.antes[1], r.antes[2], r.antes[3], r.antes[0], r.antes[4]];
+      if (JSON.stringify(r.despues) !== JSON.stringify(esperado)) {
+        return 'orden incorrecto: ' + JSON.stringify(r.despues) + ' (era ' + JSON.stringify(r.antes) + ')';
+      }
+      return true;
     },
   },
   {

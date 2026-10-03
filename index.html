@@ -254,6 +254,26 @@
             transform: scale(1.05);
         }
 
+        .preview-item.drop-target {
+            outline: 3px solid var(--gold, #ffd700);
+            outline-offset: 2px;
+            transform: scale(1.08);
+        }
+
+        @media (hover: none) {
+            .preview-item .remove-overlay {
+                opacity: 1;
+                pointer-events: auto;
+                background: transparent;
+            }
+
+            .preview-item .remove-btn {
+                width: 22px;
+                height: 22px;
+                font-size: 0.7rem;
+            }
+        }
+
         .preview-item.eliminated {
             cursor: default;
         }
@@ -1110,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.10.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.11.0</div>
     </div>
 
     <script>
@@ -3628,29 +3648,104 @@ let colors = themeColors[currentTheme];
             const item = e.target.closest('.preview-item');
             if (!item || draggedIndex === null) return;
             const dropIndex = parseInt(item.dataset.index, 10);
-            if (isNaN(dropIndex) || draggedIndex === dropIndex) return;
+            if (isNaN(dropIndex)) return;
+            moveImage(draggedIndex, dropIndex);
+        });
 
-            const movedImage = images.splice(draggedIndex, 1)[0];
-            const movedFull = fullImages.splice(draggedIndex, 1)[0];
-            const movedLoaded = loadedImages.splice(draggedIndex, 1)[0];
-            const movedName = fileNames.splice(draggedIndex, 1)[0];
+        function moveImage(from, to) {
+            if (isNaN(from) || isNaN(to) || from === to) return false;
+            if (from < 0 || to < 0 || from >= images.length || to >= images.length) return false;
+            const movedImage = images.splice(from, 1)[0];
+            const movedFull = fullImages.splice(from, 1)[0];
+            const movedLoaded = loadedImages.splice(from, 1)[0];
+            const movedName = fileNames.splice(from, 1)[0];
 
-            images.splice(dropIndex, 0, movedImage);
-            fullImages.splice(dropIndex, 0, movedFull);
-            loadedImages.splice(dropIndex, 0, movedLoaded);
-            fileNames.splice(dropIndex, 0, movedName);
+            images.splice(to, 0, movedImage);
+            fullImages.splice(to, 0, movedFull);
+            loadedImages.splice(to, 0, movedLoaded);
+            fileNames.splice(to, 0, movedName);
 
-            if (winnerIndex === draggedIndex) {
-                winnerIndex = dropIndex;
-            } else if (draggedIndex < winnerIndex && dropIndex >= winnerIndex) {
+            if (winnerIndex === from) {
+                winnerIndex = to;
+            } else if (from < winnerIndex && to >= winnerIndex) {
                 winnerIndex--;
-            } else if (draggedIndex > winnerIndex && dropIndex <= winnerIndex) {
+            } else if (from > winnerIndex && to <= winnerIndex) {
                 winnerIndex++;
             }
 
+            invalidateActive();
             updatePreview();
             rebuildWheel();
             refreshMessages();
+            return true;
+        }
+
+        let touchDragIndex = null;
+        let touchOverIndex = null;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchDragging = false;
+
+        function clearTouchHighlight() {
+            document.querySelectorAll('.preview-item.drop-target').forEach((el) => {
+                el.classList.remove('drop-target');
+            });
+        }
+
+        previewImages.addEventListener('touchstart', (e) => {
+            const item = e.target.closest('.preview-item');
+            if (!item || item.classList.contains('eliminated')) return;
+            if (e.target.closest('.remove-btn') || e.target.closest('.preview-nameless')) return;
+            const t = e.touches[0];
+            touchDragIndex = parseInt(item.dataset.index, 10);
+            touchOverIndex = null;
+            touchDragging = false;
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
+        }, { passive: true });
+
+        previewImages.addEventListener('touchmove', (e) => {
+            if (touchDragIndex === null || isNaN(touchDragIndex)) return;
+            const t = e.touches[0];
+            if (!touchDragging) {
+                const dx = t.clientX - touchStartX;
+                const dy = t.clientY - touchStartY;
+                if (dx * dx + dy * dy < 144) return;
+                touchDragging = true;
+            }
+            e.preventDefault();
+            const el = document.elementFromPoint(t.clientX, t.clientY);
+            const item = el ? el.closest('.preview-item') : null;
+            clearTouchHighlight();
+            if (item) {
+                const idx = parseInt(item.dataset.index, 10);
+                if (!isNaN(idx) && idx !== touchDragIndex) {
+                    touchOverIndex = idx;
+                    item.classList.add('drop-target');
+                    return;
+                }
+            }
+            touchOverIndex = null;
+        }, { passive: false });
+
+        previewImages.addEventListener('touchend', () => {
+            const from = touchDragIndex;
+            const to = touchOverIndex;
+            const wasDragging = touchDragging;
+            touchDragIndex = null;
+            touchOverIndex = null;
+            touchDragging = false;
+            clearTouchHighlight();
+            if (wasDragging && from !== null && !isNaN(from) && to !== null) {
+                moveImage(from, to);
+            }
+        });
+
+        previewImages.addEventListener('touchcancel', () => {
+            touchDragIndex = null;
+            touchOverIndex = null;
+            touchDragging = false;
+            clearTouchHighlight();
         });
 
 const wheelCache = document.createElement('canvas');
