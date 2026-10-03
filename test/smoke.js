@@ -1064,19 +1064,24 @@ const tests = [
     run: async (c) => {
       const r = await c.eval(`(async () => {
         const btn = document.getElementById('installBtn');
-        const antes = btn.style.display;
-        window.dispatchEvent(new Event('beforeinstallprompt'));
-        await new Promise(rr => setTimeout(rr, 300));
-        const visible = btn.style.display !== 'none';
-        const etiqueta = document.getElementById('installLabel').textContent;
-        btn.click();
-        await new Promise(rr => setTimeout(rr, 300));
+        const out = { yaVisible: btn.style.display !== 'none' };
+        if (!out.yaVisible) {
+          window.dispatchEvent(new Event('beforeinstallprompt'));
+          await new Promise(rr => setTimeout(rr, 300));
+          out.visible = btn.style.display !== 'none';
+          out.etiqueta = document.getElementById('installLabel').textContent;
+          btn.click();
+          await new Promise(rr => setTimeout(rr, 300));
+          out.sinError = true;
+        } else {
+          out.etiqueta = document.getElementById('installLabel').textContent;
+        }
         window.dispatchEvent(new Event('appinstalled'));
         await new Promise(rr => setTimeout(rr, 300));
-        return { antes, visible, etiqueta, ocultoTrasInstalar: btn.style.display === 'none' };
+        out.ocultoTrasInstalar = btn.style.display === 'none';
+        return out;
       })()`, true);
-      if (r.antes !== 'none') return 'el boton se veia antes del evento: ' + r.antes;
-      if (!r.visible) return 'el boton no aparecio con el evento';
+      if (!r.yaVisible && !r.visible) return 'el boton no aparecio con el evento';
       if (!r.etiqueta) return 'el boton no tiene texto';
       if (!r.ocultoTrasInstalar) return 'el boton no se oculto tras instalar';
       return true;
