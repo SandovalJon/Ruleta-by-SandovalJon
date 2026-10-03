@@ -683,6 +683,39 @@ const tests = [
     },
   },
   {
+    name: 'el buscador filtra miniaturas por texto',
+    run: async (c) => {
+      const r = await c.eval(`(async () => {
+        __t.clear();
+        await new Promise(rr => setTimeout(rr, 400));
+        const files = await __t.makeFiles(5);
+        handleFiles(files);
+        await __t.waitFor(() => !isLoading && images.length === 5, 15000);
+        const input = document.getElementById('searchInput');
+        if (!input) return { error: 'sin campo de busqueda' };
+        input.value = 'Foto 1';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise(rr => setTimeout(rr, 400));
+        const visibles = document.querySelectorAll('#previewImages .preview-item').length;
+        const nombres = Array.from(document.querySelectorAll('#previewImages .preview-item'))
+          .map(it => fileNames[parseInt(it.dataset.index, 10)]);
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise(rr => setTimeout(rr, 400));
+        const restauradas = document.querySelectorAll('#previewImages .preview-item').length;
+        return { visibles, nombres, restauradas, total: images.length };
+      })()`, true);
+      if (r.error) return r.error;
+      if (r.visibles === 0) return 'el buscador oculto todo con "Foto 1"';
+      if (r.visibles >= r.total) return 'el buscador no filtro nada (' + r.visibles + '/' + r.total + ')';
+      if (!r.nombres.every(n => n.toLowerCase().includes('foto 1'))) {
+        return 'resultados que no coinciden: ' + JSON.stringify(r.nombres);
+      }
+      if (r.restauradas !== r.total) return 'al limpiar no vuelven todas (' + r.restauradas + '/' + r.total + ')';
+      return true;
+    },
+  },
+  {
     name: 'con mas de 50 imagenes avisa que dibuja colores',
     run: async (c) => {
       const r = await c.eval(`(async () => {

@@ -1052,6 +1052,7 @@ canvas {
             </div>
 
             <button id="bulkRenameBtn" class="bulk-rename-btn" type="button" style="display:none;">✎ <span id="bulkRenameLabel"></span></button>
+            <input type="text" id="searchInput" placeholder="🔍 Buscar imagen..." class="search-input" style="width:100%;padding:8px 12px;margin:10px 0;border-radius:12px;border:1px solid var(--accent);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box;" />
             <div class="preview-images" id="previewImages"></div>
             <div id="bulkModal" class="bulk-modal" style="display:none;">
                 <div class="bulk-box">
@@ -1089,7 +1090,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.7.2</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.7.3</div>
     </div>
 
     <script>
@@ -1113,6 +1114,15 @@ by <span>SandovalJon</span>
         const elimBtn = document.getElementById('elimBtn');
         const result = document.getElementById('result');
         const resultHint = document.getElementById('result-hint');
+        const searchInput = document.getElementById('searchInput');
+
+        if (searchInput) {
+            let searchTimer = null;
+            searchInput.addEventListener('input', () => {
+                if (searchTimer) clearTimeout(searchTimer);
+                searchTimer = setTimeout(updatePreview, 120);
+            });
+        }
 
         let images = [];
         let fullImages = [];
@@ -3235,9 +3245,11 @@ let colors = themeColors[currentTheme];
         }
 
         function updatePreview() {
+            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
             const frag = document.createDocumentFragment();
             for (let index = 0; index < images.length; index++) {
                 const fileName = fileNames[index] || '';
+                if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) continue;
                 const isEliminated = eliminatedIndices.has(index);
                 const item = document.createElement('div');
                 item.className = 'preview-item' + (isEliminated ? ' eliminated' : '');
