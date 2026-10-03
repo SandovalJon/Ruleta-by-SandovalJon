@@ -925,88 +925,6 @@ canvas {
             }
         }
 
-        .history-panel {
-            width: 300px;
-            margin-top: 14px;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-        }
-
-        .history-panel h3 {
-            margin-bottom: 10px;
-            font-size: 1rem;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        .history-list {
-            list-style: none;
-            max-height: 190px;
-            overflow-y: auto;
-            font-size: 0.85rem;
-        }
-
-        .history-list:empty::after {
-            content: attr(data-empty);
-            display: block;
-            color: var(--text-hint);
-            text-align: center;
-            font-size: 0.8rem;
-            padding: 10px 0;
-        }
-
-        .history-list li {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-            animation: fadeInScale 0.25s ease-out;
-        }
-
-        .history-list li:last-child {
-            border-bottom: none;
-        }
-
-        .history-pos {
-            flex-shrink: 0;
-            min-width: 22px;
-            font-weight: 700;
-            color: var(--gold);
-            font-family: monospace;
-        }
-
-        .history-thumb {
-            flex-shrink: 0;
-            width: 30px;
-            height: 30px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .history-name {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .history-time {
-            flex-shrink: 0;
-            font-size: 0.72rem;
-            color: var(--text-hint);
-            font-family: monospace;
-        }
-
-        .history-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
         .history-btn {
             flex: 1;
             padding: 7px 6px;
@@ -1022,23 +940,6 @@ canvas {
         .history-btn:hover {
             background: var(--accent);
             color: #fff;
-        }
-
-        .history-btn.danger {
-            color: #f85149;
-            border-color: #f85149;
-        }
-
-        .history-btn.danger:hover {
-            background: #f85149;
-            color: #fff;
-        }
-
-        @media (max-width: 600px) {
-            .history-panel {
-                width: 100%;
-                max-width: 300px;
-            }
         }
     </style>
 </head>
@@ -1123,17 +1024,6 @@ canvas {
                 <div class="set-msg" id="setMsg"></div>
             </div>
 
-            <div class="history-panel" id="historyPanel">
-                <h3 id="historyTitle">🕘 Historial de sorteos</h3>
-                <ol class="history-list" id="historyList"></ol>
-                <div class="history-actions">
-                    <button class="history-btn" id="historyCopyBtn" type="button">📋 Copiar</button>
-                    <button class="history-btn" id="historyExportBtn" type="button">⬇️ Descargar</button>
-                    <button class="history-btn danger" id="historyClearBtn" type="button">🗑️ Limpiar</button>
-                </div>
-                <div class="set-msg" id="historyMsg"></div>
-            </div>
-            <input type="text" id="searchInput" placeholder="🔍 Buscar imagen..." class="search-input" style="width:100%;padding:8px 12px;margin:10px 0;border-radius:12px;border:1px solid var(--accent);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box;" />
             <button id="bulkRenameBtn" class="bulk-rename-btn" type="button" style="display:none;">✎ <span id="bulkRenameLabel"></span></button>
             <div class="preview-images" id="previewImages"></div>
             <div id="bulkModal" class="bulk-modal" style="display:none;">
@@ -1163,7 +1053,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.4.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.4.1</div>
     </div>
 
     <script>
@@ -1187,15 +1077,6 @@ by <span>SandovalJon</span>
         const elimBtn = document.getElementById('elimBtn');
         const result = document.getElementById('result');
         const resultHint = document.getElementById('result-hint');
-        const searchInput = document.getElementById('searchInput');
-
-        if (searchInput) {
-            let searchTimer = null;
-            searchInput.addEventListener('input', () => {
-                if (searchTimer) clearTimeout(searchTimer);
-                searchTimer = setTimeout(updatePreview, 120);
-            });
-        }
 
         let images = [];
         let fullImages = [];
@@ -1216,10 +1097,7 @@ by <span>SandovalJon</span>
 
         const MAX_IMAGES = 100;
         const UNDO_LIMIT = 30;
-        const HISTORY_LIMIT = 50;
-        const HISTORY_KEY = 'roulette-history';
         const undoStack = [];
-        let spinHistory = [];
         let pendingRenames = 0;
         let imageEpoch = 0;
 
@@ -1322,11 +1200,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Eliminar',
                 undo: 'Deshacer',
                 undoWinner: 'Deshacer giro',
-                historyTitle: '🕘 Historial de sorteos',
-                historyEmpty: 'Aún no hay sorteos',
-                historyCopied: 'Historial copiado ✓',
-                historyCopyFail: 'No se pudo copiar',
-                historyConfirm: '¿Borrar todo el historial de sorteos?',
                 renamedImages: '{n} imágenes no guardaban su nombre, así que se muestran como «Imagen N». Vuelve a subirlas para recuperar los nombres originales.',
                 bulkTitle: 'Renombrar imágenes sin nombre',
                 bulkSave: 'Guardar',
@@ -1379,11 +1252,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Remove',
                 undo: 'Undo',
                 undoWinner: 'Undo spin',
-                historyTitle: '🕘 Spin history',
-                historyEmpty: 'No spins yet',
-                historyCopied: 'History copied ✓',
-                historyCopyFail: 'Could not copy',
-                historyConfirm: 'Delete the entire spin history?',
                 renamedImages: '{n} images had no name saved, so they show as "Image N". Upload them again to restore the original names.',
                 bulkTitle: 'Rename unnamed images',
                 bulkSave: 'Save',
@@ -1436,11 +1304,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Remover',
                 undo: 'Desfazer',
                 undoWinner: 'Desfazer giro',
-                historyTitle: '🕘 Histórico de sorteios',
-                historyEmpty: 'Ainda sem sorteios',
-                historyCopied: 'Histórico copiado ✓',
-                historyCopyFail: 'Não foi possível copiar',
-                historyConfirm: 'Apagar todo o histórico de sorteios?',
                 renamedImages: '{n} imagens não tinham nome salvo, então aparecem como "Imagem N". Envie-as novamente para recuperar os nomes originais.',
                 bulkTitle: 'Renomear imagens sem nome',
                 bulkSave: 'Salvar',
@@ -1493,11 +1356,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Retirer',
                 undo: 'Annuler',
                 undoWinner: 'Annuler le tour',
-                historyTitle: '🕘 Historique des tirages',
-                historyEmpty: 'Aucun tirage',
-                historyCopied: 'Historique copié ✓',
-                historyCopyFail: 'Copie impossible',
-                historyConfirm: 'Supprimer tout l\'historique des tirages ?',
                 renamedImages: '{n} images n\'avaient pas de nom enregistré, elles s\'affichent donc « Image N ». Réimportez-les pour retrouver les noms d\'origine.',
                 bulkTitle: 'Renommer les images sans nom',
                 bulkSave: 'Enregistrer',
@@ -1550,11 +1408,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Entfernen',
                 undo: 'Rückgängig',
                 undoWinner: 'Drehung rückgängig',
-                historyTitle: '🕘 Drehverlauf',
-                historyEmpty: 'Noch keine Drehungen',
-                historyCopied: 'Verlauf kopiert ✓',
-                historyCopyFail: 'Kopieren fehlgeschlagen',
-                historyConfirm: 'Gesamten Drehverlauf löschen?',
                 renamedImages: '{n} Bilder hatten keinen gespeicherten Namen und zeigen sich als „Bild N“. Lade sie erneut hoch, um die Originalnamen wiederherzustellen.',
                 bulkTitle: 'Bilder ohne Namen umbenennen',
                 bulkSave: 'Speichern',
@@ -1607,11 +1460,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '移除',
                 undo: '撤销',
                 undoWinner: '撤销旋转',
-                historyTitle: '🕘 抽奖历史',
-                historyEmpty: '还没有抽奖记录',
-                historyCopied: '历史已复制 ✓',
-                historyCopyFail: '无法复制',
-                historyConfirm: '要删除全部抽奖历史吗？',
                 renamedImages: '{n} 张图片没有保存文件名，因此显示为“图片 N”。重新上传即可恢复原始名称。',
                 bulkTitle: '重命名未命名的图片',
                 bulkSave: '保存',
@@ -1664,11 +1512,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'हटाएं',
                 undo: 'पूर्ववत',
                 undoWinner: 'घुमाव पूर्ववत करें',
-                historyTitle: '🕘 स्पिन इतिहास',
-                historyEmpty: 'अभी तक कोई स्पिन नहीं',
-                historyCopied: 'इतिहास कॉपी ✓',
-                historyCopyFail: 'कॉपी नहीं हो सका',
-                historyConfirm: 'पूरा स्पिन इतिहास हटाएँ?',
                 renamedImages: '{n} चित्रों का नाम सहेजा नहीं गया, इसलिए वे "चित्र N" के रूप में दिखते हैं। मूल नाम बहाल करने के लिए उन्हें फिर से अपलोड करें।',
                 bulkTitle: 'बिना नाम वाली छवियों का नाम बदलें',
                 bulkSave: 'सहेजें',
@@ -1721,11 +1564,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'إزالة',
                 undo: 'تراجع',
                 undoWinner: 'تراجع الدوران',
-                historyTitle: '🕘 سجل السحوبات',
-                historyEmpty: 'لا توجد سحوبات بعد',
-                historyCopied: 'تم نسخ السجل ✓',
-                historyCopyFail: 'تعذّر النسخ',
-                historyConfirm: 'حذف سجل السحوبات كاملاً؟',
                 renamedImages: '{n} صور لم يكن اسمها محفوظًا، لذا تظهر كـ "صورة N". أعد رفعها لاستعادة الأسماء الأصلية.',
                 bulkTitle: 'إعادة تسمية الصور بلا اسم',
                 bulkSave: 'حفظ',
@@ -1778,11 +1616,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'সরান',
                 undo: 'ফিরিয়ে আনুন',
                 undoWinner: 'ঘোরা ফিরিয়ে আনুন',
-                historyTitle: '🕘 ঘোরার ইতিহাস',
-                historyEmpty: 'এখনো কোনো ঘোরা নেই',
-                historyCopied: 'ইতিহাস কপি হয়েছে ✓',
-                historyCopyFail: 'কপি করা যায়নি',
-                historyConfirm: 'সমস্ত ঘোরার ইতিহাস মুছবেন?',
                 renamedImages: '{n}টি ছবির নাম সংরক্ষিত ছিল না, তাই সেগুলো "ছবি N" হিসেবে দেখাচ্ছে। মূল নাম ফিরিয়ে আনতে আবার আপলোড করুন।',
                 bulkTitle: 'নামহীন ছবিগুলোর নাম দিন',
                 bulkSave: 'সংরক্ষণ',
@@ -1835,11 +1668,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Убрать',
                 undo: 'Отменить',
                 undoWinner: 'Отменить вращение',
-                historyTitle: '🕘 История розыгрышей',
-                historyEmpty: 'Розыгрышей пока нет',
-                historyCopied: 'История скопирована ✓',
-                historyCopyFail: 'Не удалось скопировать',
-                historyConfirm: 'Удалить всю историю розыгрышей?',
                 renamedImages: '{n} изображений не сохранили имя, поэтому они показаны как «Изображение N». Загрузите их снова, чтобы вернуть исходные имена.',
                 bulkTitle: 'Переименовать изображения без имени',
                 bulkSave: 'Сохранить',
@@ -1892,11 +1720,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'ہٹائیں',
                 undo: 'واپس لیں',
                 undoWinner: 'گھماؤ واپس لیں',
-                historyTitle: '🕘 گھماؤ کی تاریخ',
-                historyEmpty: 'ابھی کوئی گھماؤ نہیں',
-                historyCopied: 'تاریخ کاپی ہو گئی ✓',
-                historyCopyFail: 'کاپی نہیں ہو سکا',
-                historyConfirm: 'پوری گھماؤ کی تاریخ حذف کریں؟',
                 renamedImages: '{n} تصاویر کے نام محفوظ نہیں تھے، اس لیے وہ "تصویر N" کے طور پر دکھائی دیتی ہیں۔ اصل نام بحال کرنے کے لیے انہیں دوبارہ اپ لوڈ کریں۔',
                 bulkTitle: 'بغیر نام تصاویر کا نام بدلیں',
                 bulkSave: 'محفوظ کریں',
@@ -1949,11 +1772,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Hapus',
                 undo: 'Urungkan',
                 undoWinner: 'Urungkan putaran',
-                historyTitle: '🕘 Riwayat undian',
-                historyEmpty: 'Belum ada undian',
-                historyCopied: 'Riwayat disalin ✓',
-                historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus seluruh riwayat undian?',
                 renamedImages: '{n} gambar tidak menyimpan nama, jadi tampil sebagai "Gambar N". Unggah ulang untuk memulihkan nama asli.',
                 bulkTitle: 'Ganti nama gambar tanpa nama',
                 bulkSave: 'Simpan',
@@ -2006,11 +1824,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '削除',
                 undo: '元に戻す',
                 undoWinner: '回転を元に戻す',
-                historyTitle: '🕘 抽選履歴',
-                historyEmpty: 'まだ抽選がありません',
-                historyCopied: '履歴をコピーしました ✓',
-                historyCopyFail: 'コピーできませんでした',
-                historyConfirm: '抽選履歴をすべて削除しますか？',
                 renamedImages: '{n}枚の画像に名前が保存されていなかったため「画像 N」と表示されています。再度アップロードすると元の名前が復元されます。',
                 bulkTitle: '名前のない画像の名前を変更',
                 bulkSave: '保存',
@@ -2063,11 +1876,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'ਹਟਾਓ',
                 undo: 'ਵਾਪਸ',
                 undoWinner: 'ਘੁੰਮਾਅ ਵਾਪਸ',
-                historyTitle: '🕘 ਘੁੰਮਾਅ ਇਤਿਹਾਸ',
-                historyEmpty: 'ਹਾਲੇ ਕੋਈ ਘੁੰਮਾਅ ਨਹੀਂ',
-                historyCopied: 'ਇਤਿਹਾਸ ਕਾਪੀ ਹੋਇਆ ✓',
-                historyCopyFail: 'ਕਾਪੀ ਨਹੀਂ ਹੋ ਸਕਿਆ',
-                historyConfirm: 'ਪੂਰਾ ਘੁੰਮਾਅ ਇਤਿਹਾਸ ਮਿਟਾਓ?',
                 renamedImages: '{n} ਤਸਵੀਰਾਂ ਦੇ ਨਾਮ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ, ਇਸ ਲਈ ਉਹ "ਤਸਵੀਰ N" ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ। ਮੂਲ ਨਾਮ ਬਹਾਲ ਕਰਨ ਲਈ ਉਹਨਾਂ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰੋ।',
                 bulkTitle: 'ਬਿਨਾਂ ਨਾਮ ਤਸਵੀਰਾਂ ਦਾ ਨਾਮ ਬਦਲੋ',
                 bulkSave: 'ਸੰਭਾਲੋ',
@@ -2120,11 +1928,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Busak',
                 undo: 'Batal',
                 undoWinner: 'Batal putar',
-                historyTitle: '🕘 Riwayat undian',
-                historyEmpty: 'Belum ada undian',
-                historyCopied: 'Riwayat disalin ✓',
-                historyCopyFail: 'Gagal menyalin',
-                historyConfirm: 'Hapus semua riwayat undian?',
                 renamedImages: '{n} gambar tidak nyimpen jeneng, mula katon minangka "Gambar N". Unggah maneh deui kanggo mulihake jeneng asli.',
                 bulkTitle: 'Ganti jeneng gambar tanpa jeneng',
                 bulkSave: 'Simpen',
@@ -2177,11 +1980,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Xóa',
                 undo: 'Hoàn tác',
                 undoWinner: 'Hoàn tác vòng quay',
-                historyTitle: '🕘 Lịch sử quay',
-                historyEmpty: 'Chưa có lượt quay nào',
-                historyCopied: 'Đã sao chép lịch sử ✓',
-                historyCopyFail: 'Không thể sao chép',
-                historyConfirm: 'Xóa toàn bộ lịch sử quay?',
                 renamedImages: '{n} ảnh không lưu tên nên hiện là "Ảnh N". Tải lại để khôi phục tên gốc.',
                 bulkTitle: 'Đổi tên ảnh chưa có tên',
                 bulkSave: 'Lưu',
@@ -2234,11 +2032,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'తొలగించండి',
                 undo: 'రద్దు',
                 undoWinner: 'ఫిర్రులను రద్దు',
-                historyTitle: '🕘 ఫిర్రుల చరిత్ర',
-                historyEmpty: 'ఇంకా ఫిర్రులు లేవు',
-                historyCopied: 'చరిత్ర కాపీ అయింది ✓',
-                historyCopyFail: 'కాపీ చేయలేకపోయాము',
-                historyConfirm: 'మొత్తం చరిత్ర తొలగించాలా?',
                 renamedImages: '{n} చిత్రాల పేరు భద్రపరబడలేదు, అందువల్ల అవి "చిత్రం N"గా కనిపిస్తాయి. అసలు పేర్లు తిరిగి పొందడానికి మళ్లీ అప్‌లోడ్ చేయండి.',
                 bulkTitle: 'పేరు లేని చిత్రాలకు పేరు పెట్టండి',
                 bulkSave: 'సేవ్',
@@ -2291,11 +2084,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: '제거',
                 undo: '실행 취소',
                 undoWinner: '회전 취소',
-                historyTitle: '🕘 회전 기록',
-                historyEmpty: '아직 회전이 없습니다',
-                historyCopied: '기록 복사됨 ✓',
-                historyCopyFail: '복사할 수 없음',
-                historyConfirm: '회전 기록을 모두 삭제할까요?',
                 renamedImages: '{n}개의 이미지 이름이 저장되지 않아 "이미지 N"으로 표시됩니다. 원래 이름을 복원하려면 다시 업로드하세요.',
                 bulkTitle: '이름 없는 이미지 이름 바꾸기',
                 bulkSave: '저장',
@@ -2348,11 +2136,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Kaldır',
                 undo: 'Geri al',
                 undoWinner: 'Çevirmeyi geri al',
-                historyTitle: '🕘 Çekim geçmişi',
-                historyEmpty: 'Henüz çekim yok',
-                historyCopied: 'Geçmiş kopyalandı ✓',
-                historyCopyFail: 'Kopyalanamadı',
-                historyConfirm: 'Tüm çekim geçmişi silinsin mi?',
                 renamedImages: '{n} görselin adı kaydedilmemiş, bu yüzden "Görsel N" olarak görünüyor. Özgün adları geri yüklemek için yeniden yükleyin.',
                 bulkTitle: 'Adsız görselleri yeniden adlandır',
                 bulkSave: 'Kaydet',
@@ -2405,11 +2188,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'حذف',
                 undo: 'واگرد',
                 undoWinner: 'واگرد چرخش',
-                historyTitle: '🕘 تاریخچه چرخش',
-                historyEmpty: 'هنوز چرخشی نیست',
-                historyCopied: 'تاریخچه کپی شد ✓',
-                historyCopyFail: 'کپی نشد',
-                historyConfirm: 'کل تاریخچه حذف شود؟',
                 renamedImages: '{n} تصویر نامش ذخیره نشده بود، بنابراین به شکل «تصویر N» نمایش داده می‌شوند. برای بازیابی نام اصلی دوباره بارگذاری کنید.',
                 bulkTitle: 'تغییر نام تصاویر بی‌نام',
                 bulkSave: 'ذخیره',
@@ -2462,11 +2240,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'काढा',
                 undo: 'पूर्ववत करा',
                 undoWinner: 'फिरवे पूर्ववत करा',
-                historyTitle: '🕘 फिरव्यांचा इतिहास',
-                historyEmpty: 'अजून फिरवे नाहीत',
-                historyCopied: 'इतिहास कॉपी झाला ✓',
-                historyCopyFail: 'कॉपी होऊ शकला नाही',
-                historyConfirm: 'संपूर्ण इतिहास हटवायचा?',
                 renamedImages: '{n} प्रतिमांचे नाव जतन करण्यात आले नाही, त्यामुळे त्या "प्रतिमा N" असे दिसतात. मूळ नावे पुनः प्राप्त करण्यासाठी त्यांना पुन्हा अपलोड करा.',
                 bulkTitle: 'नाव नसलेल्या प्रतिमांचे नाव बदला',
                 bulkSave: 'जतन करा',
@@ -2519,11 +2292,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'நீக்கு',
                 undo: 'செயல்தவிர்',
                 undoWinner: 'சுழற்சியைச் செயல்தவிர்',
-                historyTitle: '🕘 சுழற்சி வரலாறு',
-                historyEmpty: 'இன்னும் சுழற்சி இல்லை',
-                historyCopied: 'வரலாறு நகலெடுக்கப்பட்டது ✓',
-                historyCopyFail: 'நகலெடுக்க முடியவில்லை',
-                historyConfirm: 'முழு வரலாறையும் நீக்கவா?',
                 renamedImages: '{n} படங்களின் பெயர் சேமிக்கப்படவில்லை, எனவே அவை "படம் N" எனக் காட்டப்படுகின்றன. அசல் பெயர்களை மீட்டெடுக்க மீண்டும் பதிவேற்றவும்.',
                 bulkTitle: 'பெயரில்லாத படங்களுக்கு பெயரிடுக',
                 bulkSave: 'சேமி',
@@ -2576,11 +2344,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Cire',
                 undo: 'Sau',
                 undoWinner: 'Maida sau',
-                historyTitle: '🕘 Tarihin ayyuka',
-                historyEmpty: 'Babban ciyawa ba a yi',
-                historyCopied: 'An ruwaita ✓',
-                historyCopyFail: 'Ba a iya kwayewa',
-                historyConfirm: 'Duka tarihi a gafafe?',
                 renamedImages: '{n} hotuna ba tucka sunan a bayan, suna ke nuna a cikin sanya “Hotuna N”. Sake upload don ya kuma dawo da asusun sunan.',
                 bulkTitle: 'Sanya wa hotuna marasa suna',
                 bulkSave: 'Ajiye',
@@ -2633,11 +2396,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Ondoa',
                 undo: 'Tendua',
                 undoWinner: 'Tendua mzunguko',
-                historyTitle: '🕘 Historia ya mzunguko',
-                historyEmpty: 'Hakuna mzunguko bado',
-                historyCopied: 'Imecopiwa ✓',
-                historyCopyFail: 'Imeshindwa kunakili',
-                historyConfirm: 'Ufutafute historia yote?',
                 renamedImages: '{n} picha hazina jina lililohifadhiwa, hivyo zinaonyeshwa kama "Picha N". Pakua tena ili kurejesha majina halisi.',
                 bulkTitle: 'Weka majina picha zisizo na majina',
                 bulkSave: 'Hifadhi',
@@ -2690,11 +2448,6 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 remove: 'Rimuovi',
                 undo: 'Annulla',
                 undoWinner: 'Annulla giro',
-                historyTitle: '🕘 Cronologia estrazioni',
-                historyEmpty: 'Nessuna estrazione',
-                historyCopied: 'Cronologia copiata ✓',
-                historyCopyFail: 'Copia non riuscita',
-                historyConfirm: 'Eliminare tutta la cronologia?',
                 renamedImages: '{n} immagini non hanno salvato il nome, quindi mostrano "Immagine N". Ricaricale per ripristinare i nomi originali.',
                 bulkTitle: 'Rinomina immagini senza nome',
                 bulkSave: 'Salva',
@@ -3148,22 +2901,6 @@ let colors = themeColors[currentTheme];
             });
         }
 
-        const historyCopyBtn = document.getElementById('historyCopyBtn');
-        if (historyCopyBtn) historyCopyBtn.addEventListener('click', copyHistory);
-        const historyExportBtn = document.getElementById('historyExportBtn');
-        if (historyExportBtn) historyExportBtn.addEventListener('click', downloadHistory);
-        const historyClearBtn = document.getElementById('historyClearBtn');
-        if (historyClearBtn) {
-            historyClearBtn.addEventListener('click', () => {
-                if (spinHistory.length === 0) return;
-                if (!confirm(t('historyConfirm'))) return;
-                clearHistory();
-            });
-        }
-
-        loadHistory();
-        renderHistory();
-
         clearBtn.addEventListener('click', () => {
             if (loadedImages.length > 0 && !confirm(t('confirmClear'))) return;
             if (recActive) {
@@ -3179,7 +2916,6 @@ let colors = themeColors[currentTheme];
             eliminatedIndices.clear();
             invalidateActive();
             clearUndo();
-            clearHistory();
             currentSetId = null;
             saveEliminationState();
             clearImagesDB();
@@ -3465,11 +3201,9 @@ let colors = themeColors[currentTheme];
         }
 
         function updatePreview() {
-            const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
             const frag = document.createDocumentFragment();
             for (let index = 0; index < images.length; index++) {
                 const fileName = fileNames[index] || '';
-                if (searchTerm && !fileName.toLowerCase().includes(searchTerm)) continue;
                 const isEliminated = eliminatedIndices.has(index);
                 const item = document.createElement('div');
                 item.className = 'preview-item' + (isEliminated ? ' eliminated' : '');
@@ -3891,7 +3625,6 @@ const wheelCache = document.createElement('canvas');
                 fi.onload = () => { winnerFullImg = fi; };
                 fi.src = fullImages[winnerIndex];
             }
-            recordSpin();
             refreshMessages();
             const zoomStart = Date.now();
             const zoomDuration = prefersReducedMotion ? 1 : 1500;
@@ -3915,146 +3648,6 @@ const wheelCache = document.createElement('canvas');
             }
 
             animateWinner();
-        }
-
-        function formatHistoryTime(ts) {
-            const d = new Date(ts);
-            const two = (n) => String(n).padStart(2, '0');
-            return two(d.getHours()) + ':' + two(d.getMinutes());
-        }
-
-        function formatHistoryDate(ts) {
-            const d = new Date(ts);
-            const two = (n) => String(n).padStart(2, '0');
-            return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
-        }
-
-        function recordSpin() {
-            const name = fileNames[winnerIndex] || ('Imagen ' + (winnerIndex + 1));
-            const thumb = images[winnerIndex];
-            spinHistory.unshift({
-                nombre: name,
-                index: winnerIndex,
-                fecha: new Date().toISOString(),
-                thumb: (typeof thumb === 'string' && thumb.length < 200000) ? thumb : ''
-            });
-            if (spinHistory.length > HISTORY_LIMIT) spinHistory.length = HISTORY_LIMIT;
-            saveHistory();
-            renderHistory();
-        }
-
-        function saveHistory() {
-            try {
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(spinHistory));
-            } catch (e) {}
-        }
-
-        function loadHistory() {
-            try {
-                const saved = localStorage.getItem(HISTORY_KEY);
-                if (!saved) return;
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed)) {
-                    spinHistory = parsed
-                        .filter(e => e && typeof e.nombre === 'string' && e.fecha)
-                        .map(e => ({
-                            nombre: e.nombre,
-                            index: e.index,
-                            fecha: e.fecha,
-                            thumb: (typeof e.thumb === 'string' && e.thumb.length < 200000) ? e.thumb : ''
-                        }));
-                }
-            } catch (e) {}
-        }
-
-        function clearHistory() {
-            spinHistory = [];
-            try { localStorage.removeItem(HISTORY_KEY); } catch (e) {}
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            if (!list) return;
-            const msg = document.getElementById('historyMsg');
-            if (msg) msg.textContent = '';
-            list.replaceChildren();
-            list.dataset.empty = t('historyEmpty');
-            spinHistory.forEach((entry, i) => {
-                const li = document.createElement('li');
-                const pos = document.createElement('span');
-                pos.className = 'history-pos';
-                pos.textContent = String(i + 1) + '.';
-                li.appendChild(pos);
-                if (typeof entry.thumb === 'string' && entry.thumb) {
-                    const th = document.createElement('img');
-                    th.className = 'history-thumb';
-                    th.src = entry.thumb;
-                    th.alt = '';
-                    th.loading = 'lazy';
-                    li.appendChild(th);
-                }
-                const name = document.createElement('span');
-                name.className = 'history-name';
-                name.textContent = entry.nombre;
-                name.title = entry.nombre;
-                const time = document.createElement('span');
-                time.className = 'history-time';
-                const ts = new Date(entry.fecha).getTime();
-                time.textContent = isNaN(ts) ? '' : formatHistoryTime(ts);
-                time.title = isNaN(ts) ? '' : formatHistoryDate(ts);
-                li.appendChild(pos);
-                li.appendChild(name);
-                li.appendChild(time);
-                list.appendChild(li);
-            });
-            const has = spinHistory.length > 0;
-            const copyBtn = document.getElementById('historyCopyBtn');
-            const expBtn = document.getElementById('historyExportBtn');
-            if (copyBtn) copyBtn.disabled = !has;
-            if (expBtn) expBtn.disabled = !has;
-        }
-
-        function buildHistoryText() {
-            if (spinHistory.length === 0) return '';
-            const lines = ['Historial de sorteos — Ruleta de Imágenes'];
-            lines.push('Generado: ' + formatHistoryDate(Date.now()));
-            lines.push('');
-            spinHistory.forEach((entry, i) => {
-                const ts = new Date(entry.fecha);
-                const stamp = isNaN(ts.getTime()) ? '' : formatHistoryDate(ts.getTime()) + ' ' + formatHistoryTime(ts.getTime());
-                lines.push((i + 1) + '. ' + entry.nombre + (stamp ? '  —  ' + stamp : ''));
-            });
-            return lines.join('\n');
-        }
-
-        async function copyHistory() {
-            const msg = document.getElementById('historyMsg');
-            const text = buildHistoryText();
-            if (!text) return;
-            try {
-                await navigator.clipboard.writeText(text);
-                if (msg) {
-                    msg.textContent = t('historyCopied');
-                    setTimeout(() => { if (msg) msg.textContent = ''; }, 2000);
-                }
-            } catch (e) {
-                if (msg) msg.textContent = t('historyCopyFail');
-            }
-        }
-
-        function downloadHistory() {
-            const text = buildHistoryText();
-            if (!text) return;
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'sorteos-' + formatHistoryDate(Date.now()) + '.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
         function pushUndo(entry) {

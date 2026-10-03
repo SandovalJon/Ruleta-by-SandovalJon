@@ -575,15 +575,11 @@ const tests = [
         return {
           ganador: winnerIndex,
           esperado: fileNames[winnerIndex],
-          enHistorial: spinHistory[0] ? spinHistory[0].nombre : null,
           enDom: document.querySelector('.winner-name') ? document.querySelector('.winner-name').textContent : null
         };
       })()`, true);
       if (!r.esperado) return 'el ganador no tiene nombre';
       if (/^Imagen \\d+$/.test(r.esperado)) return 'el ganador uso un nombre generico: ' + r.esperado;
-      if (r.enHistorial !== r.esperado) {
-        return 'el historial guardo "' + r.enHistorial + '" en vez de "' + r.esperado + '"';
-      }
       if (r.enDom !== r.esperado) {
         return 'el DOM muestra "' + r.enDom + '" en vez de "' + r.esperado + '"';
       }
@@ -657,13 +653,11 @@ const tests = [
         return {
           total: images.length,
           nombresOk: nombresOk,
-          nombres: fileNames.slice(),
-          historial: spinHistory.map(h => h.nombre)
+          nombres: fileNames.slice()
         };
       })()`, true);
       if (r.total !== 5) return 'se esperaban 5 imagenes, hay ' + r.total;
       if (!r.nombresOk) return 'hay nombres vacios tras recuperar datos antiguos';
-      if (r.historial.length === 0) return 'el historial quedo vacio';
       return true;
     },
   },
@@ -821,111 +815,6 @@ const tests = [
       if (r.error) return r.error;
       if (r.mal.length > 0) return 'insignias incorrectas: ' + r.mal.slice(0, 5).join(', ');
       return true;
-    },
-  },
-  {
-    name: 'el historial guarda foto y la muestra',
-    run: async (c) => {
-      const r = await c.eval(`(async () => {
-        const antes = spinHistory.length;
-        spin();
-        await __t.waitSpin();
-        await new Promise(rr => setTimeout(rr, 300));
-        const ultima = spinHistory[0];
-        const imgs = document.querySelectorAll('#historyList .history-thumb');
-        return {
-          antes,
-          despues: spinHistory.length,
-          tieneFoto: !!(ultima && ultima.thumb),
-          fotoEsDataUrl: !!(ultima && ultima.thumb && ultima.thumb.indexOf('data:image') === 0),
-          fotosEnDom: imgs.length,
-          primeraConSrc: imgs.length > 0 ? imgs[0].src.slice(0, 20) : null
-        };
-      })()`, true);
-      if (r.despues !== r.antes + 1) return 'el historial no registro el giro';
-      if (!r.tieneFoto) return 'la entrada no guardo la foto';
-      if (!r.fotoEsDataUrl) return 'la foto no es un dataURL valido';
-      if (r.fotosEnDom === 0) return 'no se renderizo la foto en el historial';
-      return true;
-    },
-  },
-  {
-    name: 'el historial viejo sin foto sigue funcionando',
-    run: async (c) => {
-      const r = await c.eval(`(() => {
-        const copia = spinHistory.slice();
-        spinHistory = [{ nombre: 'Antiguo', index: 0, fecha: new Date().toISOString() }];
-        saveHistory();
-        renderHistory();
-        const filas = document.querySelectorAll('#historyList li').length;
-        const fotos = document.querySelectorAll('#historyList .history-thumb').length;
-        const nombre = document.querySelector('#historyList .history-name');
-        const ok = filas === 1 && fotos === 0 && nombre && nombre.textContent === 'Antiguo';
-        spinHistory = copia;
-        saveHistory();
-        renderHistory();
-        return ok ? true : { filas, fotos };
-      })()`);
-      return r === true ? true : 'fallo con entrada antigua: ' + JSON.stringify(r);
-    },
-  },
-  {
-    name: 'el historial registra los giros',
-    run: async (c) => {
-      const r = await c.eval(`(async () => {
-        if (typeof spinHistory === 'undefined') return { error: 'spinHistory no existe' };
-        __t.clear();
-        await new Promise(r => setTimeout(r, 400));
-        const files = await __t.makeFiles(5);
-        handleFiles(files);
-        await __t.waitFor(() => !isLoading && images.length === 5, 15000);
-        const antes = spinHistory.length;
-        spin();
-        await __t.waitSpin();
-        await new Promise(r => setTimeout(r, 300));
-        return {
-          antes,
-          despues: spinHistory.length,
-          ultima: spinHistory[0] || null,
-          visible: document.getElementById('historyPanel')
-            ? getComputedStyle(document.getElementById('historyPanel')).display !== 'none'
-            : false
-        };
-      })()`, true);
-      if (r.error) return r.error;
-      if (r.despues !== r.antes + 1) return 'el historial paso de ' + r.antes + ' a ' + r.despues;
-      if (!r.ultima || !r.ultima.nombre) return 'la entrada no tiene nombre';
-      if (!r.ultima.fecha) return 'la entrada no tiene fecha';
-      return true;
-    },
-  },
-  {
-    name: 'el historial se puede copiar y exportar',
-    run: async (c) => {
-      const r = await c.eval(`(async () => {
-        if (typeof buildHistoryText !== 'function') return { error: 'buildHistoryText no existe' };
-        const txt = buildHistoryText();
-        return {
-          largo: txt.length,
-          lineas: txt.split('\\n').filter(Boolean).length,
-          tieneEntrada: spinHistory.length > 0
-        };
-      })()`, true);
-      if (r.error) return r.error;
-      if (r.largo === 0) return 'el texto exportado esta vacio';
-      if (!r.tieneEntrada) return 'no hay entradas que exportar';
-      return true;
-    },
-  },
-  {
-    name: 'el historial se limpia al borrar las imagenes',
-    run: async (c) => {
-      const r = await c.eval(`(async () => {
-        __t.clear();
-        await new Promise(r => setTimeout(r, 600));
-        return spinHistory.length;
-      })()`, true);
-      return r === 0 ? true : 'quedaron ' + r + ' entradas tras limpiar';
     },
   },
 ];
