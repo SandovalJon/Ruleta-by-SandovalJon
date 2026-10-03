@@ -57,7 +57,7 @@
 | Open Graph | ✅ | Título, descripción e imagen para compartir el link |
 | Badge versión | ✅ | Visible para todos |
 | Botón actualizar | ✅ | Limpia cache y recarga |
-| Tests humo | ✅ | test/smoke.js, 39 checks (npm test local, test:live en .io) |
+| Tests humo | ✅ | test/smoke.js, 40 checks (npm test local, test:live en .io) |
 
 ## 5. LECCIONES
 
