@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.3</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.4</div>
     </div>
 
     <script>
@@ -3331,7 +3331,9 @@ let colors = themeColors[currentTheme];
                 if (myEpoch !== imageEpoch) return;
                 const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
                 const loadSeconds = loadingStartTime ? Math.round((now - loadingStartTime) / 1000) : 0;
-                lastLoadSeconds = loadSeconds;
+                if (loadSeconds > 0) {
+                    lastLoadSeconds = loadSeconds;
+                }
                 const isNewSet = images.length === 0;
                 for (let i = 0; i < slots.length; i++) {
                     const s = slots[i];
@@ -3366,7 +3368,6 @@ let colors = themeColors[currentTheme];
                 updatePreview();
                 rebuildWheel();
                 refreshMessages();
-                loadingStartTime = 0;
                 if (loadSeconds > 0) {
                     result.textContent = t('preview').replace('{n}', activeCount) + ' · ' + loadSeconds + 's';
                     setTimeout(() => { if (!isSpinning && winnerIndex < 0) refreshMessages(); }, 3000);
