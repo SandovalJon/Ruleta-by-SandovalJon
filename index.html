@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.7</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.8</div>
     </div>
 
     <script>
@@ -3313,7 +3313,7 @@ let colors = themeColors[currentTheme];
                 setTimeout(() => { setMsg.textContent = ''; }, 9000);
             }
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const BATCH_SIZE = isMobile ? 5 : 50;
+            const BATCH_SIZE = isMobile ? 2 : 50;
             let batchStart = 0;
             let failed = 0;
             const slots = new Array(total);
