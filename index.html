@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.0</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.1</div>
     </div>
 
     <script>
@@ -1192,6 +1192,7 @@ by <span>SandovalJon</span>
         const undoStack = [];
         let loadingProgress = 0;
         let loadingTotal = 0;
+        let loadingStartTime = 0;
         let imageEpoch = 0;
 
         let isBraveBrowser = false;
@@ -2736,7 +2737,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 return;
             }
             if (isLoading) {
-                result.textContent = t('loading') + ' (' + loadingProgress + '/' + loadingTotal + ')';
+                const elapsed = loadingStartTime ? Math.round((Date.now() - loadingStartTime) / 1000) : 0;
+                result.textContent = t('loading') + ' (' + loadingProgress + '/' + loadingTotal + ') ' + elapsed + 's';
                 return;
             }
             if (isSpinning) {
@@ -3298,6 +3300,7 @@ let colors = themeColors[currentTheme];
             isLoading = true;
             loadingProgress = 0;
             loadingTotal = newFiles.length;
+            loadingStartTime = Date.now();
             refreshMessages();
             drawRoulette();
 
@@ -3320,6 +3323,7 @@ let colors = themeColors[currentTheme];
 
             function finishLoading() {
                 if (myEpoch !== imageEpoch) return;
+                const loadSeconds = loadingStartTime ? Math.round((Date.now() - loadingStartTime) / 1000) : 0;
                 const isNewSet = images.length === 0;
                 for (let i = 0; i < slots.length; i++) {
                     const s = slots[i];
@@ -3354,6 +3358,11 @@ let colors = themeColors[currentTheme];
                 updatePreview();
                 rebuildWheel();
                 refreshMessages();
+                loadingStartTime = 0;
+                if (loadSeconds > 0) {
+                    result.textContent = t('preview').replace('{n}', activeCount) + ' · ' + loadSeconds + 's';
+                    setTimeout(() => { if (!isSpinning && winnerIndex < 0) refreshMessages(); }, 3000);
+                }
                 if (typeof updateSaveBtn === 'function') updateSaveBtn();
                 if (failed > 0) console.warn(failed + ' images failed');
             }
