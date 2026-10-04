@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.2</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.3</div>
     </div>
 
     <script>
@@ -2741,7 +2741,8 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 return;
             }
             if (isLoading) {
-                const elapsed = loadingStartTime ? Math.round((Date.now() - loadingStartTime) / 1000) : 0;
+                const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+                const elapsed = loadingStartTime ? Math.round((now - loadingStartTime) / 1000) : 0;
                 result.textContent = t('loading') + ' (' + loadingProgress + '/' + loadingTotal + ') ' + elapsed + 's';
                 return;
             }
@@ -3304,7 +3305,7 @@ let colors = themeColors[currentTheme];
             isLoading = true;
             loadingProgress = 0;
             loadingTotal = newFiles.length;
-            loadingStartTime = Date.now();
+            loadingStartTime = (typeof performance !== 'undefined') ? performance.now() : Date.now();
             lastLoadSeconds = 0;
             refreshMessages();
             drawRoulette();
@@ -3328,7 +3329,8 @@ let colors = themeColors[currentTheme];
 
             function finishLoading() {
                 if (myEpoch !== imageEpoch) return;
-                const loadSeconds = loadingStartTime ? Math.round((Date.now() - loadingStartTime) / 1000) : 0;
+                const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+                const loadSeconds = loadingStartTime ? Math.round((now - loadingStartTime) / 1000) : 0;
                 lastLoadSeconds = loadSeconds;
                 const isNewSet = images.length === 0;
                 for (let i = 0; i < slots.length; i++) {
