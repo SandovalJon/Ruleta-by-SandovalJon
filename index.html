@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.4</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.5</div>
     </div>
 
     <script>
@@ -3418,11 +3418,11 @@ let colors = themeColors[currentTheme];
                             return c;
                         };
                         const small = drawScaled(MAX_IMAGE);
-                        const full = drawScaled(384);
+                        const full = drawScaled(256);
                         URL.revokeObjectURL(objectUrl);
                         Promise.all([
-                            toDataURLAsync(small, 'image/jpeg', 0.7),
-                            toDataURLAsync(full, 'image/jpeg', 0.85)
+                            toDataURLAsync(small, 'image/jpeg', 0.6),
+                            toDataURLAsync(full, 'image/jpeg', 0.75)
                         ]).then(([smallDataUrl, fullDataUrl]) => {
                             slots[i] = {
                                 small: smallDataUrl,
