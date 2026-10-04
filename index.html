@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.6</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.7</div>
     </div>
 
     <script>
@@ -3401,14 +3401,27 @@ let colors = themeColors[currentTheme];
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
                     const objectUrl = URL.createObjectURL(file);
-                    const img = new Image();
-                    img.onerror = () => {
+
+                    const finishSlot = (smallDataUrl, fullDataUrl, small) => {
+                        URL.revokeObjectURL(objectUrl);
+                        slots[i] = {
+                            small: smallDataUrl,
+                            full: fullDataUrl,
+                            canvas: small,
+                            name: resolvedNames[i] || ''
+                        };
+                        onOneDone();
+                    };
+
+                    const failSlot = () => {
                         URL.revokeObjectURL(objectUrl);
                         slots[i] = null;
                         failed++;
                         onOneDone();
                     };
-                    img.onload = () => {
+
+                    const drawAndEncode = (img) => {
+                        if (!img || !img.width || !img.height) { failSlot(); return; }
                         const drawScaled = (target) => {
                             const s = Math.min(1, target / Math.max(img.width, img.height));
                             const c = document.createElement('canvas');
@@ -3419,21 +3432,22 @@ let colors = themeColors[currentTheme];
                         };
                         const small = drawScaled(MAX_IMAGE);
                         const full = drawScaled(256);
-                        URL.revokeObjectURL(objectUrl);
                         Promise.all([
                             toDataURLAsync(small, 'image/jpeg', 0.6),
                             toDataURLAsync(full, 'image/jpeg', 0.75)
                         ]).then(([smallDataUrl, fullDataUrl]) => {
-                            slots[i] = {
-                                small: smallDataUrl,
-                                full: fullDataUrl,
-                                canvas: small,
-                                name: resolvedNames[i] || ''
-                            };
-                            onOneDone();
+                            finishSlot(smallDataUrl, fullDataUrl, small);
                         });
                     };
-                    img.src = objectUrl;
+
+                    const loadWithImage = () => {
+                        const img = new Image();
+                        img.onload = () => drawAndEncode(img);
+                        img.onerror = failSlot;
+                        img.src = objectUrl;
+                    };
+
+                    loadWithImage();
                 }
                 batchStart = end;
                 if (batchStart < total) {
