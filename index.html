@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.2</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.3</div>
     </div>
 
     <script>
@@ -3383,8 +3383,14 @@ let colors = themeColors[currentTheme];
                 for (let i = batchStart; i < end; i++) {
                     const file = newFiles[i];
                     const objectUrl = URL.createObjectURL(file);
-
-                    const processImage = (img) => {
+                    const img = new Image();
+                    img.onerror = () => {
+                        URL.revokeObjectURL(objectUrl);
+                        slots[i] = null;
+                        failed++;
+                        onOneDone();
+                    };
+                    img.onload = () => {
                         const drawScaled = (target) => {
                             const s = Math.min(1, target / Math.max(img.width, img.height));
                             const c = document.createElement('canvas');
@@ -3409,30 +3415,7 @@ let colors = themeColors[currentTheme];
                             onOneDone();
                         });
                     };
-
-                    if (typeof createImageBitmap === 'function') {
-                        createImageBitmap(file).then(processImage).catch(() => {
-                            const img = new Image();
-                            img.onload = () => processImage(img);
-                            img.onerror = () => {
-                                URL.revokeObjectURL(objectUrl);
-                                slots[i] = null;
-                                failed++;
-                                onOneDone();
-                            };
-                            img.src = objectUrl;
-                        });
-                    } else {
-                        const img = new Image();
-                        img.onload = () => processImage(img);
-                        img.onerror = () => {
-                            URL.revokeObjectURL(objectUrl);
-                            slots[i] = null;
-                            failed++;
-                            onOneDone();
-                        };
-                        img.src = objectUrl;
-                    }
+                    img.src = objectUrl;
                 }
                 batchStart = end;
                 if (batchStart < total) {
