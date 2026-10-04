@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.8</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.14.0</div>
     </div>
 
     <script>
@@ -3400,7 +3400,7 @@ let colors = themeColors[currentTheme];
                             return c;
                         };
                         const small = drawScaled(MAX_IMAGE);
-                        const full = drawScaled(512);
+                        const full = drawScaled(384);
                         URL.revokeObjectURL(objectUrl);
                         Promise.all([
                             toDataURLAsync(small, 'image/jpeg', 0.7),
@@ -3419,7 +3419,7 @@ let colors = themeColors[currentTheme];
                 }
                 batchStart = end;
                 if (batchStart < total) {
-                    setTimeout(processBatch, 50);
+                    setTimeout(processBatch, 0);
                 }
             }
 
