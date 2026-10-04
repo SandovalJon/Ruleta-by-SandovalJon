@@ -1130,7 +1130,7 @@ canvas {
 
 <div class="footer" id="footerCredit">
 by <span>SandovalJon</span>
-                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.12.1</div>
+                <div id="versionBadge" style="display:block;margin-top:8px;font-size:0.75rem;color:rgba(255,255,255,0.35);font-family:monospace;">v3.13.0</div>
     </div>
 
     <script>
@@ -1190,6 +1190,8 @@ by <span>SandovalJon</span>
         const PREVIEW_LIMIT = 10;
         const UNDO_LIMIT = 30;
         const undoStack = [];
+        let loadingProgress = 0;
+        let loadingTotal = 0;
         let imageEpoch = 0;
 
         let isBraveBrowser = false;
@@ -2734,7 +2736,7 @@ const themeSwitcher = document.getElementById('themeSwitcher');
                 return;
             }
             if (isLoading) {
-                result.textContent = t('loading') + ' (' + images.length + ')';
+                result.textContent = t('loading') + ' (' + loadingProgress + '/' + loadingTotal + ')';
                 return;
             }
             if (isSpinning) {
@@ -3294,6 +3296,8 @@ let colors = themeColors[currentTheme];
             }
 
             isLoading = true;
+            loadingProgress = 0;
+            loadingTotal = newFiles.length;
             refreshMessages();
             drawRoulette();
 
@@ -3308,7 +3312,9 @@ let colors = themeColors[currentTheme];
                 setMsg.textContent = warnMsg;
                 setTimeout(() => { setMsg.textContent = ''; }, 9000);
             }
-            const BATCH_SIZE = 50;
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const BATCH_SIZE = isMobile ? 15 : 50;
+            const BATCH_DELAY = isMobile ? 100 : 50;
             let batchStart = 0;
             let failed = 0;
             const slots = new Array(total);
@@ -3326,6 +3332,8 @@ let colors = themeColors[currentTheme];
                 }
                 slots.length = 0;
                 isLoading = false;
+                loadingProgress = 0;
+                loadingTotal = 0;
                 if (isNewSet) {
                     // Las eliminaciones persistidas pertenecen a imagenes anteriores
                     eliminatedIndices = new Set();
@@ -3360,7 +3368,8 @@ let colors = themeColors[currentTheme];
 
             function onOneDone() {
                 processed++;
-                if (processed % 25 === 0) {
+                loadingProgress = processed;
+                if (processed % 10 === 0 || processed === total) {
                     refreshMessages();
                     drawRoulette();
                 }
@@ -3394,10 +3403,13 @@ let colors = themeColors[currentTheme];
                         const small = drawScaled(MAX_IMAGE);
                         const full = drawScaled(512);
                         URL.revokeObjectURL(objectUrl);
-                        toDataURLAsync(small, 'image/jpeg', 0.7).then((smallDataUrl) => {
+                        Promise.all([
+                            toDataURLAsync(small, 'image/jpeg', 0.7),
+                            toDataURLAsync(full, 'image/jpeg', 0.85)
+                        ]).then(([smallDataUrl, fullDataUrl]) => {
                             slots[i] = {
                                 small: smallDataUrl,
-                                full: full.toDataURL('image/jpeg', 0.85),
+                                full: fullDataUrl,
                                 canvas: small,
                                 name: resolvedNames[i] || ''
                             };
