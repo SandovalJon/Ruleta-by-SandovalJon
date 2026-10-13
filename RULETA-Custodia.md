@@ -104,6 +104,7 @@ Sin entradas archivadas todavía.
 
 - [opencode-1] Tarea activa: ninguna. Migración Ruta B ejecutada el 2026-10-12: se unificaron `RULETA-Base-Conocimiento.md` y `RULETA-Manual-Skills.md` en este archivo, y los originales quedaron en `archivados/`.
 - [opencode-1] Corrección: la documentación heredada declaraba versión `v3.12.0` y commit `6fb15fe`, pero el código real es `v3.14.7` en `index.html:1133` y commit `12d9543`. Se adopta lo verificado en el código.
+- [opencode-1] Cambio fuera del código el 2026-10-12: la descripción del repositorio en GitHub estaba vacía, así que el índice `mis-paginas` mostraba "Sin descripción". Se rellenó con el texto de la `meta description` de la propia página: "Ruleta de imágenes para sorteos y giros aleatorios". No se tocó ningún archivo del proyecto ni hubo despliegue.
 - [opencode-1] Decisión: `NOMBRE` es `RULETA` — motivo: carpeta, repo y prefijo de los archivos heredados coinciden en esa raíz — estado: tomada.
 - [opencode-1] Decisión: recargar la página empieza vacío, sin restauración automática — motivo: la restauración automática borraba subidas en curso — estado: tomada.
 - [opencode-1] Decisión: se eliminó `ImageDecoder` en favor de `Image.onload` — motivo: no funciona en headless ni en Brave — estado: tomada.
